@@ -1,0 +1,110 @@
+const { Job } = require("../models");
+
+const JobData = async () => {
+  try {
+    const insertRecords = [
+      {
+        jobTitle: "Full Stack Developer",
+        jobLocation: "On-site",
+        employeeId: 1,
+        specificCity: "New York",
+        advertiseCity: "Yes",
+        city: "New York",
+        area: "Manhattan",
+        pincode: "10001",
+        streetAddress: "123 Main Street",
+        jobTypes: ["Full-time", "Permanent"],
+        minimumPay: 50000,
+        maximumPay: 80000,
+        payType: "Range",
+        exactPay: null,
+        payRate: "per year",
+        jobDescription: "Seeking a skilled full stack developer...",
+        numberOfPeople: 2,
+        mobileNumber: "1234567890",
+        email: "example@example.com",
+        deadline: "No",
+        deadlineDate: null,
+      },
+
+      {
+        jobTitle: "Backend Engineer",
+        jobLocation: "Remote",
+        employeeId: 1,
+
+        specificCity: null,
+        advertiseCity: "No",
+        city: "San Francisco",
+        area: "Bay Area",
+        pincode: "94105",
+        streetAddress: "456 Market Street",
+        jobTypes: ["Full-time"],
+        minimumPay: null,
+        maximumPay: null,
+        payType: "Exact",
+        exactPay: 70000,
+        payRate: "per year",
+        jobDescription: "Backend engineer needed to build scalable APIs...",
+        numberOfPeople: 1,
+        mobileNumber: "9876543210",
+        email: "another@example.com",
+        deadline: "Yes",
+        deadlineDate: "2024-12-31",
+      },
+      {
+        jobTitle: "UI/UX Designer",
+        jobLocation: "On-site",
+        specificCity: "Los Angeles",
+        employeeId: 1,
+        advertiseCity: "Yes",
+        city: "Los Angeles",
+        area: "Downtown",
+        pincode: "90001",
+        streetAddress: "789 Broadway",
+        jobTypes: ["Full-time", "Temporary"],
+        minimumPay: 60000,
+        maximumPay: 90000,
+        payType: "Range",
+        exactPay: null,
+        payRate: "per year",
+        jobDescription:
+          "Looking for a creative UI/UX designer to join our team...",
+        numberOfPeople: 1,
+        mobileNumber: "5556667777",
+        email: "designer@example.com",
+        deadline: "No",
+        deadlineDate: null,
+      },
+      {
+        jobTitle: "Data Analyst",
+        jobLocation: "Remote",
+        employeeId: 1,
+        specificCity: null,
+        advertiseCity: "No",
+        city: "Chicago",
+        area: "Downtown",
+        pincode: "60601",
+        streetAddress: "321 Elm Street",
+        jobTypes: ["Part-time"],
+        minimumPay: null,
+        maximumPay: null,
+        payType: "Exact",
+        exactPay: 40000,
+        payRate: "per year",
+        jobDescription: "Data analyst needed to analyze trends and patterns...",
+        numberOfPeople: 1,
+        mobileNumber: "3334445555",
+        email: "data@example.com",
+        deadline: "Yes",
+        deadlineDate: "2024-06-30",
+      },
+
+      // Add more records as needed
+    ];
+    await Job.bulkCreate(insertRecords);
+  } catch (error) {
+    console.log("Coupon seeder:", error);
+  }
+};
+
+module.exports = { JobData };
