@@ -1,39 +1,37 @@
 const Joi = require("joi");
 
 exports.jobSchema = Joi.object({
-  jobTitle: Joi.string().required(),
-  jobLocation: Joi.string().valid("On-site", "Remote").required(),
-  specificCity: Joi.string(),
-  advertiseCity: Joi.string().required(),
-  city: Joi.string().required(),
-  area: Joi.string().required(),
-  pincode: Joi.string().required(),
-  streetAddress: Joi.string().required(),
-  jobTypes: Joi.array()
-    .items(
-      Joi.string().valid(
-        "Full-time",
-        "Permanent",
-        "Fresher",
-        "Part-time",
-        "Internship",
-        "Temporary",
-        "Freelance",
-        "Volunteer"
-      )
+  jobTitle: Joi.string().allow(""),
+  jobLocation: Joi.string().valid("On-site", "Remote"),
+  specificCity: Joi.string().allow(""),
+  advertiseCity: Joi.string().allow(""),
+  city: Joi.string().allow(""),
+  area: Joi.string().allow(""),
+  pincode: Joi.string().allow(""),
+  streetAddress: Joi.string().allow(""),
+  jobTypes: Joi.array().items(
+    Joi.string().valid(
+      "Full-time",
+      "Permanent",
+      "Fresher",
+      "Part-time",
+      "Internship",
+      "Temporary",
+      "Freelance",
+      "Volunteer"
     )
-    .required(),
-  minimumPay: Joi.number().integer().allow(null),
-  maximumPay: Joi.number().integer().allow(null),
-  payType: Joi.string().valid("Exact", "Range").allow(null),
-  exactPay: Joi.number().integer().allow(null),
+  ),
+  minimumPay: Joi.number().integer().allow(""),
+  maximumPay: Joi.number().integer().allow(""),
+  payType: Joi.string().valid("Exact amount", "Range").allow(""),
+  exactPay: Joi.number().integer().allow(""),
   payRate: Joi.string()
     .valid("per hour", "per day", "per month", "per year")
-    .allow(null),
-  jobDescription: Joi.string().required(),
-  numberOfPeople: Joi.number().integer().required(),
-  mobileNumber: Joi.string().required(),
-  email: Joi.string().email().required(),
-  deadline: Joi.string().required(),
-  deadlineDate: Joi.date().allow(null),
+    .allow(""),
+  jobDescription: Joi.string().allow(""),
+  numberOfPeople: Joi.number().integer().allow(""),
+  mobileNumber: Joi.string().allow(""),
+  email: Joi.string().email().allow(""),
+  deadline: Joi.string().allow(""),
+  deadlineDate: Joi.date().allow(""),
 });

@@ -36,13 +36,30 @@ sequelize
   });
 
 // Import models
-db.Job = require("./jobs")(sequelize, DataTypes); // Assuming you have a file for employee model
-db.Employer = require("./employer")(sequelize, DataTypes); // Assuming you have a file for employee model
-db.Employee = require("./employee")(sequelize, DataTypes); // Assuming you have a file for employee model
+db.Job = require("./jobs")(sequelize, DataTypes);
+db.Employer = require("./employer")(sequelize, DataTypes);
+db.Employee = require("./employee")(sequelize, DataTypes);
+db.SavedJob = require("./savedJob")(sequelize, DataTypes);
+db.AppliedJob = require("./appliedJobs")(sequelize, DataTypes);
 
 // relationship between jobs and employee
 db.Employer.hasMany(db.Job, {
   foreignKey: "employeeId",
   as: "jobs", // Alias for the association
 });
+// Define associations
+db.Employee.hasMany(db.SavedJob, { foreignKey: "employeeId" });
+db.SavedJob.belongsTo(db.Employee, { foreignKey: "employeeId" });
+
+db.Employee.hasMany(db.AppliedJob, { foreignKey: "employeeId" });
+db.AppliedJob.belongsTo(db.Employee, {
+  foreignKey: "employeeId",
+  as: "employee",
+});
+
+db.SavedJob.belongsTo(db.Job, { foreignKey: "jobId", as: "job" });
+
+db.AppliedJob.belongsTo(db.Job, { foreignKey: "jobId", as: "job" });
+db.Job.belongsTo(db.Employer, { as: "employer", foreignKey: "employerId" });
+
 module.exports = db;

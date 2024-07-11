@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM("On-site", "Remote"),
       allowNull: false,
     },
-    employeeId: {
+    employerId: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -61,7 +61,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
     },
     payType: {
-      type: DataTypes.ENUM("Exact", "Range"),
+      type: DataTypes.ENUM("Exact amount", "Range"),
       allowNull: true,
     },
     exactPay: {
@@ -99,6 +99,11 @@ module.exports = (sequelize, DataTypes) => {
     deadlineDate: {
       type: DataTypes.DATE,
       allowNull: true,
+    },
+    status: {
+      type: DataTypes.ENUM("Open", "Paused", "Closed"),
+      allowNull: false,
+      defaultValue: "Open",
     },
   });
 

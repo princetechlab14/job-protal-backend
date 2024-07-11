@@ -6,7 +6,7 @@ const JobData = async () => {
       {
         jobTitle: "Full Stack Developer",
         jobLocation: "On-site",
-        employeeId: 1,
+        employerId: 1,
         specificCity: "New York",
         advertiseCity: "Yes",
         city: "New York",
@@ -30,7 +30,7 @@ const JobData = async () => {
       {
         jobTitle: "Backend Engineer",
         jobLocation: "Remote",
-        employeeId: 1,
+        employerId: 1,
 
         specificCity: null,
         advertiseCity: "No",
@@ -55,7 +55,7 @@ const JobData = async () => {
         jobTitle: "UI/UX Designer",
         jobLocation: "On-site",
         specificCity: "Los Angeles",
-        employeeId: 1,
+        employerId: 1,
         advertiseCity: "Yes",
         city: "Los Angeles",
         area: "Downtown",
@@ -78,7 +78,7 @@ const JobData = async () => {
       {
         jobTitle: "Data Analyst",
         jobLocation: "Remote",
-        employeeId: 1,
+        employerId: 1,
         specificCity: null,
         advertiseCity: "No",
         city: "Chicago",

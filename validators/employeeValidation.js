@@ -23,5 +23,6 @@ exports.updateProfileSchema = Joi.object({
   city: Joi.string().trim(),
   area: Joi.string().trim(),
   pincode: Joi.string().trim(),
+  role: Joi.string().trim(),
   streetAddress: Joi.string().trim(),
 });

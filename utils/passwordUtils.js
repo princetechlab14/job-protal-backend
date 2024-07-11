@@ -15,12 +15,9 @@ exports.comparePassword = async (plainPassword, hashedPassword) => {
 };
 
 // Function to generate JWT token
-exports.generateJWTToken = async (employeeId) => {
-  const payload = {
-    employeeId,
-  };
+exports.generateJWTToken = async (payload) => {
   const options = {
-    expiresIn: "1h", // Token expires in 1 hour
+    expiresIn: "24h", // Token expires in 24 hour
   };
   return jwt.sign(payload, process.env.JWT_SECRET, options);
 };

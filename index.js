@@ -1,13 +1,15 @@
 require("dotenv").config();
 
 const express = require("express");
+const cors = require("cors");
 const app = express();
+const swaggerConfig = require("./swaggerConfig"); // Adjust path as needed
 const port = process.env.PORT || 3000; // Use port from environment variables or default to 3000
 const { apiRoutes } = require("./routes");
 // Middleware setup
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
-
+app.use(cors());
 // importing connection
 const db = require("./models");
 const synchronizeAndSeed = async () => {
@@ -29,9 +31,17 @@ const synchronizeAndSeed = async () => {
 // synchronizeAndSeed()
 // Routes
 app.use("/api", apiRoutes);
+// Set up Swagger UI
+app.use(
+  "/api-docs",
+  swaggerConfig.swaggerUi.serve,
+  swaggerConfig.swaggerUi.setup(swaggerConfig.specs)
+);
+
 app.get("/", (req, res) => {
   res.send("This is job portal ");
 });
+// Error handling middleware
 
 // Start server
 app.listen(port, () => {
