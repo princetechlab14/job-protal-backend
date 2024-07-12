@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const employerController = require("../controllers/employer-controller");
+const jobController = require("../controllers/job-controller");
 const { authenticateToken } = require("../middleware/verifyToken");
 
 /**
@@ -179,13 +180,6 @@ router.get("/jobs", authenticateToken, employerController.getJobsByEmployeeId);
  *     tags: [Employers]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: employeeId
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID of the employer to get closed jobs for
  *     responses:
  *       200:
  *         description: Successful response with closed jobs
@@ -357,4 +351,238 @@ router.get(
   employerController.getApplicationDetailsById
 );
 
+/**
+ * @swagger
+ * /employer/jobs:
+ *   post:
+ *     summary: Create a new job
+ *     tags: [Employers]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *
+ *               jobTitle:
+ *                 type: string
+ *               jobLocation:
+ *                 type: string
+ *                 enum: [On-site, Remote]
+ *               specificCity:
+ *                 type: string
+ *               advertiseCity:
+ *                 type: string
+ *                 enum: [Yes, No]
+ *               city:
+ *                 type: string
+ *               state:
+ *                 type: string
+ *               area:
+ *                 type: string
+ *               pincode:
+ *                 type: string
+ *               streetAddress:
+ *                 type: string
+ *               jobTypes:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   enum:
+ *                     - Full-time
+ *                     - Permanent
+ *                     - Fresher
+ *                     - Part-time
+ *                     - Internship
+ *                     - Temporary
+ *                     - Freelance
+ *                     - Volunteer
+ *               skills:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               minimumPay:
+ *                 type: integer
+ *               maximumPay:
+ *                 type: integer
+ *               payType:
+ *                 type: string
+ *                 enum: [Exact amount, Range]
+ *               exactPay:
+ *                 type: integer
+ *               payRate:
+ *                 type: string
+ *                 enum: [per hour, per day, per month, per year]
+ *               jobDescription:
+ *                 type: string
+ *               numberOfPeople:
+ *                 type: integer
+ *               mobileNumber:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               deadline:
+ *                 type: string
+ *                 enum: [Yes, No]
+ *               deadlineDate:
+ *                 type: string
+ *                 format: date
+ *               languages:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               education:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       201:
+ *         description: Job created successfully
+ *       400:
+ *         description: Bad request - Validation error
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       500:
+ *         description: Server error
+ */
+router.post("/jobs", authenticateToken, jobController.createJob);
+
+/**
+ * @swagger
+ * /employer/jobs/{jobId}:
+ *   put:
+ *     summary: Update job by ID
+ *     tags: [Employers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the job to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               jobTitle:
+ *                 type: string
+ *               jobLocation:
+ *                 type: string
+ *                 enum: [On-site, Remote]
+ *               specificCity:
+ *                 type: string
+ *               advertiseCity:
+ *                 type: string
+ *                 enum: [Yes, No]
+ *               city:
+ *                 type: string
+ *               state:
+ *                 type: string
+ *               area:
+ *                 type: string
+ *               pincode:
+ *                 type: string
+ *               streetAddress:
+ *                 type: string
+ *               jobTypes:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               education:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               skills:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               languages:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   enum:
+ *                     - Full-time
+ *                     - Permanent
+ *                     - Fresher
+ *                     - Part-time
+ *                     - Internship
+ *                     - Temporary
+ *                     - Freelance
+ *                     - Volunteer
+ *               minimumPay:
+ *                 type: integer
+ *               maximumPay:
+ *                 type: integer
+ *               payType:
+ *                 type: string
+ *                 enum: [Exact, Range]
+ *               exactPay:
+ *                 type: integer
+ *               payRate:
+ *                 type: string
+ *                 enum: [per hour, per day, per month, per year]
+ *               jobDescription:
+ *                 type: string
+ *               numberOfPeople:
+ *                 type: integer
+ *               mobileNumber:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               deadline:
+ *                 type: string
+ *                 enum: [Yes, No]
+ *               deadlineDate:
+ *                 type: string
+ *                 format: date
+ *     responses:
+ *       200:
+ *         description: Job updated successfully
+ *       400:
+ *         description: Bad request - Validation error
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       404:
+ *         description: Job not found
+ *       500:
+ *         description: Server error
+ */
+router.put("/jobs/:jobId", authenticateToken, jobController.updateJob);
+
+/**
+ * @swagger
+ * /employer/jobs/{jobId}:
+ *   delete:
+ *     summary: Delete job by ID
+ *     tags: [Employers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the job to delete
+ *     responses:
+ *       200:
+ *         description: Job deleted successfully
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       404:
+ *         description: Job not found
+ *       500:
+ *         description: Server error
+ */
+router.delete("/jobs/:jobId", authenticateToken, jobController.deleteJob);
 module.exports = router;

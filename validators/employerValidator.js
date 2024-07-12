@@ -8,16 +8,11 @@ exports.registerSchema = Joi.object({
   fullName: Joi.string().required(),
 });
 
-exports.loginSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().required(),
-});
-
 // Define Joi schema for updating employee profile
 exports.updateProfileSchema = Joi.object({
   fullName: Joi.string().required(),
   companyName: Joi.string().required(),
-  numberOfEmployees: Joi.number().integer().required(),
+  numberOfEmployees: Joi.string().required(),
   howHeard: Joi.string().required(),
   hiringManager: Joi.string().required(),
   phoneNumber: Joi.string()

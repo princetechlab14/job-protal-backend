@@ -76,6 +76,8 @@ router.post("/register", employeeController.registerOrLoginEmployee);
  *                 type: string
  *               city:
  *                 type: string
+ *               role:
+ *                 type: string
  *               area:
  *                 type: string
  *               pincode:
@@ -319,4 +321,84 @@ router.get(
   employeeController.getAllSavedJobs
 );
 
+/**
+ * @swagger
+ * /employee/salary-range:
+ *   post:
+ *     summary: Get filtered jobs with average salary
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               jobTitle:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Successful response with filtered jobs and average salary
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 jobs:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       jobTitle:
+ *                         type: string
+ *                       location:
+ *                         type: string
+ *                       salary:
+ *                         type: number
+ *                 totalPages:
+ *                   type: integer
+ *                 currentPage:
+ *                   type: integer
+ *                 averageSalary:
+ *                   type: object
+ *                   properties:
+ *                     yearly:
+ *                       type: number
+ *                     hourly:
+ *                       type: number
+ *                     daily:
+ *                       type: number
+ *                     weekly:
+ *                       type: number
+ *       400:
+ *         description: Bad request - Validation error
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       500:
+ *         description: Server error
+ */
+router.post(
+  "/salary-range",
+  authenticateToken,
+  employeeController.getFilteredJobsWithSalary
+);
 module.exports = router;

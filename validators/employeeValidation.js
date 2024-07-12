@@ -9,11 +9,6 @@ exports.registerSchema = Joi.object({
   password: Joi.string().required(),
 });
 
-exports.loginSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().required(),
-});
-
 exports.updateProfileSchema = Joi.object({
   firstName: Joi.string().trim().min(2).max(50),
   lastName: Joi.string().trim().min(2).max(50),

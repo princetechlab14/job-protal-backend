@@ -6,6 +6,7 @@ exports.jobSchema = Joi.object({
   specificCity: Joi.string().allow(""),
   advertiseCity: Joi.string().allow(""),
   city: Joi.string().allow(""),
+  state: Joi.string().allow(""),
   area: Joi.string().allow(""),
   pincode: Joi.string().allow(""),
   streetAddress: Joi.string().allow(""),
@@ -21,6 +22,9 @@ exports.jobSchema = Joi.object({
       "Volunteer"
     )
   ),
+  skills: Joi.array().items(Joi.string()),
+  languages: Joi.array().items(Joi.string()),
+  education: Joi.array().items(Joi.string()),
   minimumPay: Joi.number().integer().allow(""),
   maximumPay: Joi.number().integer().allow(""),
   payType: Joi.string().valid("Exact amount", "Range").allow(""),

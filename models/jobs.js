@@ -25,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    state: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     area: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -50,6 +54,18 @@ module.exports = (sequelize, DataTypes) => {
           "Volunteer"
         )
       ),
+      allowNull: false,
+    },
+    education: {
+      type: DataTypes.JSON(),
+      allowNull: false,
+    },
+    skills: {
+      type: DataTypes.JSON(),
+      allowNull: false,
+    },
+    languages: {
+      type: DataTypes.JSON(),
       allowNull: false,
     },
     minimumPay: {
