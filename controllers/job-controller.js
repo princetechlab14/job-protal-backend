@@ -16,8 +16,8 @@ const ensureEmployer = (req, res, next) => {
 
 // Middleware to check if the user is an employee
 const ensureEmployee = (req, res, next) => {
-  if (req.user.userType !== "employer") {
-    return sendErrorResponse(res, "Employee cannot access this API", 403);
+  if (req.user.userType !== "employee") {
+    return sendErrorResponse(res, "Employer cannot access this API", 403);
   }
   next();
 };
@@ -104,6 +104,9 @@ exports.getAllJobs = [
     };
 
     // Filters
+    if (jobTitle) {
+      whereClause.jobTitle = { [Op.like]: `%${jobTitle}%` };
+    }
 
     // Filter by jobTitle with partial matching
     if (jobTitle) {
@@ -295,8 +298,9 @@ exports.getJobById = async (req, res) => {
 
     // Parse jobTypes field
     job.jobTypes = JSON.parse(job.jobTypes);
-    job.skills = JSON.parse(job.skills);
     job.languages = JSON.parse(job.languages);
+    job.skills = JSON.parse(job.skills);
+    job.education = JSON.parse(job.education);
 
     sendSuccessResponse(res, job);
   } catch (error) {

@@ -5,11 +5,10 @@ const { sendErrorResponse } = require("../utils/responseUtils.js");
 exports.authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
-
   if (!token) {
     return sendErrorResponse(
       res,
-      { status: false, message: "Unauthorized" },
+      { status: false, message: "No Token provided" },
       401
     ); // Unauthorized if token is not provided
   }

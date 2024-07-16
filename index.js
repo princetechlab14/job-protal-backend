@@ -2,10 +2,12 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const app = express();
 const swaggerConfig = require("./swaggerConfig"); // Adjust path as needed
 const port = process.env.PORT || 3000; // Use port from environment variables or default to 3000
-const { apiRoutes } = require("./routes");
+const { apiRoutes } = require("./routes/apis");
+const adminRoutes = require("./routes/admin");
 // Middleware setup
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
@@ -29,8 +31,13 @@ const synchronizeAndSeed = async () => {
   }
 };
 // synchronizeAndSeed()
+
 // Routes
+app.set("view engine", "ejs"); // Set EJS as the view engine
+app.set("views", path.join(__dirname, "views"));
+
 app.use("/api", apiRoutes);
+app.use("/admin", adminRoutes);
 // Set up Swagger UI
 app.use(
   "/api-docs",

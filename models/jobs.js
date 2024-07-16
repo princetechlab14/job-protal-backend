@@ -121,6 +121,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: "Open",
     },
+    experience: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   });
 
   return Job;

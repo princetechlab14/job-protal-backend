@@ -41,7 +41,9 @@ exports.registerOrLoginEmployee = async (req, res) => {
 
     const { email, password } = value;
 
-    const existingEmployee = await Employee.findOne({ where: { email } });
+    const existingEmployee = await Employee.findOne({
+      where: { email, status: true },
+    });
     if (existingEmployee) {
       const isPasswordValid = await comparePassword(
         password,

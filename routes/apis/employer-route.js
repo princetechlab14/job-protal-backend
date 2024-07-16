@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const employerController = require("../controllers/employer-controller");
-const jobController = require("../controllers/job-controller");
-const { authenticateToken } = require("../middleware/verifyToken");
+const employerController = require("../../controllers/employer-controller");
+const jobController = require("../../controllers/job-controller");
+const { authenticateToken } = require("../../middleware/verifyToken");
 
 /**
  * @swagger
@@ -152,25 +152,54 @@ router.put(
 
 /**
  * @swagger
- * /employer/jobs:
- *   get:
- *     summary: Get jobs by employer ID
+ * /employer/jobs/live:
+ *   post:
+ *     summary: Get jobs by employer ID with optional filters and sorting
  *     tags: [Employers]
  *     security:
  *       - bearerAuth: []
- *
- *         schema:
- *           type: integer
- *         description: ID of the employer to get jobs for
- *     responses:
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               jobTitle:
+ *                 type: string
+ *                 description: Filter jobs by title containing the specified string
+ *               location:
+ *                 type: string
+ *                 description: Filter jobs by location containing the specified string
+ *               sortBy:
+ *                 type: string
+ *                 enum: [createdAt, updatedAt, jobTitle] 
+ *                 description: Field to sort by (createdAt, updatedAt, jobTitle)
+ *               sortOrder:
+ *                 type: string
+ *                 enum: [asc, desc]
+ *                 description: Sort order (ascending 'asc' or descending 'desc')
+ *               startDate:
+ *                 type: string
+ *                 format: date
+ *                 description: Start date to filter jobs created after this date (YYYY-MM-DD)
+ *               endDate:
+ *                 type: string
+ *                 format: date
+ *                 description: End date to filter jobs created before this date (YYYY-MM-DD)
+ *     responses: 
  *       200:
- *         description: Successful response with jobs
+ *         description: Successful response with jobs matching the criteria
  *       401:
  *         description: Unauthorized - Missing or invalid token
  *       500:
  *         description: Server error
  */
-router.get("/jobs", authenticateToken, employerController.getJobsByEmployeeId);
+router.post(
+  "/jobs/live",
+  authenticateToken,
+  employerController.getJobsByEmployeeId
+);
 
 /**
  * @swagger
@@ -269,6 +298,7 @@ router.put(
   authenticateToken,
   employerController.updateJobStatus
 );
+
 /**
  * @swagger
  * /employer/search-employees:
@@ -366,8 +396,9 @@ router.get(
  *           schema:
  *             type: object
  *             properties:
- *
  *               jobTitle:
+ *                 type: string
+ *               experience :
  *                 type: string
  *               jobLocation:
  *                 type: string
@@ -585,4 +616,5 @@ router.put("/jobs/:jobId", authenticateToken, jobController.updateJob);
  *         description: Server error
  */
 router.delete("/jobs/:jobId", authenticateToken, jobController.deleteJob);
+
 module.exports = router;

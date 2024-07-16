@@ -36,6 +36,14 @@ exports.jobSchema = Joi.object({
   numberOfPeople: Joi.number().integer().allow(""),
   mobileNumber: Joi.string().allow(""),
   email: Joi.string().email().allow(""),
-  deadline: Joi.string().allow(""),
-  deadlineDate: Joi.date().allow(""),
+  deadline: Joi.string().valid("Yes", "No").allow(""),
+  experience: Joi.string().allow(""),
+  deadlineDate: Joi.when("deadline", {
+    is: "Yes",
+    then: Joi.date().required(),
+    otherwise: Joi.alternatives().try(
+      Joi.date().allow(null),
+      Joi.string().allow("")
+    ),
+  }),
 });

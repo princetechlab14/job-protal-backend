@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const employeeController = require("../controllers/employee-controller");
-const { authenticateToken } = require("../middleware/verifyToken");
-const { upload, convertPdfToBase64 } = require("../middleware/pdfTobase64");
+const employeeController = require("../../controllers/employee-controller");
+const { authenticateToken } = require("../../middleware/verifyToken");
+const { upload, convertPdfToBase64 } = require("../../middleware/pdfTobase64");
 
 /**
  * @swagger
@@ -401,4 +401,5 @@ router.post(
   authenticateToken,
   employeeController.getFilteredJobsWithSalary
 );
+  
 module.exports = router;

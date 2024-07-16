@@ -5,7 +5,7 @@ const options = {
   swaggerDefinition: {
     openapi: "3.0.0",
     info: {
-      title: "Your API Documentation",
+      title: "Job portal API Documentation",
       version: "1.0.0",
       description:
         "API documentation for your employer, jobs, and employee routes",
@@ -27,7 +27,7 @@ const options = {
       },
     ],
   },
-  apis: ["./routes/*.js"], // Path to the API routes
+  apis: ["./routes/apis/*.js"], // Path to the API routes
 };
 
 const specs = swaggerJsdoc(options);

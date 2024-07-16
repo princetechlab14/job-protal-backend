@@ -203,27 +203,56 @@ exports.getJobsByEmployeeId = [
   ensureEmployer,
   async (req, res) => {
     const { employerId } = req.user;
-    console.log(employerId);
+    const { jobTitle, location, sortBy, sortOrder, startDate, endDate } =
+      req.body;
+
     try {
       const employee = await Employer.findByPk(employerId);
       if (!employee) {
         return sendErrorResponse(res, "Employer not found", 404);
       }
 
-      const jobs = await Job.findAll({
-        where: {
-          employerId: employerId, // Assuming the foreign key is employerId in the Job model
-          status: {
-            [Op.in]: ["Open", "Paused"], // Filter by status = "Open" or "Paused"
-          },
-          [Op.or]: [
-            { deadline: "No" },
-            { deadlineDate: { [Op.gt]: new Date() } },
-          ],
+      // Prepare filter conditions for jobs
+      const filterConditions = {
+        employerId: employerId,
+        status: {
+          [Op.in]: ["Open", "Paused"],
+          // Filter by status = "Open" or "Paused"
         },
+      };
+
+      // Optional filters based on query parameters
+      if (jobTitle) {
+        filterConditions.jobTitle = {
+          [Op.like]: `%${jobTitle}%`,
+        };
+      }
+      if (location) {
+        filterConditions.city = {
+          [Op.like]: `%${location}%`,
+        };
+      }
+      if (startDate && endDate) {
+        filterConditions.createdAt = {
+          [Op.between]: [startDate, endDate], // Assuming startDate and endDate are Date objects or ISO strings
+        };
+      }
+
+      // Sorting options
+      orderBy = [["createdAt", "ASC"]]; // Default sort by createdAt in ascending order
+      if (sortOrder === "dsc") {
+        orderBy = [["createdAt", "DESC"]]; // Default sort by createdAt in ascending order
+      } else {
+        orderBy = [["createdAt", "ASC"]]; // Default sort by createdAt in ascending order
+      }
+
+      // Query jobs with filters and sorting
+      const jobs = await Job.findAll({
+        where: filterConditions,
+        order: orderBy,
       });
 
-      // Parse jobTypes field for each job
+      // Parse jobTypes field for each job (assuming jobTypes is stored as JSON)
       jobs.forEach((job) => {
         job.jobTypes = JSON.parse(job.jobTypes);
         job.skills = JSON.parse(job.skills);
@@ -233,8 +262,8 @@ exports.getJobsByEmployeeId = [
 
       sendSuccessResponse(res, jobs);
     } catch (error) {
-      console.error("Error retrieving jobs by employee ID:", error);
-      sendErrorResponse(res, "Error retrieving jobs by employee ID");
+      console.error("Error retrieving jobs by employer ID:", error);
+      sendErrorResponse(res, "Error retrieving jobs by employer ID");
     }
   },
 ];

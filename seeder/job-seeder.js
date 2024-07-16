@@ -29,7 +29,6 @@ const JobData = async () => {
         deadline: "No",
         deadlineDate: null,
       },
-
       {
         jobTitle: "Backend Engineer",
         jobLocation: "Remote",
@@ -109,8 +108,6 @@ const JobData = async () => {
         deadline: "Yes",
         deadlineDate: "2024-06-30",
       },
-
-      // Add more records as needed
     ];
     await Job.bulkCreate(insertRecords);
   } catch (error) {
