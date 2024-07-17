@@ -1,24 +1,49 @@
 require("dotenv").config();
-
+const cron = require("node-cron");
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const app = express();
 const swaggerConfig = require("./swaggerConfig"); // Adjust path as needed
+const db = require("./models");
+const { Op } = require("sequelize");
+
+const app = express();
 const port = process.env.PORT || 3000; // Use port from environment variables or default to 3000
-const { apiRoutes } = require("./routes/apis");
-const adminRoutes = require("./routes/admin");
+
 // Middleware setup
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(cors());
-// importing connection
-const db = require("./models");
+
+// Importing routes
+const { apiRoutes } = require("./routes/apis");
+const adminRoutes = require("./routes/admin");
+
+// Set up EJS view engine
+app.set("view engine", "ejs"); // Set EJS as the view engine
+app.set("views", path.join(__dirname, "views"));
+
+// Define routes
+app.use("/api", apiRoutes);
+app.use("/admin", adminRoutes);
+app.use(
+  "/api-docs",
+  swaggerConfig.swaggerUi.serve,
+  swaggerConfig.swaggerUi.setup(swaggerConfig.specs)
+);
+app.get("/", (req, res) => {
+  res.send("This is job portal");
+});
+
+// Error handling middleware
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled promise rejection:", err);
+});
+
+// Synchronize and seed database
 const synchronizeAndSeed = async () => {
   try {
     await db.sequelize.sync({ force: true }); // Sync models with the database and force re-creation of tables
-    // Uncomment the line below if you don't want to force re-creation of tables
-    // await db.sequelize.sync();
 
     // Import and execute all seeders
     await require("./seeder/employer-seeder").employeeData();
@@ -32,23 +57,34 @@ const synchronizeAndSeed = async () => {
 };
 // synchronizeAndSeed()
 
-// Routes
-app.set("view engine", "ejs"); // Set EJS as the view engine
-app.set("views", path.join(__dirname, "views"));
+// Define a cron job to run at 12:01 AM
+cron.schedule("1 0 * * *", async () => {
+  try {
+    const currentDate = new Date();
+    const jobsToUpdate = await db.Job.findAll({
+      where: {
+        status: "Open",
+        deadlineDate: {
+          [Op.lte]: currentDate, // Jobs where deadlineDate <= today
+        },
+      },
+    });
 
-app.use("/api", apiRoutes);
-app.use("/admin", adminRoutes);
-// Set up Swagger UI
-app.use(
-  "/api-docs",
-  swaggerConfig.swaggerUi.serve,
-  swaggerConfig.swaggerUi.setup(swaggerConfig.specs)
-);
+    const promises = jobsToUpdate.map(async (job) => {
+      await job.update({ status: "Closed" });
+    });
 
-app.get("/", (req, res) => {
-  res.send("This is job portal ");
+    // Wait for all updates to complete
+    await Promise.all(promises);
+
+    console.log(`Job statuses updated for ${jobsToUpdate.length} jobs.`);
+  } catch (error) {
+    console.error("Error updating job statuses:", error);
+  }
 });
-// Error handling middleware
+
+// Log when the cron job starts
+console.log("Cron job scheduled to run at 12:01 AM");
 
 // Start server
 app.listen(port, () => {

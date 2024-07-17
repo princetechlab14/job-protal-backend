@@ -179,6 +179,7 @@ exports.saveJob = [
     }
   },
 ];
+
 // Apply for a job
 exports.applyJob = [
   ensureEmployee,
@@ -429,6 +430,31 @@ exports.getFilteredJobsWithSalary = [
     } catch (error) {
       console.error("Error retrieving jobs:", error);
       sendErrorResponse(res, "Error retrieving jobs", 500);
+    }
+  },
+];
+
+// Unsaved a job
+exports.unsavedJob = [
+  ensureEmployee,
+  async (req, res) => {
+    try {
+      const { employeeId } = req.user;
+      const { jobId } = req.params;
+
+      const savedJob = await SavedJob.findOne({
+        where: { employeeId, jobId },
+      });
+      if (!savedJob) {
+        return sendErrorResponse(res, "Saved job not found", 404);
+      }
+
+      await savedJob.destroy();
+
+      sendSuccessResponse(res, { message: "Job unsaved successfully" }, 200);
+    } catch (error) {
+      console.error("Error unsaving job:", error);
+      sendErrorResponse(res, "Error unsaving job", 500);
     }
   },
 ];

@@ -401,5 +401,35 @@ router.post(
   authenticateToken,
   employeeController.getFilteredJobsWithSalary
 );
-  
+/**
+ * @swagger
+ * /employee/unsave-job/{jobId}:
+ *   delete:
+ *     summary: Unsave a job
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the job to unsave
+ *     responses:
+ *       200:
+ *         description: Job unsaved successfully
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       404:
+ *         description: Job not found
+ *       500:
+ *         description: Server error
+ */
+router.delete(
+  "/unsave-job/:jobId",
+  authenticateToken,
+  employeeController.unsavedJob
+);
+
 module.exports = router;

@@ -30,8 +30,8 @@ const employeeData = async () => {
       insertRecords.push({
         fullName: `Employee ${i}`,
         companyName: "Tech Solutions Inc.",
-        numberOfEmployees: 100,
-        isHiringManager: false,
+        numberOfEmployees: 100+i,
+        isHiringManager: "Yes",
         phoneNumber: `123-456-700${i}`,
         email: `employee${i}@example.com`,
         password: "dummyPasswordHashed",

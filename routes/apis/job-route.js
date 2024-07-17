@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const jobController = require("../../controllers/job-controller");
-const { authenticateToken } = require("../../middleware/verifyToken");
 
 /**
  * @swagger
@@ -16,8 +15,6 @@ const { authenticateToken } = require("../../middleware/verifyToken");
  *   post:
  *     summary: Get all jobs with pagination and filtering
  *     tags: [Jobs]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -79,7 +76,7 @@ const { authenticateToken } = require("../../middleware/verifyToken");
  *       500:
  *         description: Server error
  */
-router.post("/getall", authenticateToken, jobController.getAllJobs);
+router.post("/getall", jobController.getAllJobs);
 
 /**
  * @swagger
@@ -87,8 +84,6 @@ router.post("/getall", authenticateToken, jobController.getAllJobs);
  *   get:
  *     summary: Get job by ID
  *     tags: [Jobs]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: jobId
@@ -106,6 +101,6 @@ router.post("/getall", authenticateToken, jobController.getAllJobs);
  *       500:
  *         description: Server error
  */
-router.get("/:jobId", authenticateToken, jobController.getJobById);
+router.get("/:jobId", jobController.getJobById);
 
 module.exports = router;

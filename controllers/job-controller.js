@@ -14,14 +14,6 @@ const ensureEmployer = (req, res, next) => {
   next();
 };
 
-// Middleware to check if the user is an employee
-const ensureEmployee = (req, res, next) => {
-  if (req.user.userType !== "employee") {
-    return sendErrorResponse(res, "Employer cannot access this API", 403);
-  }
-  next();
-};
-
 // Create a new job
 exports.createJob = [
   ensureEmployer,
@@ -79,214 +71,219 @@ exports.updateJob = [
 ];
 
 // Get all jobs with pagination and optional filtering
-exports.getAllJobs = [
-  ensureEmployee,
-  async (req, res) => {
-    const { page = 1, limit = 10 } = req.query; // Default page is 1, limit is 10 per page
-    const {
-      jobTitle,
-      location,
-      datePosted,
-      jobLocation,
-      minPay,
-      maxPay,
-      jobType,
-      skills,
-      language,
-      city,
-      education,
-    } = req.body;
-    const offset = (page - 1) * limit;
+exports.getAllJobs = async (req, res) => {
+  const { page = 1, limit = 10 } = req.query; // Default page is 1, limit is 10 per page
+  const {
+    jobTitle,
+    location,
+    datePosted,
+    jobLocation,
+    minPay,
+    maxPay,
+    jobType,
+    skills,
+    language,
+    city,
+    education,
+  } = req.body;
+  const offset = (page - 1) * limit;
 
-    // Construct the where clause for filtering
-    const whereClause = {
-      status: "Open", // Filter by status = "Open"
-    };
+  // Construct the where clause for filtering
+  const whereClause = {
+    status: "Open", // Filter by status = "Open"
+  };
 
-    // Filters
-    if (jobTitle) {
-      whereClause.jobTitle = { [Op.like]: `%${jobTitle}%` };
+  // Filter by deadline date in the future or null
+  const currentDate = new Date();
+  whereClause.deadlineDate = {
+    [Op.or]: [
+      { [Op.gt]: currentDate }, // Deadline date is in the future
+      { [Op.eq]: null }, // Deadline date is null
+    ],
+  };
+
+  // Filters
+  if (jobTitle) {
+    whereClause.jobTitle = { [Op.like]: `%${jobTitle}%` };
+  }
+
+  // Filter by jobTitle with partial matching
+  if (jobTitle) {
+    whereClause[Op.or] = [
+      ...(whereClause[Op.or] || []),
+      Sequelize.where(
+        Sequelize.fn("LOWER", Sequelize.col("jobTitle")),
+        "LIKE",
+        `%${jobTitle.toLowerCase()}%`
+      ),
+    ];
+  }
+
+  // Filter by location (city or state)
+  if (location) {
+    whereClause[Op.or] = [
+      ...(whereClause[Op.or] || []),
+      Sequelize.where(
+        Sequelize.fn("LOWER", Sequelize.col("city")),
+        "LIKE",
+        `%${location.toLowerCase()}%`
+      ),
+      Sequelize.where(
+        Sequelize.fn("LOWER", Sequelize.col("state")),
+        "LIKE",
+        `%${location.toLowerCase()}%`
+      ),
+    ];
+  }
+
+  // Filter by date posted
+  if (datePosted) {
+    const currentDate = new Date();
+    let pastDate;
+    switch (datePosted.toLowerCase()) {
+      case "last 14 hours":
+        pastDate = new Date(currentDate.getTime() - 14 * 60 * 60 * 1000);
+        break;
+      case "last 3 days":
+        pastDate = new Date(currentDate.getTime() - 3 * 24 * 60 * 60 * 1000);
+        break;
+      case "last 7 days":
+        pastDate = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case "last 14 days":
+        pastDate = new Date(currentDate.getTime() - 14 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        pastDate = null;
     }
+    if (pastDate) {
+      whereClause.createdAt = { [Op.gte]: pastDate };
+    }
+  }
 
-    // Filter by jobTitle with partial matching
-    if (jobTitle) {
-      whereClause[Op.or] = [
-        ...(whereClause[Op.or] || []),
-        Sequelize.where(
-          Sequelize.fn("LOWER", Sequelize.col("jobTitle")),
-          "LIKE",
-          `%${jobTitle.toLowerCase()}%`
+  // Filter by jobLocation with partial matching
+  if (jobLocation) {
+    whereClause[Op.or] = [
+      ...(whereClause[Op.or] || []),
+      Sequelize.where(
+        Sequelize.fn("LOWER", Sequelize.col("jobLocation")),
+        "LIKE",
+        `%${jobLocation.toLowerCase()}%`
+      ),
+    ];
+  }
+
+  // Filter by minimum pay
+  if (minPay) {
+    whereClause[Op.or] = [
+      ...(whereClause[Op.or] || []),
+      Sequelize.where(Sequelize.col("minimumPay"), ">=", minPay),
+    ];
+  }
+
+  // Filter by maximum pay
+  if (maxPay) {
+    whereClause[Op.or] = [
+      ...(whereClause[Op.or] || []),
+      Sequelize.where(Sequelize.col("maximumPay"), "<=", maxPay),
+    ];
+  }
+
+  // Filter by jobType using JSON_CONTAINS for array field
+  if (jobType) {
+    whereClause[Op.or] = [
+      ...(whereClause[Op.or] || []),
+      Sequelize.where(
+        Sequelize.fn(
+          "JSON_CONTAINS",
+          Sequelize.col("jobTypes"),
+          JSON.stringify([jobType])
         ),
-      ];
-    }
+        true
+      ),
+    ];
+  }
 
-    // Filter by location (city or state)
-    if (location) {
-      whereClause[Op.or] = [
-        ...(whereClause[Op.or] || []),
-        Sequelize.where(
-          Sequelize.fn("LOWER", Sequelize.col("city")),
-          "LIKE",
-          `%${location.toLowerCase()}%`
+  // Filter by skills using JSON_CONTAINS for array field
+  if (skills) {
+    whereClause[Op.or] = [
+      ...(whereClause[Op.or] || []),
+      Sequelize.where(
+        Sequelize.fn(
+          "JSON_CONTAINS",
+          Sequelize.col("skills"),
+          JSON.stringify([skills])
         ),
-        Sequelize.where(
-          Sequelize.fn("LOWER", Sequelize.col("state")),
-          "LIKE",
-          `%${location.toLowerCase()}%`
+        true
+      ),
+    ];
+  }
+  // Filter by education using JSON_CONTAINS for array field
+  if (education) {
+    whereClause[Op.or] = [
+      ...(whereClause[Op.or] || []),
+      Sequelize.where(
+        Sequelize.fn(
+          "JSON_CONTAINS",
+          Sequelize.col("education"),
+          JSON.stringify([education])
         ),
-      ];
-    }
+        true
+      ),
+    ];
+  }
 
-    // Filter by date posted
-    if (datePosted) {
-      const currentDate = new Date();
-      let pastDate;
-      switch (datePosted.toLowerCase()) {
-        case "last 14 hours":
-          pastDate = new Date(currentDate.getTime() - 14 * 60 * 60 * 1000);
-          break;
-        case "last 3 days":
-          pastDate = new Date(currentDate.getTime() - 3 * 24 * 60 * 60 * 1000);
-          break;
-        case "last 7 days":
-          pastDate = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-          break;
-        case "last 14 days":
-          pastDate = new Date(currentDate.getTime() - 14 * 24 * 60 * 60 * 1000);
-          break;
-        default:
-          pastDate = null;
-      }
-      if (pastDate) {
-        whereClause.createdAt = { [Op.gte]: pastDate };
-      }
-    }
-
-    // Filter by jobLocation with partial matching
-    if (jobLocation) {
-      whereClause[Op.or] = [
-        ...(whereClause[Op.or] || []),
-        Sequelize.where(
-          Sequelize.fn("LOWER", Sequelize.col("jobLocation")),
-          "LIKE",
-          `%${jobLocation.toLowerCase()}%`
+  // Filter by language using JSON_CONTAINS for array field
+  if (language) {
+    whereClause[Op.or] = [
+      ...(whereClause[Op.or] || []),
+      Sequelize.where(
+        Sequelize.fn(
+          "JSON_CONTAINS",
+          Sequelize.col("languages"),
+          JSON.stringify([language])
         ),
-      ];
-    }
+        true
+      ),
+    ];
+  }
 
-    // Filter by minimum pay
-    if (minPay) {
-      whereClause[Op.or] = [
-        ...(whereClause[Op.or] || []),
-        Sequelize.where(Sequelize.col("minimumPay"), ">=", minPay),
-      ];
-    }
+  // Filter by city with partial matching
+  if (city) {
+    whereClause[Op.or] = [
+      ...(whereClause[Op.or] || []),
+      Sequelize.where(
+        Sequelize.fn("LOWER", Sequelize.col("city")),
+        "LIKE",
+        `%${city.toLowerCase()}%`
+      ),
+    ];
+  }
 
-    // Filter by maximum pay
-    if (maxPay) {
-      whereClause[Op.or] = [
-        ...(whereClause[Op.or] || []),
-        Sequelize.where(Sequelize.col("maximumPay"), "<=", maxPay),
-      ];
-    }
+  try {
+    const { count, rows: jobs } = await Job.findAndCountAll({
+      where: whereClause,
+      limit: parseInt(limit),
+      offset: offset,
+    });
 
-    // Filter by jobType using JSON_CONTAINS for array field
-    if (jobType) {
-      whereClause[Op.or] = [
-        ...(whereClause[Op.or] || []),
-        Sequelize.where(
-          Sequelize.fn(
-            "JSON_CONTAINS",
-            Sequelize.col("jobTypes"),
-            JSON.stringify([jobType])
-          ),
-          true
-        ),
-      ];
-    }
+    // Parse JSON fields for each job
+    jobs.forEach((job) => {
+      job.jobTypes = JSON.parse(job.jobTypes);
+      job.skills = JSON.parse(job.skills);
+      job.languages = JSON.parse(job.languages);
+      job.education = JSON.parse(job.education);
+    });
+    // Construct pagination metadata
+    const totalPages = Math.ceil(count / limit);
+    const currentPage = parseInt(page);
 
-    // Filter by skills using JSON_CONTAINS for array field
-    if (skills) {
-      whereClause[Op.or] = [
-        ...(whereClause[Op.or] || []),
-        Sequelize.where(
-          Sequelize.fn(
-            "JSON_CONTAINS",
-            Sequelize.col("skills"),
-            JSON.stringify([skills])
-          ),
-          true
-        ),
-      ];
-    }
-    // Filter by education using JSON_CONTAINS for array field
-    if (education) {
-      whereClause[Op.or] = [
-        ...(whereClause[Op.or] || []),
-        Sequelize.where(
-          Sequelize.fn(
-            "JSON_CONTAINS",
-            Sequelize.col("education"),
-            JSON.stringify([education])
-          ),
-          true
-        ),
-      ];
-    }
-
-    // Filter by language using JSON_CONTAINS for array field
-    if (language) {
-      whereClause[Op.or] = [
-        ...(whereClause[Op.or] || []),
-        Sequelize.where(
-          Sequelize.fn(
-            "JSON_CONTAINS",
-            Sequelize.col("languages"),
-            JSON.stringify([language])
-          ),
-          true
-        ),
-      ];
-    }
-
-    // Filter by city with partial matching
-    if (city) {
-      whereClause[Op.or] = [
-        ...(whereClause[Op.or] || []),
-        Sequelize.where(
-          Sequelize.fn("LOWER", Sequelize.col("city")),
-          "LIKE",
-          `%${city.toLowerCase()}%`
-        ),
-      ];
-    }
-
-    try {
-      const { count, rows: jobs } = await Job.findAndCountAll({
-        where: whereClause,
-        limit: parseInt(limit),
-        offset: offset,
-      });
-
-      // Parse JSON fields for each job
-      jobs.forEach((job) => {
-        job.jobTypes = JSON.parse(job.jobTypes);
-        job.skills = JSON.parse(job.skills);
-        job.languages = JSON.parse(job.languages);
-        job.education = JSON.parse(job.education);
-      });
-      // Construct pagination metadata
-      const totalPages = Math.ceil(count / limit);
-      const currentPage = parseInt(page);
-
-      sendSuccessResponse(res, { jobs, totalPages, currentPage });
-    } catch (error) {
-      console.error("Error retrieving jobs:", error);
-      sendErrorResponse(res, "Error retrieving jobs", 500);
-    }
-  },
-];
-
+    sendSuccessResponse(res, { jobs, totalPages, currentPage });
+  } catch (error) {
+    console.error("Error retrieving jobs:", error);
+    sendErrorResponse(res, "Error retrieving jobs", 500);
+  }
+};
 // Get job by ID
 exports.getJobById = async (req, res) => {
   try {
