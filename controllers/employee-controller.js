@@ -117,7 +117,12 @@ exports.updateProfile = [
         return sendErrorResponse(res, "Employee not found", 404);
       }
 
-      await employee.update(value);
+      // Update only the fields provided in the request body
+      Object.keys(value).forEach((key) => {
+        employee[key] = value[key];
+      });
+
+      await employee.save();
 
       sendSuccessResponse(res, { employee }, 200);
     } catch (error) {
@@ -178,7 +183,7 @@ exports.saveJob = [
       sendErrorResponse(res, "Error saving job", 500);
     }
   },
-];
+];  
 
 // Apply for a job
 exports.applyJob = [

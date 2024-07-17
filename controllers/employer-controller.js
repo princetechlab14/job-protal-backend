@@ -110,18 +110,8 @@ exports.updateProfile = [
         return sendErrorResponse(res, error.details[0].message, 400);
       }
 
-      const {
-        fullName,
-        companyName,
-        numberOfEmployees,
-        howHeard,
-        hiringManager,
-        phoneNumber,
-      } = value; // Use validated values from Joi
-
-      // Get employer ID from authenticated user (assuming it's stored in req.user.id)
       const { employerId } = req.user;
-      console.log(req.user);
+
       // Find the employer by ID
       let employer = await Employer.findByPk(employerId);
 
@@ -130,13 +120,10 @@ exports.updateProfile = [
         return sendErrorResponse(res, "Employer not found", 404);
       }
 
-      // Update employer's profile fields
-      employer.fullName = fullName;
-      employer.companyName = companyName;
-      employer.numberOfEmployees = numberOfEmployees;
-      employer.howHeard = howHeard;
-      employer.hiringManager = hiringManager;
-      employer.phoneNumber = phoneNumber;
+      // Update only the fields provided in the request body
+      Object.keys(value).forEach((key) => {
+        employer[key] = value[key];
+      });
 
       // Save the updated employer
       await employer.save();
@@ -171,7 +158,7 @@ exports.getProfile = [
       sendErrorResponse(res, "Error fetching employer profile", 500);
     }
   },
-];
+];               
 
 // Update employer status for an applied job
 exports.updateEmployerStatus = [
@@ -382,9 +369,8 @@ exports.updateJobStatus = [
         return sendErrorResponse(res, "Job not found", 404);
       }
 
-      // Update job status
-      job.status = status;
-      await job.save();
+      // Update only the status field
+      await job.update({ status });
 
       sendSuccessResponse(
         res,
