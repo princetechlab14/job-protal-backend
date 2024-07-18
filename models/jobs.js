@@ -126,7 +126,7 @@ module.exports = (sequelize, DataTypes) => {
     experience: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue:"dfsdfsdfsdfsdfsd"
+      defaultValue:"1 year"
     },
   });
 

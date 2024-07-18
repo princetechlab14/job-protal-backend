@@ -87,6 +87,6 @@ cron.schedule("1 0 * * *", async () => {
 console.log("Cron job scheduled to run at 12:01 AM");
 
 // Start server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+app.listen(port, "192.168.29.62", () => {
+  console.log(`Server is running on http://192.168.29.62:${port}`);
 });
