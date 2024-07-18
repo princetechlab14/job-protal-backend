@@ -240,12 +240,12 @@ exports.getJobsByEmployeeId = [
       });
 
       // Parse jobTypes field for each job (assuming jobTypes is stored as JSON)
-      jobs.forEach((job) => {
-        job.jobTypes = JSON.parse(job.jobTypes);
-        job.skills = JSON.parse(job.skills);
-        job.languages = JSON.parse(job.languages);
-        job.education = JSON.parse(job.education);
-      });
+      // jobs.forEach((job) => {
+      //   job.jobTypes = JSON.parse(job.jobTypes);
+      //   job.skills = JSON.parse(job.skills);
+      //   job.languages = JSON.parse(job.languages);
+      //   job.education = JSON.parse(job.education);
+      // });
 
       sendSuccessResponse(res, jobs);
     } catch (error) {
@@ -283,12 +283,12 @@ exports.getClosedJobsByEmployeeId = [
       });
 
       // Parse jobTypes field for each job
-      jobs.forEach((job) => {
-        job.jobTypes = JSON.parse(job.jobTypes);
-        job.skills = JSON.parse(job.skills);
-        job.languages = JSON.parse(job.languages);
-        job.education = JSON.parse(job.education);
-      });
+      // jobs.forEach((job) => {
+      //   job.jobTypes = JSON.parse(job.jobTypes);
+      //   job.skills = JSON.parse(job.skills);
+      //   job.languages = JSON.parse(job.languages);
+      //   job.education = JSON.parse(job.education);
+      // });
 
       sendSuccessResponse(res, jobs);
     } catch (error) {
@@ -505,7 +505,7 @@ exports.getApplicationDetailsById = [
         ],
       });
       // Parse jobTypes field for each job
-      appliedJob.job.jobTypes = JSON.parse(appliedJob.job.jobTypes);
+      // appliedJob.job.jobTypes = JSON.parse(appliedJob.job.jobTypes);
 
       if (!appliedJob) {
         return sendErrorResponse(res, "Application not found", 404);

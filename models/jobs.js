@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     state: {
       type: DataTypes.STRING,
       allowNull: false,
+      defaultValue: "Dsadsasa",
     },
     area: {
       type: DataTypes.STRING,
@@ -69,11 +70,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     minimumPay: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: true,
     },
     maximumPay: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: true,
     },
     payType: {
@@ -81,19 +82,20 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
     },
     exactPay: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: true,
     },
     payRate: {
       type: DataTypes.ENUM("per hour", "per day", "per month", "per year"),
       allowNull: true,
+      defaultValue:"per hour"
     },
     jobDescription: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
     numberOfPeople: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     mobileNumber: {
@@ -113,7 +115,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: "No",
     },
     deadlineDate: {
-      type: DataTypes.DATE,
+      type: DataTypes.STRING,
       allowNull: true,
     },
     status: {
@@ -124,6 +126,7 @@ module.exports = (sequelize, DataTypes) => {
     experience: {
       type: DataTypes.STRING,
       allowNull: false,
+      defaultValue:"dfsdfsdfsdfsdfsd"
     },
   });
 

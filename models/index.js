@@ -1,11 +1,9 @@
 const { Sequelize, DataTypes } = require("sequelize");
 
+// Using the connection URL directly
 const sequelize = new Sequelize(
-  process.env.DB_DATABASE,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
+  "mysql://avnadmin:AVNS_ezymcMuAiILubl2YTel@mysql-148385bc-lipsatechlab-6210.c.aivencloud.com:21998/defaultdb?ssl-mode=REQUIRED",
   {
-    host: "localhost",
     dialect: "mysql",
     pool: {
       max: 5,
@@ -24,6 +22,16 @@ const sequelize = new Sequelize(
 const db = {};
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
+
+// Optionally, you can test the database connection
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log("Database connection has been established successfully.");
+  })
+  .catch((err) => {
+    console.error("Unable to connect to the database:", err);
+  });
 
 // Optionally, you can test the database connection
 sequelize
