@@ -22,7 +22,7 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:5000/api", // Replace with your server URL
+        url: "https://job-protal-backend.onrender.com/api", // Replace with your server URL
         description: "Local development server",
       },
     ],
