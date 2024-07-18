@@ -146,7 +146,7 @@ router.get("/profile", authenticateToken, employerController.getProfile);
  *         description: Server error
  */
 router.put(
-  "/applied-jobs/:appliedJobId/update-employer-status",
+  "/applied-jobs/:appliedJobId/update-application-status",
   employerController.updateEmployerStatus
 );
 

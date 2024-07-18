@@ -294,10 +294,10 @@ exports.getJobById = async (req, res) => {
     }
 
     // Parse jobTypes field
-    job.jobTypes = JSON.parse(job.jobTypes);
-    job.languages = JSON.parse(job.languages);
-    job.skills = JSON.parse(job.skills);
-    job.education = JSON.parse(job.education);
+    // job.jobTypes = JSON.parse(job.jobTypes);
+    // job.languages = JSON.parse(job.languages);
+    // job.skills = JSON.parse(job.skills);
+    // job.education = JSON.parse(job.education);
 
     sendSuccessResponse(res, job);
   } catch (error) {

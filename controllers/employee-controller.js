@@ -303,14 +303,14 @@ exports.getAllAppliedJobs = [
         ],
       });
 
-      appliedJobs.forEach((appliedJob) => {
-        const { job } = appliedJob;
-        if (job && job.jobTypes) {
-          job.jobTypes = JSON.parse(job.jobTypes);
-          job.skills = JSON.parse(job.skills);
-          job.languages = JSON.parse(job.languages);
-        }
-      });
+      // appliedJobs.forEach((appliedJob) => {
+      //   const { job } = appliedJob;
+      //   if (job && job.jobTypes) {
+      //     job.jobTypes = JSON.parse(job.jobTypes);
+      //     job.skills = JSON.parse(job.skills);
+      //     job.languages = JSON.parse(job.languages);
+      //   }
+      // });
 
       sendSuccessResponse(res, { appliedJobs }, 200);
     } catch (error) {
@@ -332,14 +332,14 @@ exports.getAllSavedJobs = [
         include: [{ model: Job, as: "job" }],
       });
 
-      savedJobs.forEach((savedJob) => {
-        const { job } = savedJob;
-        if (job && job.jobTypes) {
-          job.jobTypes = JSON.parse(job.jobTypes);
-          job.skills = JSON.parse(job.skills);
-          job.languages = JSON.parse(job.languages);
-        }
-      });
+      // savedJobs.forEach((savedJob) => {
+      //   const { job } = savedJob;
+      //   if (job && job.jobTypes) {
+      //     job.jobTypes = JSON.parse(job.jobTypes);
+      //     job.skills = JSON.parse(job.skills);
+      //     job.languages = JSON.parse(job.languages);
+      //   }
+      // });
 
       sendSuccessResponse(res, { savedJobs }, 200);
     } catch (error) {
@@ -389,13 +389,13 @@ exports.getFilteredJobsWithSalary = [
         limit: parseInt(limit),
         offset: offset,
       });
-      // Parse JSON fields for each job
-      jobs.forEach((job) => {
-        job.jobTypes = JSON.parse(job.jobTypes);
-        job.skills = JSON.parse(job.skills);
-        job.languages = JSON.parse(job.languages);
-        job.education = JSON.parse(job.education);
-      });
+      // // Parse JSON fields for each job
+      // jobs.forEach((job) => {
+      //   job.jobTypes = JSON.parse(job.jobTypes);
+      //   job.skills = JSON.parse(job.skills);
+      //   job.languages = JSON.parse(job.languages);
+      //   job.education = JSON.parse(job.education);
+      // });
 
       // Calculate average salary
       const salaries = jobs
