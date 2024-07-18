@@ -31,12 +31,7 @@ exports.createJob = [
       }
 
       // Append city to employerId if advertise is true
-      const payload = {
-        ...req.body,
-        numberOfPeople: req.body.numberOfPeople.toString(),
-        employerId,
-      };
-      let jobData = payload;
+      let jobData = { ...req.body, employerId };
 
       const newJob = await Job.create(jobData);
       sendSuccessResponse(res, newJob, 201);
@@ -273,13 +268,12 @@ exports.getAllJobs = async (req, res) => {
     });
 
     // Parse JSON fields for each job
-    // jobs.forEach((job) => {
-    //   console.log(job?.jobTypes)
-    //   job.jobTypes = JSON.parse(job?.jobTypes);
-    //   job.skills = JSON.parse(job?.skills);
-    //   job.languages = JSON.parse(job?.languages);
-    //   job.education = JSON.parse(job?.education);
-    // });
+    jobs.forEach((job) => {
+      job.jobTypes = JSON.parse(job.jobTypes);
+      job.skills = JSON.parse(job.skills);
+      job.languages = JSON.parse(job.languages);
+      job.education = JSON.parse(job.education);
+    });
     // Construct pagination metadata
     const totalPages = Math.ceil(count / limit);
     const currentPage = parseInt(page);
@@ -299,11 +293,11 @@ exports.getJobById = async (req, res) => {
       return sendErrorResponse(res, "Job not found", 404);
     }
 
-    // // Parse jobTypes field
-    // job.jobTypes = JSON.parse(job.jobTypes);
-    // job.languages = JSON.parse(job.languages);
-    // job.skills = JSON.parse(job.skills);
-    // job.education = JSON.parse(job.education);
+    // Parse jobTypes field
+    job.jobTypes = JSON.parse(job.jobTypes);
+    job.languages = JSON.parse(job.languages);
+    job.skills = JSON.parse(job.skills);
+    job.education = JSON.parse(job.education);
 
     sendSuccessResponse(res, job);
   } catch (error) {

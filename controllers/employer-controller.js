@@ -158,7 +158,7 @@ exports.getProfile = [
       sendErrorResponse(res, "Error fetching employer profile", 500);
     }
   },
-];
+];               
 
 // Update employer status for an applied job
 exports.updateEmployerStatus = [
@@ -190,7 +190,8 @@ exports.getJobsByEmployeeId = [
   ensureEmployer,
   async (req, res) => {
     const { employerId } = req.user;
-    const { jobTitle, location, sortOrder, startDate, endDate } = req.body;
+    const { jobTitle, location, sortBy, sortOrder, startDate, endDate } =
+      req.body;
 
     try {
       const employee = await Employer.findByPk(employerId);
@@ -239,12 +240,12 @@ exports.getJobsByEmployeeId = [
       });
 
       // Parse jobTypes field for each job (assuming jobTypes is stored as JSON)
-      // jobs.forEach((job) => {
-      //   job.jobTypes = JSON.parse(job.jobTypes);
-      //   job.skills = JSON.parse(job.skills);
-      //   job.languages = JSON.parse(job.languages);
-      //   job.education = JSON.parse(job.education);
-      // });
+      jobs.forEach((job) => {
+        job.jobTypes = JSON.parse(job.jobTypes);
+        job.skills = JSON.parse(job.skills);
+        job.languages = JSON.parse(job.languages);
+        job.education = JSON.parse(job.education);
+      });
 
       sendSuccessResponse(res, jobs);
     } catch (error) {
@@ -282,12 +283,12 @@ exports.getClosedJobsByEmployeeId = [
       });
 
       // Parse jobTypes field for each job
-      // jobs.forEach((job) => {
-      //   job.jobTypes = JSON.parse(job.jobTypes);
-      //   job.skills = JSON.parse(job.skills);
-      //   job.languages = JSON.parse(job.languages);
-      //   job.education = JSON.parse(job.education);
-      // });
+      jobs.forEach((job) => {
+        job.jobTypes = JSON.parse(job.jobTypes);
+        job.skills = JSON.parse(job.skills);
+        job.languages = JSON.parse(job.languages);
+        job.education = JSON.parse(job.education);
+      });
 
       sendSuccessResponse(res, jobs);
     } catch (error) {
@@ -504,7 +505,7 @@ exports.getApplicationDetailsById = [
         ],
       });
       // Parse jobTypes field for each job
-      // appliedJob.job.jobTypes = JSON.parse(appliedJob.job.jobTypes);
+      appliedJob.job.jobTypes = JSON.parse(appliedJob.job.jobTypes);
 
       if (!appliedJob) {
         return sendErrorResponse(res, "Application not found", 404);
@@ -514,62 +515,6 @@ exports.getApplicationDetailsById = [
     } catch (error) {
       console.error("Error retrieving application details:", error);
       sendErrorResponse(res, "Error retrieving application details", 500);
-    }
-  },
-];
-
-// Get all jobs by employer ID with jobTitle and count of applicants
-exports.getAllJobsByEmployerId = [
-  ensureEmployer,
-  async (req, res) => {
-    const { employerId } = req.user;
-
-    try {
-      const employer = await Employer.findByPk(employerId);
-      if (!employer) {
-        return sendErrorResponse(res, "Employer not found", 404);
-      }
-
-      // Fetch all jobs for the employer
-      const jobs = await Job.findAll({
-        where: {
-          employerId,
-        },
-        attributes: ["id", "jobTitle"], // Select only jobTitle and id
-        include: [
-          {
-            model: AppliedJob,
-            as: "appliedJobs",
-            attributes: [], // Exclude all attributes of AppliedJob
-            includeIgnoreAttributes: false,
-            include: [
-              {
-                model: Employee,
-                as: "employee",
-                attributes: [], // Exclude all attributes of Employee
-              },
-            ],
-          },
-        ],
-        group: ["Job.id"], // Group by Job.id to get distinct job titles
-      });
-
-      // Calculate count of applicants for each job
-      const jobsWithApplicantCount = await Promise.all(
-        jobs.map(async (job) => {
-          const count = await AppliedJob.count({ where: { jobId: job.id } });
-          return {
-            id: job.id,
-            jobTitle: job.jobTitle,
-            applicantCount: count,
-          };
-        })
-      );
-
-      sendSuccessResponse(res, jobsWithApplicantCount);
-    } catch (error) {
-      console.error("Error retrieving jobs by employer ID:", error);
-      sendErrorResponse(res, "Error retrieving jobs by employer ID");
     }
   },
 ];

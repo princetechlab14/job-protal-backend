@@ -174,7 +174,7 @@ router.put(
  *                 description: Filter jobs by location containing the specified string
  *               sortBy:
  *                 type: string
- *                 enum: [createdAt, updatedAt, jobTitle] 
+ *                 enum: [createdAt, updatedAt, jobTitle]
  *                 description: Field to sort by (createdAt, updatedAt, jobTitle)
  *               sortOrder:
  *                 type: string
@@ -188,7 +188,7 @@ router.put(
  *                 type: string
  *                 format: date
  *                 description: End date to filter jobs created before this date (YYYY-MM-DD)
- *     responses: 
+ *     responses:
  *       200:
  *         description: Successful response with jobs matching the criteria
  *       401:
@@ -330,37 +330,6 @@ router.get(
   "/search-employees",
   authenticateToken,
   employerController.searchEmployees
-);
-
-/**
- * @swagger
- * /employer/applications/{appliedJobId}:
- *   get:
- *     summary: Get application details by applied job ID
- *     tags: [Employers]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: appliedJobId
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID of the applied job to fetch details for
- *     responses:
- *       200:
- *         description: Successful response with application details
- *       401:
- *         description: Unauthorized - Missing or invalid token
- *       404:
- *         description: Applied job not found
- *       500:
- *         description: Server error
- */
-router.get(
-  "/applications/:appliedJobId",
-  authenticateToken,
-  employerController.getAllJobsByEmployerId
 );
 
 module.exports = router;
