@@ -1,5 +1,5 @@
-const { Employer, AppliedJob, Job, Employee } = require("../models");
-const { Op } = require("sequelize");
+const { Employer, AppliedJob, Job, Employee, sequelize } = require("../models");
+const { Op, Sequelize } = require("sequelize");
 const {
   hashPassword,
   comparePassword,
@@ -158,7 +158,7 @@ exports.getProfile = [
       sendErrorResponse(res, "Error fetching employer profile", 500);
     }
   },
-];               
+];
 
 // Update employer status for an applied job
 exports.updateEmployerStatus = [
@@ -515,6 +515,37 @@ exports.getApplicationDetailsById = [
     } catch (error) {
       console.error("Error retrieving application details:", error);
       sendErrorResponse(res, "Error retrieving application details", 500);
+    }
+  },
+];
+
+// Get all jobs by employer ID and total count of applicants
+exports.getAllJobsWithApplicantsCount = [
+  ensureEmployer,
+  async (req, res) => {
+    const { employerId } = req.user;
+
+    try {
+      const jobs = await Job.findAll({
+        where: { employerId },
+        attributes: [
+          "id",
+          "jobTitle",
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*)
+              FROM \`AppliedJobs\` AS \`appliedJobs\`
+              WHERE \`appliedJobs\`.\`jobId\` = \`Job\`.\`id\`
+            )`),
+            "applicantsCount",
+          ],
+        ],
+      });
+
+      sendSuccessResponse(res, jobs);
+    } catch (error) {
+      console.error("Error retrieving jobs by employer ID:", error);
+      sendErrorResponse(res, "Error retrieving jobs by employer ID");
     }
   },
 ];

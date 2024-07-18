@@ -268,12 +268,12 @@ exports.getAllJobs = async (req, res) => {
     });
 
     // Parse JSON fields for each job
-    jobs.forEach((job) => {
-      job.jobTypes = JSON.parse(job.jobTypes);
-      job.skills = JSON.parse(job.skills);
-      job.languages = JSON.parse(job.languages);
-      job.education = JSON.parse(job.education);
-    });
+    // jobs.forEach((job) => {
+    //   job.jobTypes = JSON.parse(job.jobTypes);
+    //   job.skills = JSON.parse(job.skills);
+    //   job.languages = JSON.parse(job.languages);
+    //   job.education = JSON.parse(job.education);
+    // });
     // Construct pagination metadata
     const totalPages = Math.ceil(count / limit);
     const currentPage = parseInt(page);

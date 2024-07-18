@@ -25,6 +25,10 @@ const options = {
         url: "http://192.168.29.62:5000/api", // Replace with your server URL
         description: "Local development server",
       },
+      {
+        url: "http://jobs.techpediapro.com/api", // Replace with your server URL
+        description: "Live development server",
+      },
     ],
   },
   apis: ["./routes/apis/*.js"], // Path to the API routes
