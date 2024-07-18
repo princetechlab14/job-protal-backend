@@ -183,7 +183,7 @@ exports.saveJob = [
       sendErrorResponse(res, "Error saving job", 500);
     }
   },
-];  
+];
 
 // Apply for a job
 exports.applyJob = [
