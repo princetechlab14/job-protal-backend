@@ -638,4 +638,23 @@ router.get(
   authenticateToken,
   employerController.getAllJobsWithApplicantsCount
 );
+
+/**
+ * @swagger
+ * /employer/applicant-count:
+ *   get:
+ *     summary: Get all jobs posted by the employer with the total count of applicants for each job
+ *     tags: [Employers]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successful response with all jobs and applicants count
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       500:
+ *         description: Server error
+ */
+router.get("/applicant-count",authenticateToken, employerController.getCountOfApplicantHired);
+
 module.exports = router;

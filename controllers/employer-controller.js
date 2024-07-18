@@ -240,12 +240,12 @@ exports.getJobsByEmployeeId = [
       });
 
       // Parse jobTypes field for each job (assuming jobTypes is stored as JSON)
-      // jobs.forEach((job) => {
-      //   job.jobTypes = JSON.parse(job.jobTypes);
-      //   job.skills = JSON.parse(job.skills);
-      //   job.languages = JSON.parse(job.languages);
-      //   job.education = JSON.parse(job.education);
-      // });
+      jobs.forEach((job) => {
+        job.jobTypes = JSON.parse(job.jobTypes);
+        job.skills = JSON.parse(job.skills);
+        job.languages = JSON.parse(job.languages);
+        job.education = JSON.parse(job.education);
+      });
 
       sendSuccessResponse(res, jobs);
     } catch (error) {
@@ -283,12 +283,12 @@ exports.getClosedJobsByEmployeeId = [
       });
 
       // Parse jobTypes field for each job
-      // jobs.forEach((job) => {
-      //   job.jobTypes = JSON.parse(job.jobTypes);
-      //   job.skills = JSON.parse(job.skills);
-      //   job.languages = JSON.parse(job.languages);
-      //   job.education = JSON.parse(job.education);
-      // });
+      jobs.forEach((job) => {
+        job.jobTypes = JSON.parse(job.jobTypes);
+        job.skills = JSON.parse(job.skills);
+        job.languages = JSON.parse(job.languages);
+        job.education = JSON.parse(job.education);
+      });
 
       sendSuccessResponse(res, jobs);
     } catch (error) {
@@ -315,13 +315,7 @@ exports.getApplicant = [
       // Retrieve applicants for the job
       const applicants = await AppliedJob.findAll({
         attributes: ["id", "applicationDate", "employerStatus"],
-        // include: [
-        //   {
-        //     model: Job,
-        //     as: "job",
-        //     where: { id: jobId }, // Filter by the specific job ID
-        //   },
-        // ],
+        where: { jobId },
         include: [
           {
             attributes: [
@@ -505,7 +499,7 @@ exports.getApplicationDetailsById = [
         ],
       });
       // Parse jobTypes field for each job
-      appliedJob.job.jobTypes = JSON.parse(appliedJob.job.jobTypes);
+      // appliedJob.job.jobTypes = JSON.parse(appliedJob.job.jobTypes);
 
       if (!appliedJob) {
         return sendErrorResponse(res, "Application not found", 404);
@@ -549,3 +543,78 @@ exports.getAllJobsWithApplicantsCount = [
     }
   },
 ];
+
+// Get all applied count  by employerId
+exports.getCountOfApplicantHired = async (req, res) => {
+  const { employerId } = req.user;
+
+  try {
+    // Step 1: Fetch all jobs by employerId with applied and hired counts
+    const jobs = await Job.findAll({
+      where: { employerId },
+      attributes: ["id"],
+      include: [
+        {
+          model: AppliedJob,
+          attributes: [
+            "employerStatus",
+            [Sequelize.fn("COUNT", Sequelize.col("*")), "count"],
+          ],
+          where: {
+            employerStatus: [
+              "Applied",
+              "Interviewing",
+              "Offer received",
+              "Not selected by employer",
+              "No longer interested",
+            ],
+          },
+          group: ["employerStatus"],
+          separate: true, // Fetch separately to avoid redundant results
+          as: "applications",
+        },
+        {
+          model: AppliedJob,
+          attributes: [
+            [Sequelize.fn("COUNT", Sequelize.col("*")), "hiredCount"],
+          ],
+          where: { employerStatus: "Hired" },
+          separate: true,
+          as: "hiredApplications",
+        },
+      ],
+      raw: true,
+      nest: true,
+    });
+
+    // Step 2: Organize results into a structured response
+    const result = jobs.map((job) => {
+      const hiredCount =
+        job.hiredApplications.length > 0
+          ? job.hiredApplications[0].hiredCount
+          : 0;
+      const otherStatusCounts = {
+        Applied: 0,
+        Interviewing: 0,
+        "Offer received": 0,
+        "Not selected by employer": 0,
+        "No longer interested": 0,
+      };
+      job.applications.forEach((app) => {
+        otherStatusCounts[app.employerStatus] = app.count;
+      });
+
+      return {
+        jobId: job.id,
+        hiredCount,
+        otherStatusCounts,
+      };
+    });
+
+    // Step 3: Send the response
+    res.status(200).json({ status: true, count: result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
