@@ -147,6 +147,7 @@ router.get("/profile", authenticateToken, employerController.getProfile);
  */
 router.put(
   "/applied-jobs/:appliedJobId/update-application-status",
+  authenticateToken,
   employerController.updateEmployerStatus
 );
 
