@@ -110,7 +110,7 @@ router.get("/profile", authenticateToken, employerController.getProfile);
 
 /**
  * @swagger
- * /employer/applied-jobs/{appliedJobId}/update-employer-status:
+ * /employer/applied-jobs/{appliedJobId}/update-application-status:
  *   put:
  *     summary: Update employer status for an applied job
  *     tags: [Employers]
