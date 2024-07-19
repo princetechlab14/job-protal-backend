@@ -205,7 +205,7 @@ router.post(
 
 /**
  * @swagger
- * /employee/applied-jobs/{appliedJobId}/update-status:
+ * /employee/applied-jobs/{appliedJobId}/update-application-status:
  *   put:
  *     summary: Update employee status for an applied job
  *     tags: [Employees]
@@ -225,9 +225,9 @@ router.post(
  *           schema:
  *             type: object
  *             properties:
- *               status:
+ *               employeeStatus:
  *                 type: string
- *                 enum: [accepted, rejected, pending]
+ *                 enum: [ "Applied","Interviewing","Offer received","Hired","Not selected by employer","No longer interested"]
  *     responses:
  *       200:
  *         description: Employee status updated successfully
@@ -241,7 +241,7 @@ router.post(
  *         description: Server error
  */
 router.put(
-  "/applied-jobs/:appliedJobId/update-status",
+  "/applied-jobs/:appliedJobId/update-application-status",
   authenticateToken,
   employeeController.updateEmployeeStatus
 );
@@ -356,39 +356,7 @@ router.get(
  *     responses:
  *       200:
  *         description: Successful response with filtered jobs and average salary
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 jobs:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: integer
- *                       jobTitle:
- *                         type: string
- *                       location:
- *                         type: string
- *                       salary:
- *                         type: number
- *                 totalPages:
- *                   type: integer
- *                 currentPage:
- *                   type: integer
- *                 averageSalary:
- *                   type: object
- *                   properties:
- *                     yearly:
- *                       type: number
- *                     hourly:
- *                       type: number
- *                     daily:
- *                       type: number
- *                     weekly:
- *                       type: number
+ *
  *       400:
  *         description: Bad request - Validation error
  *       401:
@@ -401,6 +369,7 @@ router.post(
   authenticateToken,
   employeeController.getFilteredJobsWithSalary
 );
+
 /**
  * @swagger
  * /employee/unsave-job/{jobId}:
@@ -432,4 +401,26 @@ router.delete(
   employeeController.unsavedJob
 );
 
+/**
+ * @swagger
+ * /employee/skills:
+ *   get:
+ *     summary: Get all unique skills from jobs
+ *     tags: [Employees]
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved unique skills
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 skills:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/skills", employeeController.getAllSkills);
 module.exports = router;

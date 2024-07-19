@@ -110,7 +110,7 @@ router.get("/profile", authenticateToken, employerController.getProfile);
 
 /**
  * @swagger
- * /employer/applied-jobs/{appliedJobId}/update-employer-status:
+ * /employer/applied-jobs/{appliedJobId}/update-application-status:
  *   put:
  *     summary: Update employer status for an applied job
  *     tags: [Employers]
@@ -130,9 +130,9 @@ router.get("/profile", authenticateToken, employerController.getProfile);
  *           schema:
  *             type: object
  *             properties:
- *               status:
+ *               employerStatus:
  *                 type: string
- *                 enum: [accepted, rejected, pending]
+ *                 enum: [ "Applied","Interviewing","Offer received","Hired","Not selected by employer","No longer interested"]
  *     responses:
  *       200:
  *         description: Employer status updated successfully
@@ -655,6 +655,10 @@ router.get(
  *       500:
  *         description: Server error
  */
-router.get("/applicant-count",authenticateToken, employerController.getCountOfApplicantHired);
+router.get(
+  "/applicant-count",
+  authenticateToken,
+  employerController.getCountOfApplicantHired
+);
 
 module.exports = router;

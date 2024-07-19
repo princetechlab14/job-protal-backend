@@ -167,7 +167,9 @@ exports.updateEmployerStatus = [
     try {
       const { appliedJobId } = req.params;
       const { employerStatus } = req.body;
-
+      if (!employerStatus) {
+        return sendErrorResponse(res, "Please provide employer status", 400);
+      }
       // Find the applied job by ID
       const appliedJob = await AppliedJob.findByPk(appliedJobId);
       if (!appliedJob) {

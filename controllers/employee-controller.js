@@ -232,7 +232,9 @@ exports.updateEmployeeStatus = [
     try {
       const { appliedJobId } = req.params;
       const { employeeStatus } = req.body;
-
+      if (!employeeStatus) {
+        return sendErrorResponse(res, "Employee status is required", 400);
+      }
       const appliedJob = await AppliedJob.findByPk(appliedJobId);
       if (!appliedJob) {
         return sendErrorResponse(res, "Applied job not found", 404);
@@ -463,3 +465,27 @@ exports.unsavedJob = [
     }
   },
 ];
+
+// Get all unique skills from jobs
+exports.getAllSkills = async (req, res) => {
+  try {
+    const jobs = await Job.findAll({
+      attributes: ["skills"],
+    });
+
+    const allSkills = jobs.reduce((acc, job) => {
+      if (job.skills) {
+        const jobSkills = JSON.parse(job.skills);
+        return acc.concat(jobSkills);
+      }
+      return acc;
+    }, []);
+
+    const uniqueSkills = [...new Set(allSkills)];
+
+    sendSuccessResponse(res, { skills: uniqueSkills }, 200);
+  } catch (error) {
+    console.error("Error retrieving skills:", error);
+    sendErrorResponse(res, "Error retrieving skills", 500);
+  }
+};
