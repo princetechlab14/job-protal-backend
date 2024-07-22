@@ -1,7 +1,19 @@
 // controllers/employeeController.js
 
 const { Op, Sequelize } = require("sequelize");
-const { Employee, SavedJob, Job, AppliedJob, Employer } = require("../models");
+const {
+  Employee,
+  SavedJob,
+  Job,
+  AppliedJob,
+  Employer,
+  Experience,
+  Education,
+  Skill,
+  Language,
+  JobPreferences,
+  Resume,
+} = require("../models");
 const {
   hashPassword,
   comparePassword,
@@ -132,16 +144,61 @@ exports.updateProfile = [
   },
 ];
 
-// Get employee profile
+// get employee profile
 exports.getProfile = [
   ensureEmployee,
   async (req, res) => {
     try {
       const { employeeId } = req.user;
-      const employee = await Employee.findByPk(employeeId);
+
+      // Fetch employee with associated data
+      const employee = await Employee.findByPk(employeeId, {
+        include: [
+          {
+            model: Experience,
+            as: "experiences",
+          },
+          {
+            model: Education,
+            as: "educations",
+          },
+          {
+            model: Skill,
+            as: "skills",
+          },
+          {
+            model: Language,
+            as: "languages",
+          },
+          {
+            model: JobPreferences,
+            as: "jobPreferences",
+          },
+          {
+            model: Resume,
+            as: "resume",
+          },
+        ],
+      });
 
       if (!employee) {
         return sendErrorResponse(res, "Employee not found", 404);
+      }
+
+      // Parse jobPreferences data
+      if (employee.jobPreferences) {
+        employee.jobPreferences.jobTitles = JSON.parse(
+          employee.jobPreferences.jobTitles
+        );
+        employee.jobPreferences.jobTypes = JSON.parse(
+          employee.jobPreferences.jobTypes
+        );
+        employee.jobPreferences.workDays = JSON.parse(
+          employee.jobPreferences.workDays
+        );
+        employee.jobPreferences.shifts = JSON.parse(
+          employee.jobPreferences.shifts
+        );
       }
 
       sendSuccessResponse(res, { employee }, 200);
@@ -193,7 +250,6 @@ exports.applyJob = [
       const { employeeId } = req.user;
       const { jobId, jobTitle, companyName, availableDates, experience } =
         req.body;
-      const cv = req.body.cvBase64;
 
       const job = await Job.findByPk(jobId);
       if (!job) {
@@ -214,7 +270,6 @@ exports.applyJob = [
         companyName,
         availableDates,
         experience,
-        cv,
       });
 
       sendSuccessResponse(res, { appliedJob }, 201);
@@ -473,6 +528,7 @@ exports.getAllSkills = async (req, res) => {
       attributes: ["skills"],
     });
 
+    // Extract and combine all skills
     const allSkills = jobs.reduce((acc, job) => {
       if (job.skills) {
         const jobSkills = JSON.parse(job.skills);
@@ -481,11 +537,73 @@ exports.getAllSkills = async (req, res) => {
       return acc;
     }, []);
 
-    const uniqueSkills = [...new Set(allSkills)];
+    // Create unique skills and assign IDs
+    const uniqueSkillsMap = new Map();
+    allSkills.forEach((skill, index) => {
+      if (!uniqueSkillsMap.has(skill)) {
+        uniqueSkillsMap.set(skill, index + 1); // Start IDs from 1
+      }
+    });
 
-    sendSuccessResponse(res, { skills: uniqueSkills }, 200);
+    // Transform map to the desired format
+    const options = Array.from(uniqueSkillsMap, ([label, id]) => ({
+      id,
+      label,
+    }));
+
+    const response = {
+      id: 9,
+      label: "Skill",
+      key: "skills",
+      options,
+    };
+
+    sendSuccessResponse(res, response, 200);
   } catch (error) {
     console.error("Error retrieving skills:", error);
     sendErrorResponse(res, "Error retrieving skills", 500);
+  }
+};
+
+exports.addOrUpdateResume = async (req, res) => {
+  try {
+    const { id } = req.params; // This ID is used for updating existing resumes
+    const { employeeId } = req.user; // Assumes employee ID is available from authenticated user
+    const cv = req.body.cvBase64;
+    const fileName = req.body.fileName;
+    if (id) {
+      // Update existing resume
+      const existingResume = await Resume.findByPk(id);
+      if (!existingResume) {
+        return sendErrorResponse(res, "Resume not found", 404);
+      }
+
+      existingResume.fileName = fileName;
+      existingResume.cv = cv;
+      existingResume.employeeId = employeeId;
+      await existingResume.save();
+      return sendSuccessResponse(
+        res,
+        existingResume,
+        200,
+        "Resume updated successfully"
+      );
+    } else {
+      // Add new resume
+      const newResume = await Resume.create({
+        fileName,
+        cv,
+        employeeId,
+      });
+      return sendSuccessResponse(
+        res,
+        newResume,
+        201,
+        "Resume created successfully"
+      );
+    }
+  } catch (error) {
+    console.error("Error adding or updating resume:", error);
+    return sendErrorResponse(res, "Error adding or updating resume", 500);
   }
 };

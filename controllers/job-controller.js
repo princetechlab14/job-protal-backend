@@ -25,15 +25,26 @@ exports.createJob = [
         return sendErrorResponse(res, error.details[0].message, 400);
       }
 
-      const employee = await Employer.findByPk(employerId);
-      if (!employee) {
+      const employer = await Employer.findByPk(employerId);
+      if (!employer) {
         return sendErrorResponse(res, "Employer not found", 404);
       }
 
-      // Append city to employerId if advertise is true
+      // Append employerId to job data
       let jobData = { ...req.body, employerId };
 
+      // Handle deadlineDate
+      console.log(jobData?.deadlineDate, "<-jobData?.deadlineDate");
+      if (jobData.deadline === "Yes") {
+        jobData.deadlineDate = jobData.deadlineDate;
+      } else {
+        jobData.deadlineDate = null;
+      }
+
+      // Create new job
       const newJob = await Job.create(jobData);
+
+      // Send success response
       sendSuccessResponse(res, newJob, 201);
     } catch (error) {
       console.error("Error creating job:", error);

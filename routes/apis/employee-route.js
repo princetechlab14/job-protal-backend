@@ -3,6 +3,26 @@ const router = express.Router();
 const employeeController = require("../../controllers/employee-controller");
 const { authenticateToken } = require("../../middleware/verifyToken");
 const { upload, convertPdfToBase64 } = require("../../middleware/pdfTobase64");
+const {
+  addOrUpdateExperience,
+  deleteExperience,
+} = require("../../controllers/experience-controller");
+const {
+  addOrUpdateEducation,
+  deleteEducation,
+} = require("../../controllers/education-controller");
+const {
+  addOrUpdateSkill,
+  deleteSkill,
+} = require("../../controllers/skill-controller");
+const {
+  deleteLanguage,
+  addOrUpdateLanguage,
+} = require("../../controllers/langauge-controller");
+const {
+  deleteJobPreferences,
+  addOrUpdateJobPreferences,
+} = require("../../controllers/jobPreferences-controller");
 
 /**
  * @swagger
@@ -40,6 +60,7 @@ const { upload, convertPdfToBase64 } = require("../../middleware/pdfTobase64");
  *                 type: string
  *               email:
  *                 type: string
+ *                 format: email
  *               password:
  *                 type: string
  *                 format: password
@@ -162,17 +183,13 @@ router.post("/save-job", authenticateToken, employeeController.saveJob);
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
  *               jobId:
  *                 type: integer
  *                 description: The ID of the job to apply for
- *               cv:
- *                 type: string
- *                 format: binary
- *                 description: The CV file in PDF format
  *               jobTitle:
  *                 type: string
  *                 description: The job title the employee is applying for
@@ -195,13 +212,7 @@ router.post("/save-job", authenticateToken, employeeController.saveJob);
  *       500:
  *         description: Server error
  */
-router.post(
-  "/apply-job",
-  authenticateToken,
-  upload.single("cv"),
-  convertPdfToBase64,
-  employeeController.applyJob
-);
+router.post("/apply-job", authenticateToken, employeeController.applyJob);
 
 /**
  * @swagger
@@ -423,4 +434,372 @@ router.delete(
  *         description: Internal server error
  */
 router.get("/skills", employeeController.getAllSkills);
+
+/**
+ * @openapi
+ * /employee/experience:
+ *   post:
+ *     summary: Add or update experience
+ *     description: Add a new experience or update an existing one.
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 1
+ *               jobTitle:
+ *                 type: string
+ *                 example: Software Engineer
+ *               companyName:
+ *                 type: string
+ *                 example: Tech Inc.
+ *               startDate:
+ *                 type: string
+ *                 example: 2024/12/13
+ *               endDate:
+ *                 type: string
+ *                 example: 2024/12/13
+ *     responses:
+ *       200:
+ *         description: education successfully updated
+ *       201:
+ *         description: Experience successfully created
+ *       404:
+ *         description: Experience not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/experience", authenticateToken, addOrUpdateExperience);
+
+/**
+ * @openapi
+ * /employee/experience/{id}:
+ *   delete:
+ *     summary: Delete experience
+ *     description: Delete an existing experience by ID.
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: Experience successfully deleted
+ *       404:
+ *         description: Experience not found
+ *       500:
+ *         description: Internal server error
+ */
+
+router.delete("/experience/:id", authenticateToken, deleteExperience);
+
+/**
+ * @openapi
+ * /employee/education:
+ *   post:
+ *     summary: Add or update education
+ *     description: Add a new education or update an existing one.
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 1
+ *               levelOfEducation:
+ *                 type: string
+ *                 example: Software Engineer
+ *               fieldOfStudy:
+ *                 type: string
+ *                 example: Tech Inc.
+ *               startDate:
+ *                 type: string
+ *                 example: 2024/12/13
+ *               endDate:
+ *                 type: string
+ *                 example: 2024/12/13
+ *     responses:
+ *       200:
+ *         description: education successfully updated
+ *       201:
+ *         description: education successfully created
+ *       404:
+ *         description: Experience not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/education", authenticateToken, addOrUpdateEducation);
+
+/**
+ * @openapi
+ * /employee/education/{id}:
+ *   delete:
+ *     summary: Delete education
+ *     description: Delete an existing education by ID.
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: education successfully deleted
+ *       404:
+ *         description: education not found
+ *       500:
+ *         description: Internal server error
+ */
+
+router.delete("/education/:id", authenticateToken, deleteEducation);
+
+/**
+ * @openapi
+ * /employee/skill:
+ *   post:
+ *     summary: Add or update skill
+ *     description: Add a new skill or update an existing one.
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 1
+ *               skill:
+ *                 type: string
+ *                 example: React
+ *               yearsOfExperience:
+ *                 type: string
+ *                 example: 1
+ *     responses:
+ *       200:
+ *         description: skill successfully updated
+ *       201:
+ *         description: skill successfully created
+ *       404:
+ *         description: Experience not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/skill", authenticateToken, addOrUpdateSkill);
+
+/**
+ * @openapi
+ * /employee/skill/{id}:
+ *   delete:
+ *     summary: Delete skill
+ *     description: Delete an existing skill by ID.
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: skill successfully deleted
+ *       404:
+ *         description: skill not found
+ *       500:
+ *         description: Internal server error
+ */
+
+router.delete("/skill/:id", authenticateToken, deleteSkill);
+
+/**
+ * @openapi
+ * /employee/language:
+ *   post:
+ *     summary: Add or update language
+ *     description: Add a new language or update an existing one.
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 1
+ *               language:
+ *                 type: string
+ *                 example: hindi
+ *               proficiency:
+ *                 type: string
+ *                 example: Advanced.
+ *     responses:
+ *       200:
+ *         description: language successfully updated
+ *       201:
+ *         description: language successfully created
+ *       404:
+ *         description: Experience not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/language", authenticateToken, addOrUpdateLanguage);
+
+/**
+ * @openapi
+ * /employee/language/{id}:
+ *   delete:
+ *     summary: Delete language
+ *     description: Delete an existing language by ID.
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: language successfully deleted
+ *       404:
+ *         description: language not found
+ *       500:
+ *         description: Internal server error
+ */
+
+router.delete("/language/:id", authenticateToken, deleteLanguage);
+
+/**
+ * @openapi
+ * /employee/jobPreferences:
+ *   post:
+ *     summary: Add or update jobPreferences
+ *     description: Add a new jobPreferences or update an existing one.
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 1
+ *                 description: The ID of the job preferences to update (leave blank to create new).
+ *               jobTitles:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["Software Engineer", "Data Scientist"]
+ *                 description: List of preferred job titles.
+ *               jobTypes:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["Full-time", "Part-time"]
+ *                 description: List of preferred job types.
+ *               workDays:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+ *                 description: List of preferred work days.
+ *               shifts:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["Day", "Night"]
+ *                 description: List of preferred shifts.
+ *               readyToWork:
+ *                 type: boolean
+ *                 example: true
+ *                 description: Whether the employee is ready to work.
+ *               employeeId:
+ *                 type: integer
+ *                 example: 123
+ *                 description: The ID of the employee associated with the job preferences.
+ *     responses:
+ *       200:
+ *         description: jobPreferences successfully updated
+ *       201:
+ *         description: jobPreferences successfully created
+ *       404:
+ *         description: Experience not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/jobPreferences", authenticateToken, addOrUpdateJobPreferences);
+
+/**
+ * @openapi
+ * /employee/jobPreferences/{id}:
+ *   delete:
+ *     summary: Delete jobPreferences
+ *     description: Delete an existing jobPreferences by ID.
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: jobPreferences successfully deleted
+ *       404:
+ *         description: jobPreferences not found
+ *       500:
+ *         description: Internal server error
+ */
+
+router.delete("/jobPreferences/:id", authenticateToken, deleteJobPreferences);
+
+router.post(
+  "/resume",
+  authenticateToken,
+  upload.single("cv"),
+  convertPdfToBase64,
+  employeeController.addOrUpdateResume
+);
+
 module.exports = router;

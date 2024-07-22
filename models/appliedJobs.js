@@ -45,10 +45,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: "Applied",
     },
-    cv: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
     jobTitle: {
       type: DataTypes.STRING,
       allowNull: true,

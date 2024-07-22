@@ -10,8 +10,9 @@ const sequelize = new Sequelize(
     pool: {
       max: 5,
       min: 0,
-      acquire: 30000,
-      idle: 10000,
+      acquire: 60000, // Increase the acquire timeout to 60 seconds
+      idle: 20000, // Increase the idle timeout to 20 seconds
+      evict: 10000, // Add evict timeout, checking for idle connections every 10 seconds
     },
     define: {
       charset: "utf8mb4",
@@ -41,25 +42,52 @@ db.Employer = require("./employer")(sequelize, DataTypes);
 db.Employee = require("./employee")(sequelize, DataTypes);
 db.SavedJob = require("./savedJob")(sequelize, DataTypes);
 db.AppliedJob = require("./appliedJobs")(sequelize, DataTypes);
+db.Experience = require("./experience")(sequelize, DataTypes);
+db.Education = require("./education")(sequelize, DataTypes);
+db.Skill = require("./skill")(sequelize, DataTypes);
+db.Language = require("./langauge")(sequelize, DataTypes);
+db.Resume = require("./Resume-model")(sequelize, DataTypes);
+db.JobPreferences = require("./jobPreferences")(sequelize, DataTypes);
+db.Admin = require("./admin-model")(sequelize, DataTypes);
 
-// relationship between jobs and employee
-db.Employer.hasMany(db.Job, {
-  foreignKey: "employeeId",
-  as: "jobs", // Alias for the association
-});
 // Define associations
+
+// Job and Employee relationships
+db.Employer.hasMany(db.Job, {
+  foreignKey: "employerId",
+  as: "jobs",
+});
+db.Job.belongsTo(db.Employer, { as: "employer", foreignKey: "employerId" });
+
+// Employee and SavedJob relationships
 db.Employee.hasMany(db.SavedJob, { foreignKey: "employeeId" });
 db.SavedJob.belongsTo(db.Employee, { foreignKey: "employeeId" });
+db.SavedJob.belongsTo(db.Job, { foreignKey: "jobId", as: "job" });
 
+// Employee and AppliedJob relationships
 db.Employee.hasMany(db.AppliedJob, { foreignKey: "employeeId" });
 db.AppliedJob.belongsTo(db.Employee, {
   foreignKey: "employeeId",
   as: "employee",
 });
-
-db.SavedJob.belongsTo(db.Job, { foreignKey: "jobId", as: "job" });
-
 db.AppliedJob.belongsTo(db.Job, { foreignKey: "jobId", as: "job" });
-db.Job.belongsTo(db.Employer, { as: "employer", foreignKey: "employerId" });
+db.Job.hasMany(db.AppliedJob, { foreignKey: "jobId" });
+
+// Experience, Education, Skill, Language relationships
+db.Employee.hasMany(db.Experience, {
+  foreignKey: "employeeId",
+  as: "experiences",
+});
+db.Employee.hasMany(db.Education, {
+  foreignKey: "employeeId",
+  as: "educations",
+});
+db.Employee.hasMany(db.Skill, { foreignKey: "employeeId", as: "skills" });
+db.Employee.hasMany(db.Language, { foreignKey: "employeeId", as: "languages" });
+db.Employee.hasMany(db.Resume, { foreignKey: "employeeId", as: "resume" });
+db.Employee.hasOne(db.JobPreferences, {
+  foreignKey: "employeeId",
+  as: "jobPreferences",
+});
 
 module.exports = db;

@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { Employee, AppliedJob, Employer } = require("../../models"); // Define routes
+const { Employee, AppliedJob, Employer, Job, Admin } = require("../../models"); // Define routes
 router.get("/", (req, res) => {
   res.render("login", { title: "Login Page", error: "" });
 });
+const authController = require("../../controllers/auth-controller");
 
 // Route to render the dashboard page
 router.get("/dashboard", async (req, res) => {
@@ -11,12 +12,19 @@ router.get("/dashboard", async (req, res) => {
     const totalEmployees = await Employee.count();
     const totalEmployers = await Employer.count();
     const totalAppliedJobs = await AppliedJob.count();
+    const totalJobs = await Job.count();
+    // Assuming 'hired' is a status indicating the job has been hired
+    const hiredCount = await AppliedJob.count({
+      where: { employerStatus: "hired" },
+    });
 
     res.render("admin", {
       title: "Dashboard",
       totalEmployees,
       totalAppliedJobs,
       totalEmployers,
+      totalJobs,
+      hiredCount,
     });
   } catch (error) {
     console.error("Error fetching dashboard data:", error);
@@ -92,6 +100,23 @@ router.put("/employers/:employerId/status", async (req, res) => {
     console.error("Error updating employee status:", error);
     res.status(500).json({ error: "Internal server error" });
   }
+});
+// Registration and Login Routes
+router.post("/register", authController.register);
+router.post("/login", authController.login);
+
+// Profile Update Route
+router.post("/profile/update", authController.updateProfile);
+
+// Logout Route
+router.post("/logout", authController.logout);
+
+// Serve EJS views
+router.get("/register", (req, res) =>
+  res.render("register", { title: "Register Page", error: "" })
+);
+router.get("/profile/:id", async (req, res) => {
+  res.render("profile", { title: "Update Profile Page", error: "" });
 });
 
 module.exports = router;

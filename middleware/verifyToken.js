@@ -8,7 +8,7 @@ exports.authenticateToken = (req, res, next) => {
   if (!token) {
     return sendErrorResponse(
       res,
-      { status: false, message: "No Token provided" },
+      { statusCode: 401, status: false, message: "No Token provided" },
       401
     ); // Unauthorized if token is not provided
   }
@@ -17,14 +17,14 @@ exports.authenticateToken = (req, res, next) => {
       if (err.name === "TokenExpiredError") {
         return sendErrorResponse(
           res,
-          { status: false, message: "Login Again" },
+          { statusCode: 401, status: false, message: "Login Again" },
           401
         ); // Token expired error
       }
       console.error("JWT verification error:", err);
       return sendErrorResponse(
         res,
-        { status: false, message: "Unauthorized" },
+        { statusCode: 401, status: false, message: "Unauthorized" },
         401
       ); // Unauthorized if token is invalid
     }

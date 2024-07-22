@@ -49,6 +49,14 @@ const synchronizeAndSeed = async () => {
     await require("./seeder/employer-seeder").employeeData();
     await require("./seeder/employee-seeder").employeeData();
     await require("./seeder/job-seeder").JobData();
+    await require("./seeder/saved-job-seeder").savedJobData();
+    await require("./seeder/applied-jobs-seeder").applideData();
+    await require("./seeder/education-seeder").educationData();
+    await require("./seeder/education-seeder").educationData();
+    await require("./seeder/exp-seeder").experienceData();
+    await require("./seeder/lan-seeder").languageData();
+    await require("./seeder/skill-seeder").skillData();
+    await require("./seeder/jobpre-seeder").jobPreData();
 
     console.log("Synchronization and seeding completed successfully!!");
   } catch (error) {

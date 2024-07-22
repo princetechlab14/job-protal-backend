@@ -2,14 +2,22 @@
 <!DOCTYPE html>
 <html lang="en">
   <%- include("./partial/head",{title:title}) %>
-
   <body class="bg-gray-100 min-h-screen flex items-center justify-center">
     <div class="max-w-md w-full bg-white p-8 shadow-lg rounded-lg">
-      <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
+      <h2 class="text-2xl font-bold mb-6 text-center">Register</h2>
       <% if (error) { %>
       <p class="text-red-500 text-sm mb-4"><%= error %></p>
       <% } %>
       <form id="loginForm" action="/login" method="POST">
+        <div class="mb-4">
+          <label for="name" class="block text-gray-700">Name</label>
+          <input
+            type="name"
+            id="name"
+            name="name"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
         <div class="mb-4">
           <label for="email" class="block text-gray-700">Email</label>
           <input
@@ -44,6 +52,9 @@
           errorClass: "text-red-500 text-sm mb-4", // Custom error class for error message
           errorElement: "p", // Error message element
           rules: {
+            name: {
+              required: true,
+            },
             email: {
               required: true,
               email: true, // Validate email format
@@ -53,6 +64,10 @@
             },
           },
           messages: {
+            name: {
+              required: "Name is required.",
+              email: "Please enter a Name.",
+            },
             email: {
               required: "Email is required.",
               email: "Please enter a valid email address.",

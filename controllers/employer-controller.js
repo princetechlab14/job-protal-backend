@@ -1,4 +1,16 @@
-const { Employer, AppliedJob, Job, Employee, sequelize } = require("../models");
+const {
+  Employer,
+  AppliedJob,
+  Job,
+  Employee,
+  sequelize,
+  JobPreferences,
+  Language,
+  Skill,
+  Experience,
+  Education,
+  Resume,
+} = require("../models");
 const { Op, Sequelize } = require("sequelize");
 const {
   hashPassword,
@@ -192,8 +204,7 @@ exports.getJobsByEmployeeId = [
   ensureEmployer,
   async (req, res) => {
     const { employerId } = req.user;
-    const { jobTitle, location, sortBy, sortOrder, startDate, endDate } =
-      req.body;
+    const { jobTitle, location, sortOrder, startDate, endDate } = req.body;
 
     try {
       const employee = await Employer.findByPk(employerId);
@@ -425,49 +436,52 @@ exports.searchEmployees = [
           "city",
           "role",
         ],
+        include: [
+          {
+            model: Experience,
+            as: "experiences",
+          },
+          {
+            model: Education,
+            as: "educations",
+          },
+          {
+            model: Skill,
+            as: "skills",
+          },
+          {
+            model: Language,
+            as: "languages",
+          },
+          {
+            model: JobPreferences,
+            as: "jobPreferences",
+          },
+        ],
+      });
+
+      // Parse JSON fields for jobPreferences for each employee
+      employees.forEach((employee) => {
+        if (employee.jobPreferences) {
+          employee.jobPreferences.jobTitles = JSON.parse(
+            employee.jobPreferences.jobTitles
+          );
+          employee.jobPreferences.jobTypes = JSON.parse(
+            employee.jobPreferences.jobTypes
+          );
+          employee.jobPreferences.workDays = JSON.parse(
+            employee.jobPreferences.workDays
+          );
+          employee.jobPreferences.shifts = JSON.parse(
+            employee.jobPreferences.shifts
+          );
+        }
       });
 
       sendSuccessResponse(res, employees);
     } catch (error) {
       console.error("Error searching employees:", error);
       sendErrorResponse(res, "Error searching employees", 500);
-    }
-  },
-];
-
-// Get application by ID
-exports.getApplicationById = [
-  ensureEmployer,
-  async (req, res) => {
-    const { appliedJobId } = req.params;
-
-    try {
-      // Find the applied job by ID
-      const appliedJob = await AppliedJob.findByPk(appliedJobId, {
-        include: [
-          {
-            model: Employee,
-            as: "employee",
-            attributes: [
-              "id",
-              "firstName",
-              "lastName",
-              "phoneNumber",
-              "city",
-              "role",
-            ],
-          },
-        ],
-      });
-
-      if (!appliedJob) {
-        return sendErrorResponse(res, "Application not found", 404);
-      }
-
-      sendSuccessResponse(res, appliedJob);
-    } catch (error) {
-      console.error("Error retrieving application:", error);
-      sendErrorResponse(res, "Error retrieving application", 500);
     }
   },
 ];
@@ -491,22 +505,51 @@ exports.getApplicationDetailsById = [
             as: "employee",
             attributes: [
               "id",
+              "email",
               "firstName",
               "lastName",
               "phoneNumber",
               "city",
               "role",
             ],
+            include: [
+              {
+                model: Experience,
+                as: "experiences",
+              },
+              {
+                model: Education,
+                as: "educations",
+              },
+              {
+                model: Skill,
+                as: "skills",
+              },
+              {
+                model: Language,
+                as: "languages",
+              },
+              {
+                model: JobPreferences,
+                as: "jobPreferences",
+              },
+              {
+                model: Resume,
+                as: "resume",
+              },
+            ],
           },
         ],
       });
-      // Parse jobTypes field for each job
-      // appliedJob.job.jobTypes = JSON.parse(appliedJob.job.jobTypes);
 
       if (!appliedJob) {
         return sendErrorResponse(res, "Application not found", 404);
       }
-
+      // Parse jobTypes field for each job
+      appliedJob.job.jobTypes = JSON.parse(appliedJob.job.jobTypes);
+      appliedJob.job.skills = JSON.parse(appliedJob.job.skills);
+      appliedJob.job.languages = JSON.parse(appliedJob.job.languages);
+      appliedJob.job.education = JSON.parse(appliedJob.job.education);
       sendSuccessResponse(res, appliedJob);
     } catch (error) {
       console.error("Error retrieving application details:", error);
@@ -551,72 +594,73 @@ exports.getCountOfApplicantHired = async (req, res) => {
   const { employerId } = req.user;
 
   try {
-    // Step 1: Fetch all jobs by employerId with applied and hired counts
+    // Step 1: Fetch jobs for the given employerId
     const jobs = await Job.findAll({
       where: { employerId },
-      attributes: ["id"],
-      include: [
-        {
-          model: AppliedJob,
-          attributes: [
-            "employerStatus",
-            [Sequelize.fn("COUNT", Sequelize.col("*")), "count"],
-          ],
-          where: {
-            employerStatus: [
-              "Applied",
-              "Interviewing",
-              "Offer received",
-              "Not selected by employer",
-              "No longer interested",
-            ],
-          },
-          group: ["employerStatus"],
-          separate: true, // Fetch separately to avoid redundant results
-          as: "applications",
-        },
-        {
-          model: AppliedJob,
-          attributes: [
-            [Sequelize.fn("COUNT", Sequelize.col("*")), "hiredCount"],
-          ],
-          where: { employerStatus: "Hired" },
-          separate: true,
-          as: "hiredApplications",
-        },
+      attributes: ["id"], // Fetch only job IDs
+    });
+
+    // Extract job IDs from the jobs
+    const jobIds = jobs.map((job) => job.id);
+
+    // Step 2: Fetch counts of all application statuses for the fetched job IDs
+    const counts = await AppliedJob.findAll({
+      attributes: [
+        "employerStatus",
+        [Sequelize.fn("COUNT", Sequelize.col("id")), "count"],
       ],
+      where: {
+        jobId: {
+          [Op.in]: jobIds,
+        },
+        employerStatus: {
+          [Op.in]: [
+            "Applied",
+            "Interviewing",
+            "Offer received",
+            "Not selected by employer",
+            "No longer interested",
+            "Hired",
+          ],
+        },
+      },
+      group: "employerStatus",
       raw: true,
-      nest: true,
     });
 
-    // Step 2: Organize results into a structured response
-    const result = jobs.map((job) => {
-      const hiredCount =
-        job.hiredApplications.length > 0
-          ? job.hiredApplications[0].hiredCount
-          : 0;
-      const otherStatusCounts = {
-        Applied: 0,
-        Interviewing: 0,
-        "Offer received": 0,
-        "Not selected by employer": 0,
-        "No longer interested": 0,
-      };
-      job.applications.forEach((app) => {
-        otherStatusCounts[app.employerStatus] = app.count;
-      });
+    // Initialize counts
+    const statusCounts = {
+      Applied: 0,
+      Interviewing: 0,
+      "Offer received": 0,
+      "Not selected by employer": 0,
+      "No longer interested": 0,
+      Hired: 0,
+    };
 
-      return {
-        jobId: job.id,
-        hiredCount,
-        otherStatusCounts,
-      };
+    // Aggregate counts
+    let totalApplicationsCount = 0;
+    counts.forEach((item) => {
+      if (statusCounts.hasOwnProperty(item.employerStatus)) {
+        const count = parseInt(item.count, 10);
+        statusCounts[item.employerStatus] = count;
+        totalApplicationsCount += count; // Sum up all application counts
+      }
     });
 
-    // Step 3: Send the response
-    res.status(200).json({ status: true, count: result });
+    // Separate hiredCount from otherStatusCounts
+    const { Hired: hiredCount } = statusCounts;
+
+    // Step 3: Create the response object
+    const result = {
+      hiredCount,
+      totalApplicationsCount, // Include total applications count
+    };
+
+    // Step 4: Send the response
+    sendSuccessResponse(res, { status: true, count: result }, 200);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    sendErrorResponse(res, { error: "Internal Server Error" }, 400);
   }
 };
