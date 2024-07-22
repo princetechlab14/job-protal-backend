@@ -27,14 +27,9 @@ const {
   registerSchema,
   updateProfileSchema,
 } = require("../validators/employeeValidation");
+const { ensureEmployee } = require("../middleware/ensureEmployee");
 
-// Middleware to check if the user is an employee
-const ensureEmployee = (req, res, next) => {
-  if (req.user.userType !== "employee") {
-    return sendErrorResponse(res, "Employer cannot access this API", 403);
-  }
-  next();
-};
+
 
 // Register new employee or login
 exports.registerOrLoginEmployee = async (req, res) => {
@@ -565,45 +560,43 @@ exports.getAllSkills = async (req, res) => {
   }
 };
 
-exports.addOrUpdateResume = async (req, res) => {
-  try {
-    const { id } = req.params; // This ID is used for updating existing resumes
-    const { employeeId } = req.user; // Assumes employee ID is available from authenticated user
-    const cv = req.body.cvBase64;
-    const fileName = req.body.fileName;
-    if (id) {
-      // Update existing resume
-      const existingResume = await Resume.findByPk(id);
-      if (!existingResume) {
-        return sendErrorResponse(res, "Resume not found", 404);
-      }
+//  update resume
+exports.addOrUpdateResume = [
+  ensureEmployee,
+  async (req, res) => {
+    try {
+      const { employeeId } = req.user; // Assumes employee ID is available from authenticated user
+      const { cvBase64: cv, fileName } = req.body;
 
-      existingResume.fileName = fileName;
-      existingResume.cv = cv;
-      existingResume.employeeId = employeeId;
-      await existingResume.save();
-      return sendSuccessResponse(
-        res,
-        existingResume,
-        200,
-        "Resume updated successfully"
-      );
-    } else {
-      // Add new resume
-      const newResume = await Resume.create({
-        fileName,
-        cv,
-        employeeId,
-      });
-      return sendSuccessResponse(
-        res,
-        newResume,
-        201,
-        "Resume created successfully"
-      );
+      // Check if a resume already exists for this employee
+      const existingResume = await Resume.findOne({ where: { employeeId } });
+      if (existingResume) {
+        // Update existing resume
+        existingResume.fileName = fileName;
+        existingResume.cv = cv;
+        existingResume.employeeId = employeeId;
+        await existingResume.save();
+        return sendSuccessResponse(
+          res,
+          { data: existingResume, message: "Resume updated successfully" },
+          200
+        );
+      } else {
+        // Add new resume
+        const newResume = await Resume.create({
+          fileName,
+          cv,
+          employeeId,
+        });
+        return sendSuccessResponse(
+          res,
+          { data: newResume, message: "Resume created successfully" },
+          201
+        );
+      }
+    } catch (error) {
+      console.error("Error adding or updating resume:", error);
+      return sendErrorResponse(res, "Error adding or updating resume", 500);
     }
-  } catch (error) {
-    console.error("Error adding or updating resume:", error);
-    return sendErrorResponse(res, "Error adding or updating resume", 500);
-  }
-};
+  },
+];

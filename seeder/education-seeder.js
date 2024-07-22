@@ -4,16 +4,18 @@ const educationData = async () => {
   try {
     const insertRecords = [
       {
-        levelOfEducation: "Bachelor's Degree",
+        university: "Bachelor's Degree",
         fieldOfStudy: "Computer Science",
         employeeId: 44, // Ensure this ID exists in the Employee table
+        isPresent: false,
         createdAt: new Date("2024-07-20T09:42:28Z"),
         updatedAt: new Date("2024-07-20T09:42:28Z"),
       },
       {
-        levelOfEducation: "Bachelor's Degree",
+        university: "Bachelor's Degree",
         fieldOfStudy: "Computer Science",
         employeeId: 43, // Ensure this ID exists in the Employee table
+        isPresent: false,
         createdAt: new Date("2024-07-20T09:42:28Z"),
         updatedAt: new Date("2024-07-20T09:42:28Z"),
       },

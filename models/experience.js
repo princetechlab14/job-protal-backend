@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true, // Allow null if the end date is not provided
     },
+    isPresent: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true, // Allow null if the end date is not provided
+    },
   });
   return Experience;
 };

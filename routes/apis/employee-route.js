@@ -466,6 +466,9 @@ router.get("/skills", employeeController.getAllSkills);
  *               endDate:
  *                 type: string
  *                 example: 2024/12/13
+ *               isPresent:
+ *                 type: boolean
+ *                 example: false
  *     responses:
  *       200:
  *         description: education successfully updated
@@ -524,7 +527,7 @@ router.delete("/experience/:id", authenticateToken, deleteExperience);
  *               id:
  *                 type: integer
  *                 example: 1
- *               levelOfEducation:
+ *               university:
  *                 type: string
  *                 example: Software Engineer
  *               fieldOfStudy:
@@ -536,6 +539,9 @@ router.delete("/experience/:id", authenticateToken, deleteExperience);
  *               endDate:
  *                 type: string
  *                 example: 2024/12/13
+ *               isPresent:
+ *                 type: boolean
+ *                 example: false
  *     responses:
  *       200:
  *         description: education successfully updated

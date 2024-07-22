@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   const Education = sequelize.define("Education", {
-    levelOfEducation: {
+    university: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -18,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     endDate: {
       type: DataTypes.DATE,
+      allowNull: true, // Allow null if the end date is not provided
+    },
+    isPresent: {
+      type: DataTypes.BOOLEAN,
       allowNull: true, // Allow null if the end date is not provided
     },
   });
