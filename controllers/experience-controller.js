@@ -5,31 +5,40 @@ const {
   sendErrorResponse,
 } = require("../utils/responseUtils");
 
+// Add or Update experience
 exports.addOrUpdateExperience = [
   ensureEmployee,
   async (req, res) => {
     try {
       const { employeeId } = req.user;
-      const { id, jobTitle, companyName, startDate, endDate } = req.body;
+      const { id, jobTitle, companyName, startDate, endDate, isPresent } =
+        req.body;
 
       if (id) {
         // Update existing experience
         const experience = await db.Experience.findByPk(id);
         if (experience) {
           // Update only provided fields
-          experience.jobTitle = req?.body?.jobTitle
-            ? jobTitle
-            : experience?.jobTitle;
-          experience.companyName = req?.body?.companyName
-            ? companyName
-            : experience?.companyName;
-          experience.startDate = req?.body?.startDate
-            ? startDate
-            : experience?.startDate;
-          experience.endDate = req?.body?.endDate
-            ? endDate
-            : experience?.endDate;
+          experience.jobTitle =
+            jobTitle !== undefined ? jobTitle : experience.jobTitle;
+          experience.companyName =
+            companyName !== undefined ? companyName : experience.companyName;
+          experience.startDate =
+            startDate !== undefined ? startDate : experience.startDate;
+          experience.endDate =
+            isPresent === true
+              ? null
+              : endDate !== undefined
+              ? endDate
+              : experience.endDate;
+          experience.isPresent =
+            isPresent !== undefined
+              ? isPresent
+              : startDate && !endDate
+              ? true
+              : experience.isPresent;
           experience.employeeId = employeeId;
+
           await experience.save();
           return sendSuccessResponse(res, {
             data: experience,
@@ -48,22 +57,36 @@ exports.addOrUpdateExperience = [
           jobTitle,
           companyName,
           startDate,
-          endDate,
+          endDate: isPresent === true ? null : endDate,
+          isPresent:
+            isPresent !== undefined
+              ? isPresent
+              : startDate && !endDate
+              ? true
+              : false,
           employeeId,
         });
         return sendSuccessResponse(
           res,
-          { data: newExperience, message: "Experience added successfully" },
+          {
+            data: newExperience,
+            message: "Experience added successfully",
+          },
           201
         );
       }
     } catch (error) {
       console.error("Error adding or updating experience:", error);
-      return sendErrorResponse(res, error.message);
+      return sendErrorResponse(
+        res,
+        { message: "Error adding or updating experience" },
+        500
+      );
     }
   },
 ];
 
+// Delete experience
 exports.deleteExperience = [
   ensureEmployee,
   async (req, res) => {

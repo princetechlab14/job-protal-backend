@@ -54,7 +54,7 @@ exports.addOrUpdateSkill = [
       }
     } catch (error) {
       console.error("Error adding or updating skill:", error);
-      return sendErrorResponse(res, error.message);
+      return sendErrorResponse(res, { message: error.message }, 500);
     }
   },
 ];
@@ -81,7 +81,7 @@ exports.deleteSkill = [
       });
     } catch (error) {
       console.error("Error deleting skill:", error);
-      return sendErrorResponse(res, error.message);
+      return sendErrorResponse(res, { message: error.message }, 500);
     }
   },
 ];

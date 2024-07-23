@@ -28,8 +28,8 @@ const {
   updateProfileSchema,
 } = require("../validators/employeeValidation");
 const { ensureEmployee } = require("../middleware/ensureEmployee");
-
-
+const s3 = require("../utils/aws-config");
+const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
 
 // Register new employee or login
 exports.registerOrLoginEmployee = async (req, res) => {
@@ -570,11 +570,31 @@ exports.addOrUpdateResume = [
 
       // Check if a resume already exists for this employee
       const existingResume = await Resume.findOne({ where: { employeeId } });
+
       if (existingResume) {
+        // Delete the old resume from S3
+        if (existingResume.cv) {
+          const oldKey = existingResume.cv.split("/").pop();
+          if (oldKey !== fileName) {
+            // Extract file name from S3 URL
+            const deleteParams = {
+              Bucket: process.env.AWS_BUCKET_NAME,
+              Key: `resumes/${oldKey}`,
+            };
+
+            try {
+              await s3.send(new DeleteObjectCommand(deleteParams));
+              console.log("Delete successfully");
+            } catch (deleteError) {
+              console.error("Error deleting old resume from S3:", deleteError);
+              return res.status(500).send("Error deleting old resume from S3");
+            }
+          }
+        }
+
         // Update existing resume
         existingResume.fileName = fileName;
         existingResume.cv = cv;
-        existingResume.employeeId = employeeId;
         await existingResume.save();
         return sendSuccessResponse(
           res,
@@ -587,6 +607,7 @@ exports.addOrUpdateResume = [
           fileName,
           cv,
           employeeId,
+          s3Url, // Save the S3 URL
         });
         return sendSuccessResponse(
           res,

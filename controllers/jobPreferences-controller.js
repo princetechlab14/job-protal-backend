@@ -80,7 +80,7 @@ exports.addOrUpdateJobPreferences = [
       console.error("Error adding or updating job preferences:", error);
       return sendErrorResponse(
         res,
-        "Error adding or updating job preferences",
+        { message: "Error adding or updating job preferences" },
         500
       );
     }
@@ -95,7 +95,11 @@ exports.deleteJobPreferences = [
       const { id } = req.params;
       const { employeeId } = req.user;
       if (!id) {
-        return sendErrorResponse(res, "Job Preferences ID is required", 400);
+        return sendErrorResponse(
+          res,
+          { message: "Job Preferences ID is required" },
+          400
+        );
       }
 
       const jobPreferences = await JobPreferences.findOne({
@@ -115,7 +119,7 @@ exports.deleteJobPreferences = [
       });
     } catch (error) {
       console.error("Error deleting job preferences:", error);
-      return sendErrorResponse(res, error.message);
+      return sendErrorResponse(res, { message: error.message }, 500);
     }
   },
 ];

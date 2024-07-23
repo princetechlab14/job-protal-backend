@@ -29,7 +29,11 @@ const {
 // Middleware to check if the user is an employee
 const ensureEmployer = (req, res, next) => {
   if (req.user.userType !== "employer") {
-    return sendErrorResponse(res, "Employee cannot access this API", 403);
+    return sendErrorResponse(
+      res,
+      { message: "Employee cannot access this API" },
+      403
+    );
   }
   next();
 };
@@ -42,7 +46,7 @@ exports.registerOrLoginEmployer = async (req, res) => {
 
     // If validation fails, return error response
     if (error) {
-      return sendErrorResponse(res, error.details[0].message, 400);
+      return sendErrorResponse(res, { message: error.details[0].message }, 400);
     }
 
     const { fullName, email, password } = value; // Use validated values from Joi
@@ -55,7 +59,7 @@ exports.registerOrLoginEmployer = async (req, res) => {
         existingEmployer.password
       );
       if (!isPasswordValid) {
-        return sendErrorResponse(res, "Invalid password", 400);
+        return sendErrorResponse(res, { message: "Invalid password" }, 400);
       }
 
       // Generate token for existing employee
@@ -105,7 +109,11 @@ exports.registerOrLoginEmployer = async (req, res) => {
     );
   } catch (error) {
     console.error("Error registering or logging in employer:", error);
-    sendErrorResponse(res, "Error registering or logging in employer", 500);
+    sendErrorResponse(
+      res,
+      { message: "Error registering or logging in employer" },
+      500
+    );
   }
 };
 
@@ -367,13 +375,13 @@ exports.updateJobStatus = [
 
       // Validate status
       if (!["Open", "Paused", "Closed"].includes(status)) {
-        return sendErrorResponse(res, "Invalid status", 400);
+        return sendErrorResponse(res, { message: "Invalid status" }, 400);
       }
 
       // Find the job by ID
       const job = await Job.findByPk(jobId);
       if (!job) {
-        return sendErrorResponse(res, "Job not found", 404);
+        return sendErrorResponse(res, { message: "Job not found" }, 404);
       }
 
       // Update only the status field
@@ -388,7 +396,7 @@ exports.updateJobStatus = [
       );
     } catch (error) {
       console.error("Error updating job status:", error);
-      sendErrorResponse(res, "Error updating job status", 500);
+      sendErrorResponse(res, { message: "Error updating job status" }, 500);
     }
   },
 ];
@@ -420,7 +428,7 @@ exports.searchEmployees = [
       } else {
         return sendErrorResponse(
           res,
-          "Please provide at least one search parameter",
+          { message: "Please provide at least one search parameter" },
           400
         );
       }
@@ -543,7 +551,11 @@ exports.getApplicationDetailsById = [
       });
 
       if (!appliedJob) {
-        return sendErrorResponse(res, "Application not found", 404);
+        return sendErrorResponse(
+          res,
+          { message: "Application not found" },
+          404
+        );
       }
       // Parse jobTypes field for each job
       appliedJob.job.jobTypes = JSON.parse(appliedJob.job.jobTypes);
@@ -553,7 +565,11 @@ exports.getApplicationDetailsById = [
       sendSuccessResponse(res, appliedJob);
     } catch (error) {
       console.error("Error retrieving application details:", error);
-      sendErrorResponse(res, "Error retrieving application details", 500);
+      sendErrorResponse(
+        res,
+        { message: "Error retrieving application details" },
+        500
+      );
     }
   },
 ];
@@ -584,7 +600,11 @@ exports.getAllJobsWithApplicantsCount = [
       sendSuccessResponse(res, jobs);
     } catch (error) {
       console.error("Error retrieving jobs by employer ID:", error);
-      sendErrorResponse(res, "Error retrieving jobs by employer ID");
+      sendErrorResponse(
+        res,
+        { message: "Error retrieving jobs by employer ID" },
+        500
+      );
     }
   },
 ];
@@ -661,6 +681,6 @@ exports.getCountOfApplicantHired = async (req, res) => {
     sendSuccessResponse(res, { status: true, count: result }, 200);
   } catch (error) {
     console.error(error);
-    sendErrorResponse(res, { error: "Internal Server Error" }, 400);
+    sendErrorResponse(res, { message: "Internal Server Error" }, 400);
   }
 };

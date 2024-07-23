@@ -5,12 +5,12 @@ const {
   sendErrorResponse,
 } = require("../utils/responseUtils");
 
-// Add or Update Education
+// Add or Update education
 exports.addOrUpdateEducation = [
   ensureEmployee,
   async (req, res) => {
     try {
-      const { levelOfEducation, fieldOfStudy, startDate, endDate, id } =
+      const { university, fieldOfStudy, startDate, endDate, id, isPresent } =
         req.body;
 
       if (id) {
@@ -18,16 +18,25 @@ exports.addOrUpdateEducation = [
         const education = await Education.findByPk(id);
         if (education) {
           // Update only provided fields
-          education.levelOfEducation =
-            levelOfEducation !== undefined
-              ? levelOfEducation
-              : education.levelOfEducation;
+          education.university =
+            university !== undefined ? university : education.university;
           education.fieldOfStudy =
             fieldOfStudy !== undefined ? fieldOfStudy : education.fieldOfStudy;
           education.startDate =
             startDate !== undefined ? startDate : education.startDate;
           education.endDate =
-            endDate !== undefined ? endDate : education.endDate;
+            isPresent === true
+              ? null
+              : endDate !== undefined
+              ? endDate
+              : education.endDate;
+          education.isPresent =
+            isPresent !== undefined
+              ? isPresent
+              : startDate && !endDate
+              ? true
+              : education.isPresent;
+          education.employeeId = req.user.employeeId; // Assuming employeeId is in req.user
 
           await education.save();
           return sendSuccessResponse(res, {
@@ -43,7 +52,7 @@ exports.addOrUpdateEducation = [
         }
       } else {
         // Add new education
-        if (!levelOfEducation || !fieldOfStudy) {
+        if (!university || !fieldOfStudy) {
           return sendErrorResponse(
             res,
             { message: "Required fields missing for new education" },
@@ -52,11 +61,17 @@ exports.addOrUpdateEducation = [
         }
 
         const newEducation = await Education.create({
-          levelOfEducation,
+          university,
           fieldOfStudy,
           employeeId: req.user.employeeId, // Assuming employeeId is in req.user
           startDate,
-          endDate,
+          endDate: isPresent === true ? null : endDate,
+          isPresent:
+            isPresent !== undefined
+              ? isPresent
+              : startDate && !endDate
+              ? true
+              : false,
         });
         return sendSuccessResponse(
           res,
@@ -69,7 +84,11 @@ exports.addOrUpdateEducation = [
       }
     } catch (error) {
       console.error("Error adding or updating education:", error);
-      return sendErrorResponse(res, "Error adding or updating education", 500);
+      return sendErrorResponse(
+        res,
+        { message: "Error adding or updating education" },
+        500
+      );
     }
   },
 ];
@@ -85,13 +104,13 @@ exports.deleteEducation = [
 
       if (education) {
         await education.destroy();
-        return sendSuccessResponse(res, { message: "Education deleted" });
+        return sendSuccessResponse(res, { message: "Education deleted" }, 200);
       } else {
         return sendErrorResponse(res, { message: "Education not found" }, 404);
       }
     } catch (error) {
       console.error("Error deleting education:", error);
-      return sendErrorResponse(res, error.message);
+      return sendErrorResponse(res, { message: error.message }, 500);
     }
   },
 ];

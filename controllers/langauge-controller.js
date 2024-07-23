@@ -60,7 +60,7 @@ exports.addOrUpdateLanguage = [
       }
     } catch (error) {
       console.error("Error adding or updating language:", error);
-      return sendErrorResponse(res, error.message);
+      return sendErrorResponse(res, { message: error.message }, 500);
     }
   },
 ];
@@ -91,7 +91,7 @@ exports.deleteLanguage = [
       });
     } catch (error) {
       console.error("Error deleting language:", error);
-      return sendErrorResponse(res, error.message);
+      return sendErrorResponse(res, { message: error.message }, 500);
     }
   },
 ];

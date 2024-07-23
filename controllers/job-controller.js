@@ -296,6 +296,7 @@ exports.getAllJobs = async (req, res) => {
     sendErrorResponse(res, "Error retrieving jobs", 500);
   }
 };
+
 // Get job by ID
 exports.getJobById = async (req, res) => {
   try {
@@ -314,7 +315,7 @@ exports.getJobById = async (req, res) => {
     sendSuccessResponse(res, job);
   } catch (error) {
     console.error("Error retrieving job:", error);
-    sendErrorResponse(res, "Error retrieving job");
+    sendErrorResponse(res, { message: "Error retrieving job" }, 500);
   }
 };
 

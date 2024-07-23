@@ -518,7 +518,6 @@ router.delete("/experience/:id", authenticateToken, deleteExperience);
  *     security:
  *       - bearerAuth: []
  *     requestBody:
- *       required: true
  *       content:
  *         application/json:
  *           schema:
@@ -800,6 +799,43 @@ router.post("/jobPreferences", authenticateToken, addOrUpdateJobPreferences);
 
 router.delete("/jobPreferences/:id", authenticateToken, deleteJobPreferences);
 
+/**
+ * @swagger
+ * /employee/resume:
+ *   post:
+ *     summary: Add or update employee resume
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               cv:
+ *                 type: string
+ *                 format: binary
+ *                 description: Resume file in PDF format
+ *     responses:
+ *       200:
+ *         description: Resume added or updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Resume uploaded successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       500:
+ *         description: Server error
+ */
 router.post(
   "/resume",
   authenticateToken,
