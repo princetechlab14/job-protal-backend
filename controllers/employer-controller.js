@@ -25,18 +25,7 @@ const {
   sendSuccessResponse,
   sendErrorResponse,
 } = require("../utils/responseUtils");
-
-// Middleware to check if the user is an employee
-const ensureEmployer = (req, res, next) => {
-  if (req.user.userType !== "employer") {
-    return sendErrorResponse(
-      res,
-      { message: "Employee cannot access this API" },
-      403
-    );
-  }
-  next();
-};
+const { ensureEmployer } = require("../middleware/ensureEmployer");
 
 // Register new employer
 exports.registerOrLoginEmployer = async (req, res) => {
@@ -123,27 +112,41 @@ exports.updateProfile = [
   async (req, res) => {
     try {
       // Validate request body against Joi schema
-      const { error, value } = updateProfileSchema.validate(req.body);
-
-      // If validation fails, return error response
-      if (error) {
-        return sendErrorResponse(res, error.details[0].message, 400);
-      }
 
       const { employerId } = req.user;
-
+      const value = req.body;
       // Find the employer by ID
       let employer = await Employer.findByPk(employerId);
 
       // If employer not found, return error
       if (!employer) {
-        return sendErrorResponse(res, "Employer not found", 404);
+        return sendErrorResponse(res, { message: "Employer not found" }, 404);
       }
 
       // Update only the fields provided in the request body
       Object.keys(value).forEach((key) => {
-        employer[key] = value[key];
+        if (value[key] !== "") employer[key] = value[key];
       });
+      const imgUrl = req.body.imageUrl;
+
+      if (employer.profile) {
+        const oldKey = employer.profile.split("/").pop();
+        if (oldKey !== req.body.fileName) {
+          // Extract file name from S3 URL
+          const deleteParams = {
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: `images/${oldKey}`,
+          };
+          try {
+            await s3.send(new DeleteObjectCommand(deleteParams));
+            console.log("Delete successfully");
+          } catch (deleteError) {
+            console.error("Error deleting old resume from S3:", deleteError);
+            return res.status(500).send("Error deleting old resume from S3");
+          }
+        }
+      }
+      employer.profile = imgUrl ? imgUrl : employer.profile;
 
       // Save the updated employer
       await employer.save();
@@ -151,7 +154,11 @@ exports.updateProfile = [
       sendSuccessResponse(res, { employer }, 200);
     } catch (error) {
       console.error("Error updating employer profile:", error);
-      sendErrorResponse(res, "Error updating employer profile", 500);
+      sendErrorResponse(
+        res,
+        { message: "Error updating employer profile" },
+        500
+      );
     }
   },
 ];
@@ -169,13 +176,17 @@ exports.getProfile = [
 
       // If employer not found, return error
       if (!employer) {
-        return sendErrorResponse(res, "Employer not found", 404);
+        return sendErrorResponse(res, { message: "Employer not found" }, 404);
       }
 
       sendSuccessResponse(res, { employer }, 200);
     } catch (error) {
       console.error("Error fetching employer profile:", error);
-      sendErrorResponse(res, "Error fetching employer profile", 500);
+      sendErrorResponse(
+        res,
+        { message: "Error fetching employer profile" },
+        500
+      );
     }
   },
 ];
@@ -188,12 +199,20 @@ exports.updateEmployerStatus = [
       const { appliedJobId } = req.params;
       const { employerStatus } = req.body;
       if (!employerStatus) {
-        return sendErrorResponse(res, "Please provide employer status", 400);
+        return sendErrorResponse(
+          res,
+          { message: "Please provide employer status" },
+          400
+        );
       }
       // Find the applied job by ID
       const appliedJob = await AppliedJob.findByPk(appliedJobId);
       if (!appliedJob) {
-        return sendErrorResponse(res, "Applied job not found", 404);
+        return sendErrorResponse(
+          res,
+          { message: "Applied job not found" },
+          404
+        );
       }
 
       // Update the employer status
@@ -202,7 +221,11 @@ exports.updateEmployerStatus = [
       sendSuccessResponse(res, { appliedJob }, 200);
     } catch (error) {
       console.error("Error updating employer status:", error);
-      sendErrorResponse(res, "Error updating employer status", 500);
+      sendErrorResponse(
+        res,
+        { message: "Error updating employer status" },
+        500
+      );
     }
   },
 ];
@@ -217,7 +240,7 @@ exports.getJobsByEmployeeId = [
     try {
       const employee = await Employer.findByPk(employerId);
       if (!employee) {
-        return sendErrorResponse(res, "Employer not found", 404);
+        return sendErrorResponse(res, { message: "Employer not found" }, 404);
       }
 
       // Prepare filter conditions for jobs
@@ -271,7 +294,11 @@ exports.getJobsByEmployeeId = [
       sendSuccessResponse(res, jobs);
     } catch (error) {
       console.error("Error retrieving jobs by employer ID:", error);
-      sendErrorResponse(res, "Error retrieving jobs by employer ID");
+      sendErrorResponse(
+        res,
+        { message: "Error retrieving jobs by employer ID" },
+        500
+      );
     }
   },
 ];
@@ -285,7 +312,7 @@ exports.getClosedJobsByEmployeeId = [
     try {
       const employer = await Employer.findByPk(employerId);
       if (!employer) {
-        return sendErrorResponse(res, "Employer not found", 404);
+        return sendErrorResponse(res, { message: "Employer not found" }, 404);
       }
 
       const jobs = await Job.findAll({
@@ -314,7 +341,11 @@ exports.getClosedJobsByEmployeeId = [
       sendSuccessResponse(res, jobs);
     } catch (error) {
       console.error("Error retrieving closed jobs by employer ID:", error);
-      sendErrorResponse(res, "Error retrieving closed jobs by employer ID");
+      sendErrorResponse(
+        res,
+        { message: "Error retrieving closed jobs by employer ID" },
+        500
+      );
     }
   },
 ];
@@ -330,7 +361,7 @@ exports.getApplicant = [
       const job = await Job.findByPk(jobId);
 
       if (!job) {
-        return sendErrorResponse(res, "Job not found", 404);
+        return sendErrorResponse(res, { message: "Job not found" }, 404);
       }
 
       // Retrieve applicants for the job
@@ -360,7 +391,11 @@ exports.getApplicant = [
       sendSuccessResponse(res, applicants);
     } catch (error) {
       console.error("Error retrieving applicants for job:", error);
-      sendErrorResponse(res, "Error retrieving applicants for job", 500);
+      sendErrorResponse(
+        res,
+        { message: "Error retrieving applicants for job" },
+        500
+      );
     }
   },
 ];
@@ -489,7 +524,7 @@ exports.searchEmployees = [
       sendSuccessResponse(res, employees);
     } catch (error) {
       console.error("Error searching employees:", error);
-      sendErrorResponse(res, "Error searching employees", 500);
+      sendErrorResponse(res, { message: "Error searching employees" }, 500);
     }
   },
 ];

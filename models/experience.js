@@ -11,18 +11,22 @@ module.exports = (sequelize, DataTypes) => {
     employeeId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "Employees",
+        key: "id",
+      },
     },
     startDate: {
       type: DataTypes.DATE,
-      allowNull: true, // Allow null if the start date is not provided
+      allowNull: true,
     },
     endDate: {
       type: DataTypes.DATE,
-      allowNull: true, // Allow null if the end date is not provided
+      allowNull: true,
     },
     isPresent: {
       type: DataTypes.BOOLEAN,
-      allowNull: true, // Allow null if the end date is not provided
+      allowNull: true,
     },
   });
   return Experience;

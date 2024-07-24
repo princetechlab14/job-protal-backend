@@ -110,25 +110,37 @@ exports.updateProfile = [
   ensureEmployee,
   async (req, res) => {
     try {
-      const { error, value } = updateProfileSchema.validate(req.body, {
-        abortEarly: false,
-      });
-      if (error) {
-        return sendErrorResponse(res, error.details[0].message, 400);
-      }
-
+      const value = req.body;
       const { employeeId } = req.user;
-
+      const imgUrl = req.body.imageUrl;
       const employee = await Employee.findByPk(employeeId);
       if (!employee) {
-        return sendErrorResponse(res, "Employee not found", 404);
+        return sendErrorResponse(res, { message: "Employee not found" }, 404);
       }
 
       // Update only the fields provided in the request body
       Object.keys(value).forEach((key) => {
-        employee[key] = value[key];
+        if (value[key] !== "") employee[key] = value[key];
       });
 
+      if (employee.profile) {
+        const oldKey = employee.profile.split("/").pop();
+        if (oldKey !== req.body.fileName) {
+          // Extract file name from S3 URL
+          const deleteParams = {
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: `images/${oldKey}`,
+          };
+          try {
+            await s3.send(new DeleteObjectCommand(deleteParams));
+            console.log("Delete successfully");
+          } catch (deleteError) {
+            console.error("Error deleting old resume from S3:", deleteError);
+            return res.status(500).send("Error deleting old resume from S3");
+          }
+        }
+      }
+      employee.profile = imgUrl ? imgUrl : employee.profile;
       await employee.save();
 
       sendSuccessResponse(res, { employee }, 200);
@@ -440,8 +452,16 @@ exports.getFilteredJobsWithSalary = [
         where: whereClause,
         limit: parseInt(limit),
         offset: offset,
+        include: [
+          {
+            model: Employer,
+            as: "employer",
+            attributes: ["id", "companyName"],
+          },
+        ],
       });
-      // // Parse JSON fields for each job
+
+      // Parse JSON fields for each job
       jobs.forEach((job) => {
         job.jobTypes = JSON.parse(job.jobTypes);
         job.skills = JSON.parse(job.skills);
@@ -449,25 +469,54 @@ exports.getFilteredJobsWithSalary = [
         job.education = JSON.parse(job.education);
       });
 
-      // Calculate average salary
+      // Extract salaries from jobs
       const salaries = jobs
         .map((job) => {
           if (job.payType === "Range") {
-            return (job.minimumPay + job.maximumPay) / 2;
-          } else if (job.payType === "Exact") {
+            return job.minimumPay;
+          } else if (job.payType === "Exact amount") {
             return job.exactPay;
           }
           return 0;
         })
         .filter((salary) => salary > 0);
 
-      const totalSalary = salaries.reduce((acc, salary) => acc + salary, 0);
-      const averageSalary = totalSalary / salaries.length;
+      // If there are no valid salaries, handle accordingly
+      if (salaries.length === 0) {
+        return sendSuccessResponse(res, {
+          jobs,
+          totalPages: Math.ceil(count / limit),
+          currentPage: parseInt(page),
+          averageSalary: {
+            yearly: 0,
+            monthly: 0,
+            weekly: 0,
+            daily: 0,
+            hourly: 0,
+          },
+        });
+      }
 
-      // Convert the average salary to hourly, daily, and weekly rates
-      const averageHourly = averageSalary / 2080; // 2080 working hours in a year (40 hours/week * 52 weeks)
-      const averageDaily = averageSalary / 260; // 260 working days in a year (5 days/week * 52 weeks)
-      const averageWeekly = averageSalary / 52; // 52 weeks in a year
+      // Sort salaries to find the median
+      salaries.sort((a, b) => a - b);
+
+      // Find the median salary
+      const middle = Math.floor(salaries.length / 2);
+      const medianSalary =
+        salaries.length % 2 !== 0
+          ? salaries[middle]
+          : (salaries[middle - 1] + salaries[middle]) / 2;
+
+      // Convert the median salary to different time rates
+      const averageYearly = medianSalary * 12; // 12 months in a year
+      const averageMonthly = Number(medianSalary);
+      const averageWeekly = medianSalary / 4; // Rough estimate of weeks in a month
+      const averageDaily = medianSalary / 30; // Approximate number of days in a month
+      const averageHourly = medianSalary / (30 * 8); // Approximate working hours in a month (8 hours/day * 30 days)
+
+      // Log intermediate calculations
+      console.log("Salaries:", salaries);
+      console.log("Median Salary:", medianSalary);
 
       // Construct pagination metadata
       const totalPages = Math.ceil(count / limit);
@@ -478,10 +527,11 @@ exports.getFilteredJobsWithSalary = [
         totalPages,
         currentPage,
         averageSalary: {
-          yearly: averageSalary,
-          hourly: averageHourly,
-          daily: averageDaily,
-          weekly: averageWeekly,
+          yearly: Number(averageYearly.toFixed(2)),
+          monthly: Number(averageMonthly.toFixed(2)),
+          weekly: Number(averageWeekly.toFixed(2)),
+          daily: Number(averageDaily.toFixed(2)),
+          hourly: Number(averageHourly.toFixed(2)),
         },
       });
     } catch (error) {

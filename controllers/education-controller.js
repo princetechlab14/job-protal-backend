@@ -99,7 +99,7 @@ exports.deleteEducation = [
   async (req, res) => {
     try {
       const { id } = req.params;
-      const { employeeId } = req.params;
+      const { employeeId } = req.user;
       const education = await Education.findOne({ where: { id, employeeId } });
 
       if (education) {

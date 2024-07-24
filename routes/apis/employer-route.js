@@ -3,6 +3,7 @@ const router = express.Router();
 const employerController = require("../../controllers/employer-controller");
 const jobController = require("../../controllers/job-controller");
 const { authenticateToken } = require("../../middleware/verifyToken");
+const { upload, uploadImageToS3 } = require("../../middleware/pdfTobase64");
 
 /**
  * @swagger
@@ -53,7 +54,7 @@ router.post("/register", employerController.registerOrLoginEmployer);
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *        multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -73,7 +74,10 @@ router.post("/register", employerController.registerOrLoginEmployer);
  *                 format: phone-number
  *               email:
  *                 type: string
- *                 format: email
+ *                 format: email 
+ *               profile:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Employer profile updated successfully
@@ -86,7 +90,13 @@ router.post("/register", employerController.registerOrLoginEmployer);
  *       500:
  *         description: Server error
  */
-router.put("/profile", authenticateToken, employerController.updateProfile);
+router.put(
+  "/profile",
+  authenticateToken,
+  upload.single("profile"),
+  uploadImageToS3,
+  employerController.updateProfile
+);
 
 /**
  * @swagger

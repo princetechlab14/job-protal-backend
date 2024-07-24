@@ -24,6 +24,10 @@ module.exports = (sequelize, DataTypes) => {
     employeeId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "Employees",
+        key: "id",
+      },
     },
   });
   return JobPreferences;

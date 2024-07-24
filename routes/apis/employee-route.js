@@ -2,7 +2,11 @@ const express = require("express");
 const router = express.Router();
 const employeeController = require("../../controllers/employee-controller");
 const { authenticateToken } = require("../../middleware/verifyToken");
-const { upload, convertPdfToBase64 } = require("../../middleware/pdfTobase64");
+const {
+  upload,
+  convertPdfToBase64,
+  uploadImageToS3,
+} = require("../../middleware/pdfTobase64");
 const {
   addOrUpdateExperience,
   deleteExperience,
@@ -85,7 +89,7 @@ router.post("/register", employeeController.registerOrLoginEmployee);
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -107,6 +111,9 @@ router.post("/register", employeeController.registerOrLoginEmployee);
  *                 type: string
  *               email:
  *                 type: string
+ *               profile:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Employee profile updated successfully
@@ -119,7 +126,13 @@ router.post("/register", employeeController.registerOrLoginEmployee);
  *       500:
  *         description: Server error
  */
-router.put("/profile", authenticateToken, employeeController.updateProfile);
+router.put(
+  "/profile",
+  authenticateToken,
+  upload.single("profile"),
+  uploadImageToS3,
+  employeeController.updateProfile
+);
 
 /**
  * @swagger

@@ -45,7 +45,7 @@ const synchronizeAndSeed = async () => {
   try {
     await db.sequelize.sync({ force: true }); // Sync models with the database and force re-creation of tables
 
-    // Import and execute all seeders
+    // // Import and execute all seeders
     await require("./seeder/employer-seeder").employeeData();
     await require("./seeder/employee-seeder").employeeData();
     await require("./seeder/job-seeder").JobData();
@@ -57,6 +57,7 @@ const synchronizeAndSeed = async () => {
     await require("./seeder/lan-seeder").languageData();
     await require("./seeder/skill-seeder").skillData();
     await require("./seeder/jobpre-seeder").jobPreData();
+    await require("./seeder/review-seeder").reviewData();
 
     console.log("Synchronization and seeding completed successfully!!");
   } catch (error) {
@@ -66,7 +67,7 @@ const synchronizeAndSeed = async () => {
 // synchronizeAndSeed()
 
 // Define a cron job to run at 12:01 AM
-cron.schedule("1 0 * * *", async () => {
+cron.schedule("* * * * *", async () => {
   try {
     const currentDate = new Date();
     const jobsToUpdate = await db.Job.findAll({

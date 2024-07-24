@@ -9,7 +9,11 @@ const { Op, Sequelize } = require("sequelize");
 // Middleware to check if the user is an employee
 const ensureEmployer = (req, res, next) => {
   if (req.user.userType !== "employer") {
-    return sendErrorResponse(res, "Employee cannot access this API", 403);
+    return sendErrorResponse(
+      res,
+      { message: "Employee cannot access this API" },
+      403
+    );
   }
   next();
 };
@@ -22,12 +26,16 @@ exports.createJob = [
     try {
       const { error } = jobSchema.validate(req.body);
       if (error) {
-        return sendErrorResponse(res, error.details[0].message, 400);
+        return sendErrorResponse(
+          res,
+          { message: error.details[0].message },
+          400
+        );
       }
 
       const employer = await Employer.findByPk(employerId);
       if (!employer) {
-        return sendErrorResponse(res, "Employer not found", 404);
+        return sendErrorResponse(res, { message: "Employer not found" }, 404);
       }
 
       // Append employerId to job data
@@ -48,7 +56,7 @@ exports.createJob = [
       sendSuccessResponse(res, newJob, 201);
     } catch (error) {
       console.error("Error creating job:", error);
-      sendErrorResponse(res, "Error creating job");
+      sendErrorResponse(res, { message: "Error creating job" }, 500);
     }
   },
 ];
@@ -66,7 +74,7 @@ exports.updateJob = [
 
       const job = await Job.findByPk(jobId);
       if (!job) {
-        return sendErrorResponse(res, "Job not found", 404);
+        return sendErrorResponse(res, { message: "Job not found" }, 404);
       }
 
       // Append city to jobPostingLocation if advertise is true
@@ -76,7 +84,7 @@ exports.updateJob = [
       sendSuccessResponse(res, updatedJob);
     } catch (error) {
       console.error("Error updating job:", error);
-      sendErrorResponse(res, "Error updating job");
+      sendErrorResponse(res, { message: "Error updating job" }, 500);
     }
   },
 ];
@@ -303,7 +311,7 @@ exports.getJobById = async (req, res) => {
     const { jobId } = req.params;
     const job = await Job.findByPk(jobId);
     if (!job) {
-      return sendErrorResponse(res, "Job not found", 404);
+      return sendErrorResponse(res, { message: "Job not found" }, 404);
     }
 
     // Parse jobTypes field
@@ -312,7 +320,7 @@ exports.getJobById = async (req, res) => {
     job.skills = JSON.parse(job.skills);
     job.education = JSON.parse(job.education);
 
-    sendSuccessResponse(res, job);
+    sendSuccessResponse(res, { job });
   } catch (error) {
     console.error("Error retrieving job:", error);
     sendErrorResponse(res, { message: "Error retrieving job" }, 500);
@@ -327,13 +335,13 @@ exports.deleteJob = [
       const { jobId } = req.params;
       const job = await Job.findByPk(jobId);
       if (!job) {
-        return sendErrorResponse(res, "Job not found", 404);
+        return sendErrorResponse(res, { message: "Job not found" }, 404);
       }
       await job.destroy();
       sendSuccessResponse(res, { message: "Job deleted successfully" });
     } catch (error) {
       console.error("Error deleting job:", error);
-      sendErrorResponse(res, "Error deleting job");
+      sendErrorResponse(res, { message: "Error deleting job" }, 500);
     }
   },
 ];

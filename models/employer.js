@@ -27,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    profile: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -42,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
     status: {
       type: DataTypes.BOOLEAN,
       allowNull: true,
-      defaultValue:true
+      defaultValue: true,
     },
   });
 

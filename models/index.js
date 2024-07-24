@@ -45,9 +45,10 @@ db.AppliedJob = require("./appliedJobs")(sequelize, DataTypes);
 db.Experience = require("./experience")(sequelize, DataTypes);
 db.Education = require("./education")(sequelize, DataTypes);
 db.Skill = require("./skill")(sequelize, DataTypes);
-db.Language = require("./langauge")(sequelize, DataTypes);
+db.Language = require("./language")(sequelize, DataTypes);
 db.Resume = require("./Resume-model")(sequelize, DataTypes);
 db.JobPreferences = require("./jobPreferences")(sequelize, DataTypes);
+db.Review = require("./review")(sequelize, DataTypes);
 db.Admin = require("./admin-model")(sequelize, DataTypes);
 
 // Define associations
@@ -89,5 +90,9 @@ db.Employee.hasOne(db.JobPreferences, {
   foreignKey: "employeeId",
   as: "jobPreferences",
 });
+db.Employer.hasMany(db.Review, { foreignKey: "employerId", as: "reviews" });
+db.Review.belongsTo(db.Employer, { foreignKey: "employerId", as: "employer" });
+db.Review.belongsTo(db.Employee, { foreignKey: "employeeId", as: "employee" });
+db.Employee.hasMany(db.Review, { foreignKey: "employeeId", as: "reviews" });
 
 module.exports = db;

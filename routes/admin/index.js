@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const { Employee, AppliedJob, Employer, Job, Admin } = require("../../models"); // Define routes
+const authController = require("../../controllers/auth-controller");
+
 router.get("/", (req, res) => {
   res.render("login", { title: "Login Page", error: "" });
 });
-const authController = require("../../controllers/auth-controller");
 
 // Route to render the dashboard page
 router.get("/dashboard", async (req, res) => {
@@ -115,6 +116,7 @@ router.post("/logout", authController.logout);
 router.get("/register", (req, res) =>
   res.render("register", { title: "Register Page", error: "" })
 );
+
 router.get("/profile/:id", async (req, res) => {
   res.render("profile", { title: "Update Profile Page", error: "" });
 });
