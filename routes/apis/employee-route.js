@@ -351,8 +351,6 @@ router.get(
  *   post:
  *     summary: Get filtered jobs with average salary
  *     tags: [Employees]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -388,11 +386,7 @@ router.get(
  *       500:
  *         description: Server error
  */
-router.post(
-  "/salary-range",
-  authenticateToken,
-  employeeController.getFilteredJobsWithSalary
-);
+router.post("/salary-range", employeeController.getFilteredJobsWithSalary);
 
 /**
  * @swagger

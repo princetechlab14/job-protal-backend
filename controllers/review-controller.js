@@ -1,5 +1,5 @@
 const { Sequelize } = require("sequelize");
-const { Review, Employer, Employee } = require("../models"); // Adjust the path according to your setup
+const { Review, Employer, Employee, Job } = require("../models"); // Adjust the path according to your setup
 const {
   sendErrorResponse,
   sendSuccessResponse,
@@ -62,8 +62,16 @@ exports.deleteReview = async (req, res) => {
 // get all employers
 exports.getAllEmployers = async (req, res) => {
   try {
+    const { companyName } = req.query;
+    let whereClause = {
+      status: true,
+    };
+    if (companyName) {
+      whereClause.companyName = { [Sequelize.Op.like]: `%${companyName}%` };
+    }
     // Fetch employers along with their reviews
     const employers = await Employer.findAll({
+      where: whereClause,
       attributes: [
         "id",
         "companyName",
@@ -122,6 +130,9 @@ exports.getReviewsByEmployerId = async (req, res) => {
         400
       );
     }
+    const jobs = await Job.findAll({
+      where: { employerId },
+    });
 
     // Fetch reviews with detailed information
     const reviews = await Review.findAll({
@@ -203,10 +214,19 @@ exports.getReviewsByEmployerId = async (req, res) => {
           )
         : 0;
 
+    // Parse JSON fields for each job
+    jobs.forEach((job) => {
+      job.jobTypes = JSON.parse(job.jobTypes);
+      job.skills = JSON.parse(job.skills);
+      job.languages = JSON.parse(job.languages);
+      job.education = JSON.parse(job.education);
+    });
+
     sendSuccessResponse(res, {
       employer,
       reviews,
       reviewStats,
+      jobs,
     });
   } catch (error) {
     console.error("Error retrieving reviews:", error);

@@ -105,7 +105,7 @@ exports.getAllJobs = async (req, res) => {
     city,
     education,
   } = req.body;
-  const offset = (page - 1) * limit;
+  const offset = (Number(page) - 1) * Number(limit);
 
   // Construct the where clause for filtering
   const whereClause = {
@@ -283,7 +283,7 @@ exports.getAllJobs = async (req, res) => {
     const { count, rows: jobs } = await Job.findAndCountAll({
       where: whereClause,
       limit: parseInt(limit),
-      offset: offset,
+      offset: parseInt(offset),
     });
 
     // Parse JSON fields for each job

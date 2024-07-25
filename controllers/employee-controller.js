@@ -266,6 +266,7 @@ exports.applyJob = [
       const existingAppliedJob = await AppliedJob.findOne({
         where: { employeeId, jobId },
       });
+      
       if (existingAppliedJob) {
         return sendErrorResponse(res, "Job already applied for", 400);
       }
@@ -415,11 +416,10 @@ exports.getAllSavedJobs = [
 
 // get average salary
 exports.getFilteredJobsWithSalary = [
-  ensureEmployee,
   async (req, res) => {
     const { page = 1, limit = 10 } = req.query; // Default page is 1, limit is 10 per page
     const { jobTitle, location } = req.body;
-    const offset = (page - 1) * limit;
+    const offset = (Number(page) - 1) * Number(limit);
 
     // Construct the where clause for filtering
     const whereClause = {
@@ -451,7 +451,7 @@ exports.getFilteredJobsWithSalary = [
       const { count, rows: jobs } = await Job.findAndCountAll({
         where: whereClause,
         limit: parseInt(limit),
-        offset: offset,
+        offset: parseInt(offset),
         include: [
           {
             model: Employer,

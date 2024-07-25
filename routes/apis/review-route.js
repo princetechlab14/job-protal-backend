@@ -82,29 +82,15 @@ router.delete("/:id", authenticateToken, deleteReview);
  *     summary: Get all employers
  *     description: Retrieves a list of all employers.
  *     tags: [Reviews]
+ *     parameters:
+ *       - in: query
+ *         name: companyName
+ *         schema:
+ *           type: string
+ *         description: Compony Name of the employee to search for
  *     responses:
  *       200:
  *         description: Employers retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 employers:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: integer
- *                       companyName:
- *                         type: string
- *                       numberOfEmployees:
- *                         type: integer
- *                       phoneNumber:
- *                         type: string
- *                       profile:
- *                         type: string
  *       500:
  *         description: Internal server error
  */
