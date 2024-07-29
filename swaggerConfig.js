@@ -11,6 +11,7 @@ const options = {
         "API documentation for your employer, jobs, and employee routes",
     },
     components: {
+      
       securitySchemes: {
         bearerAuth: {
           type: "apiKey",
