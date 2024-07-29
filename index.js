@@ -6,10 +6,18 @@ const path = require("path");
 const swaggerConfig = require("./swaggerConfig"); // Adjust path as needed
 const db = require("./models");
 const { Op } = require("sequelize");
+const session = require("express-session");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 const port = process.env.PORT || 3000; // Use port from environment variables or default to 3000
 
+// Use cookie-parser middleware
+app.use(cookieParser());
+
+// Other middlewares and routes
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 // Middleware setup
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
@@ -18,8 +26,14 @@ app.use(cors());
 // Importing routes
 const { apiRoutes } = require("./routes/apis");
 const adminRoutes = require("./routes/admin");
-const { default: axios } = require("axios");
-
+app.use(
+  session({
+    secret: "TechLab", // Replace with a strong secret key
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }, // Set secure to true if using HTTPS
+  })
+);
 // Set up EJS view engine
 app.set("view engine", "ejs"); // Set EJS as the view engine
 app.set("views", path.join(__dirname, "views"));

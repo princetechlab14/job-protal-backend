@@ -2,7 +2,7 @@
 
 const { Admin } = require("../models");
 const { hashPassword, comparePassword } = require("../utils/passwordUtils");
-
+const jwt = require("jsonwebtoken");
 exports.register = async (req, res) => {
   const { name, email, password } = req.body;
   try {
@@ -14,7 +14,7 @@ exports.register = async (req, res) => {
       status: true,
       position: "500",
     });
-    res.redirect("/login");
+    res.redirect("/admin");
   } catch (error) {
     console.error("Registration error:", error);
     res.status(500).send("Internal Server Error");
@@ -26,36 +26,29 @@ exports.login = async (req, res) => {
   try {
     const admin = await Admin.findOne({ where: { email } });
     if (admin && (await comparePassword(password, admin.password))) {
+      const token = jwt.sign({ id: admin.id }, "techlabJobPortal", {
+        expiresIn: "1h", // Token expiration time
+      });
+      res.cookie("token", token, { httpOnly: true }); // For setting the token as a cookie
+
       req.session.adminId = admin.id; // Use session or JWT
-      res.redirect("/profile");
+      res.redirect("/admin/dashboard");
     } else {
-      res.status(401).send("Invalid credentials");
+      res.render("login", {
+        title: "Login Page",
+        error: "Invalid Credentials",
+      });
     }
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).send("Internal Server Error");
-  }
-};
-
-exports.updateProfile = async (req, res) => {
-  const { name, email, profile } = req.body;
-  const adminId = req.session.adminId; // Use session or JWT
-  try {
-    await Admin.update({ name, email, profile }, { where: { id: adminId } });
-    res.redirect("/profile");
-  } catch (error) {
-    console.error("Update profile error:", error);
-    res.status(500).send("Internal Server Error");
+    res.render("login", {
+      title: "Login Page",
+      error: "Internal server error",
+    });
   }
 };
 
 exports.logout = (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error("Logout error:", err);
-      res.status(500).send("Internal Server Error");
-    } else {
-      res.redirect("/login");
-    }
-  });
+  res.clearCookie("token");
+  res.redirect("/admin");
 };
