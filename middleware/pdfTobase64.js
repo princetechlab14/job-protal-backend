@@ -40,8 +40,6 @@ const convertPdfToBase64 = async (req, res, next) => {
 
 // Middleware to upload image to S3
 const uploadImageToS3 = async (req, res, next) => {
-  // Upload image to S3
-
   try {
     if (req.file) {
       const params = {

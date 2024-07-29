@@ -172,9 +172,9 @@ exports.getReviewsByEmployerId = async (req, res) => {
     // Aggregate statistics
     const reviewStats = reviews.reduce(
       (stats, review) => {
-        let roundedRating = Math.floor(review.rating); // Round down to the nearest whole number
+        let roundedRating = Math.floor(review.rating);
         if (review.rating >= roundedRating + 0.5) {
-          roundedRating += 1; // Round up if the rating is 0.5 or more above the whole number
+          roundedRating += 1;
         }
 
         stats.totalReviewCount += 1;
@@ -249,7 +249,6 @@ exports.getAllReviewsByEmployeeId = async (req, res) => {
   const { employeeId } = req.user;
 
   try {
-    // Validate input
     if (!employeeId) {
       return sendErrorResponse(
         res,

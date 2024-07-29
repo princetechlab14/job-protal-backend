@@ -3,8 +3,10 @@
 const { Admin } = require("../models");
 const { hashPassword, comparePassword } = require("../utils/passwordUtils");
 const jwt = require("jsonwebtoken");
+
 exports.register = async (req, res) => {
   const { name, email, password } = req.body;
+
   try {
     const generate = await hashPassword(password, 10);
     await Admin.create({
@@ -27,7 +29,7 @@ exports.login = async (req, res) => {
     const admin = await Admin.findOne({ where: { email } });
     if (admin && (await comparePassword(password, admin.password))) {
       const token = jwt.sign({ id: admin.id }, "techlabJobPortal", {
-        expiresIn: "1h", // Token expiration time
+        expiresIn: "24h", // Token expiration time
       });
       res.cookie("token", token, { httpOnly: true }); // For setting the token as a cookie
 

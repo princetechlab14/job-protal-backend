@@ -8,7 +8,6 @@ const {
   getAllReviewsByEmployeeId,
 } = require("../../controllers/review-controller");
 const { ensureEmployee } = require("../../middleware/ensureEmployee");
-// const { ensureEmployer } = require("../../middleware/ensureEmployer");
 const router = express.Router();
 
 /**

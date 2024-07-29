@@ -4,6 +4,7 @@ const { Employee, AppliedJob, Employer, Job, Admin } = require("../../models"); 
 const authController = require("../../controllers/auth-controller");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 const authenticateJWT = (req, res, next) => {
   const token = req.cookies.token;
   if (!token) {
@@ -12,13 +13,13 @@ const authenticateJWT = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, "techlabJobPortal");
-    console.log(decoded, "dsadasdsadsa");
     req.user = decoded;
   } catch (err) {
     return res.status(401).send("Invalid Token", err);
   }
   return next();
 };
+
 router.get("/", (req, res) => {
   res.render("login", { title: "Login Page", error: "" });
 });
@@ -131,7 +132,7 @@ router.post("/register", authController.register);
 router.post("/login", authController.login);
 
 // Logout Route
-router.get("/logout", authenticateJWT, authController.logout);
+router.get("/logout", authController.logout);
 
 // Serve EJS views
 router.get("/register", (req, res) =>

@@ -101,7 +101,6 @@ exports.deleteEducation = [
       const { id } = req.params;
       const { employeeId } = req.user;
       const education = await Education.findOne({ where: { id, employeeId } });
-
       if (education) {
         await education.destroy();
         return sendSuccessResponse(res, { message: "Education deleted" }, 200);

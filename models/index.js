@@ -10,9 +10,9 @@ const sequelize = new Sequelize(
     pool: {
       max: 5,
       min: 0,
-      acquire: 60000, // Increase the acquire timeout to 60 seconds
-      idle: 20000, // Increase the idle timeout to 20 seconds
-      evict: 10000, // Add evict timeout, checking for idle connections every 10 seconds
+      acquire: 60000,
+      idle: 20000,
+      evict: 10000,
     },
     define: {
       charset: "utf8mb4",
@@ -64,13 +64,13 @@ db.Job.belongsTo(db.Employer, { as: "employer", foreignKey: "employerId" });
 db.Employee.hasMany(db.SavedJob, { foreignKey: "employeeId" });
 db.SavedJob.belongsTo(db.Employee, { foreignKey: "employeeId" });
 db.SavedJob.belongsTo(db.Job, { foreignKey: "jobId", as: "job" });
-
+db.Job.hasMany(db.Review, {
+  foreignKey: "jobId", // Adjust if your key is different
+  as: "ratings", // Alias for accessing ratings
+});
 // Employee and AppliedJob relationships
 db.Employee.hasMany(db.AppliedJob, { foreignKey: "employeeId" });
-db.AppliedJob.belongsTo(db.Employee, {
-  foreignKey: "employeeId",
-  as: "employee",
-});
+
 db.AppliedJob.belongsTo(db.Job, { foreignKey: "jobId", as: "job" });
 db.Job.hasMany(db.AppliedJob, { foreignKey: "jobId" });
 
@@ -90,6 +90,7 @@ db.Employee.hasOne(db.JobPreferences, {
   foreignKey: "employeeId",
   as: "jobPreferences",
 });
+
 db.Employer.hasMany(db.Review, { foreignKey: "employerId", as: "reviews" });
 db.Review.belongsTo(db.Employer, { foreignKey: "employerId", as: "employer" });
 db.Review.belongsTo(db.Employee, { foreignKey: "employeeId", as: "employee" });

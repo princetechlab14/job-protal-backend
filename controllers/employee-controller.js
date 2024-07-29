@@ -13,6 +13,7 @@ const {
   Language,
   JobPreferences,
   Resume,
+  Review,
 } = require("../models");
 const {
   hashPassword,
@@ -222,7 +223,10 @@ exports.saveJob = [
     try {
       const { employeeId } = req.user;
       const { jobId } = req.body;
-
+      const employee = await Employee.findByPk(employeeId);
+      if (!employee) {
+        return sendErrorResponse(res, "Employee not found", 404);
+      }
       const job = await Job.findByPk(jobId);
       if (!job) {
         return sendErrorResponse(res, "Job not found", 404);
@@ -243,7 +247,7 @@ exports.saveJob = [
       sendSuccessResponse(res, { savedJob }, 201);
     } catch (error) {
       console.error("Error saving job:", error);
-      sendErrorResponse(res, "Error saving job", 500);
+      sendErrorResponse(res, "Error saving job" + error, 500);
     }
   },
 ];
@@ -256,7 +260,10 @@ exports.applyJob = [
       const { employeeId } = req.user;
       const { jobId, jobTitle, companyName, availableDates, experience } =
         req.body;
-
+      const employee = await Employee.findByPk(employeeId);
+      if (!employee) {
+        return sendErrorResponse(res, "Employee not found", 404);
+      }
       const job = await Job.findByPk(jobId);
       if (!job) {
         return sendErrorResponse(res, "Job not found", 404);
@@ -362,6 +369,18 @@ exports.getAllAppliedJobs = [
               model: Employer,
               as: "employer",
               attributes: ["companyName"],
+              include: [
+                {
+                  model: Review,
+                  as: "reviews",
+                  attributes: [
+                    [
+                      Sequelize.fn("AVG", Sequelize.col("rating")),
+                      "averageReviewRating",
+                    ],
+                  ],
+                },
+              ],
             },
           },
         ],
@@ -394,7 +413,29 @@ exports.getAllSavedJobs = [
 
       const savedJobs = await SavedJob.findAll({
         where: { employeeId },
-        include: [{ model: Job, as: "job" }],
+        include: [
+          {
+            model: Job,
+            as: "job",
+            include: {
+              model: Employer,
+              as: "employer",
+              attributes: ["companyName"],
+              include: [
+                {
+                  model: Review,
+                  as: "reviews",
+                  attributes: [
+                    [
+                      Sequelize.fn("AVG", Sequelize.col("rating")),
+                      "averageReviewRating",
+                    ],
+                  ],
+                },
+              ],
+            },
+          },
+        ],
       });
       if (process.env.DEV_TYPE === "local") {
         savedJobs.forEach((savedJob) => {

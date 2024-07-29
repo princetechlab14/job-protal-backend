@@ -1,4 +1,4 @@
-const { Job, Employer } = require("../models");
+const { Job, Employer, Review } = require("../models");
 const { jobSchema } = require("../validators/jobValidator");
 const {
   sendSuccessResponse,
@@ -123,11 +123,6 @@ exports.getAllJobs = async (req, res) => {
 
   // Filters
   if (jobTitle) {
-    whereClause.jobTitle = { [Op.like]: `%${jobTitle}%` };
-  }
-
-  // Filter by jobTitle with partial matching
-  if (jobTitle) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
       Sequelize.where(
@@ -138,7 +133,6 @@ exports.getAllJobs = async (req, res) => {
     ];
   }
 
-  // Filter by location (city or state)
   if (location) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
@@ -155,32 +149,13 @@ exports.getAllJobs = async (req, res) => {
     ];
   }
 
-  // Filter by date posted
   if (datePosted) {
-    const currentDate = new Date();
-    let pastDate;
-    switch (datePosted.toLowerCase()) {
-      case "last 14 hours":
-        pastDate = new Date(currentDate.getTime() - 14 * 60 * 60 * 1000);
-        break;
-      case "last 3 days":
-        pastDate = new Date(currentDate.getTime() - 3 * 24 * 60 * 60 * 1000);
-        break;
-      case "last 7 days":
-        pastDate = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-        break;
-      case "last 14 days":
-        pastDate = new Date(currentDate.getTime() - 14 * 24 * 60 * 60 * 1000);
-        break;
-      default:
-        pastDate = null;
-    }
+    const pastDate = getPastDate(datePosted);
     if (pastDate) {
       whereClause.createdAt = { [Op.gte]: pastDate };
     }
   }
 
-  // Filter by jobLocation with partial matching
   if (jobLocation) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
@@ -192,7 +167,6 @@ exports.getAllJobs = async (req, res) => {
     ];
   }
 
-  // Filter by minimum pay
   if (minPay) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
@@ -200,7 +174,6 @@ exports.getAllJobs = async (req, res) => {
     ];
   }
 
-  // Filter by maximum pay
   if (maxPay) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
@@ -208,7 +181,6 @@ exports.getAllJobs = async (req, res) => {
     ];
   }
 
-  // Filter by jobType using JSON_CONTAINS for array field
   if (jobType) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
@@ -223,7 +195,6 @@ exports.getAllJobs = async (req, res) => {
     ];
   }
 
-  // Filter by skills using JSON_CONTAINS for array field
   if (skills) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
@@ -237,7 +208,7 @@ exports.getAllJobs = async (req, res) => {
       ),
     ];
   }
-  // Filter by education using JSON_CONTAINS for array field
+
   if (education) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
@@ -252,7 +223,6 @@ exports.getAllJobs = async (req, res) => {
     ];
   }
 
-  // Filter by language using JSON_CONTAINS for array field
   if (language) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
@@ -267,7 +237,6 @@ exports.getAllJobs = async (req, res) => {
     ];
   }
 
-  // Filter by city with partial matching
   if (city) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
@@ -284,6 +253,29 @@ exports.getAllJobs = async (req, res) => {
       where: whereClause,
       limit: parseInt(limit),
       offset: parseInt(offset),
+      include: [
+        {
+          include: [
+            {
+              model: Review,
+              as: "reviews",
+              attributes: [
+                [
+                  Sequelize.fn("AVG", Sequelize.col("rating")),
+                  "averageReviewRating",
+                ],
+              ],
+            },
+          ],
+          model: Employer, // Assuming `Company` is the model name
+          attributes: [
+            "id",
+            "companyName",
+            // Average rating of reviews
+          ],
+          as: "employer",
+        },
+      ],
     });
 
     if (process.env.DEV_TYPE === "local") {
@@ -304,6 +296,22 @@ exports.getAllJobs = async (req, res) => {
   } catch (error) {
     console.error("Error retrieving jobs:", error);
     sendErrorResponse(res, "Error retrieving jobs", 500);
+  }
+};
+
+const getPastDate = (datePosted) => {
+  const currentDate = new Date();
+  switch (datePosted.toLowerCase()) {
+    case "last 14 hours":
+      return new Date(currentDate.getTime() - 14 * 60 * 60 * 1000);
+    case "last 3 days":
+      return new Date(currentDate.getTime() - 3 * 24 * 60 * 60 * 1000);
+    case "last 7 days":
+      return new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case "last 14 days":
+      return new Date(currentDate.getTime() - 14 * 24 * 60 * 60 * 1000);
+    default:
+      return null;
   }
 };
 

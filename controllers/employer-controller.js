@@ -17,10 +17,7 @@ const {
   comparePassword,
   generateJWTToken,
 } = require("../utils/passwordUtils");
-const {
-  registerSchema,
-  updateProfileSchema,
-} = require("../validators/employerValidator");
+const { registerSchema } = require("../validators/employerValidator");
 const {
   sendSuccessResponse,
   sendErrorResponse,

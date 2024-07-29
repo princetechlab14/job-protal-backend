@@ -19,7 +19,6 @@ exports.addOrUpdateLanguage = [
         if (!existingLanguage) {
           return sendErrorResponse(res, { message: "Language not found" }, 404);
         }
-
         existingLanguage.language = req.body.language
           ? language
           : existingLanguage?.language;
