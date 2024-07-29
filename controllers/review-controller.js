@@ -21,7 +21,7 @@ exports.addReview = async (req, res) => {
     const existingReview = await Review.findOne({
       where: { employerId, employeeId },
     });
-    
+
     if (existingReview) {
       return sendErrorResponse(res, { message: "Review already exists" }, 400);
     }
@@ -221,14 +221,15 @@ exports.getReviewsByEmployerId = async (req, res) => {
             ).toFixed(1)
           )
         : 0;
-
-    // Parse JSON fields for each job
-    jobs.forEach((job) => {
-      job.jobTypes = JSON.parse(job.jobTypes);
-      job.skills = JSON.parse(job.skills);
-      job.languages = JSON.parse(job.languages);
-      job.education = JSON.parse(job.education);
-    });
+    if (process.env.DEV_TYPE === "local") {
+      // Parse JSON fields for each job
+      jobs.forEach((job) => {
+        job.jobTypes = JSON.parse(job.jobTypes);
+        job.skills = JSON.parse(job.skills);
+        job.languages = JSON.parse(job.languages);
+        job.education = JSON.parse(job.education);
+      });
+    }
 
     sendSuccessResponse(res, {
       employer,

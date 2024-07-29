@@ -284,14 +284,15 @@ exports.getJobsByEmployeeId = [
         where: filterConditions,
         order: orderBy,
       });
-
-      // Parse jobTypes field for each job (assuming jobTypes is stored as JSON)
-      jobs.forEach((job) => {
-        job.jobTypes = JSON.parse(job.jobTypes);
-        job.skills = JSON.parse(job.skills);
-        job.languages = JSON.parse(job.languages);
-        job.education = JSON.parse(job.education);
-      });
+      if (process.env.DEV_TYPE === "local") {
+        // Parse jobTypes field for each job (assuming jobTypes is stored as JSON)
+        jobs.forEach((job) => {
+          job.jobTypes = JSON.parse(job.jobTypes);
+          job.skills = JSON.parse(job.skills);
+          job.languages = JSON.parse(job.languages);
+          job.education = JSON.parse(job.education);
+        });
+      }
 
       sendSuccessResponse(res, jobs);
     } catch (error) {
@@ -331,15 +332,15 @@ exports.getClosedJobsByEmployeeId = [
           ],
         },
       });
-
-      // Parse jobTypes field for each job
-      jobs.forEach((job) => {
-        job.jobTypes = JSON.parse(job.jobTypes);
-        job.skills = JSON.parse(job.skills);
-        job.languages = JSON.parse(job.languages);
-        job.education = JSON.parse(job.education);
-      });
-
+      if (process.env.DEV_TYPE === "local") {
+        // Parse jobTypes field for each job
+        jobs.forEach((job) => {
+          job.jobTypes = JSON.parse(job.jobTypes);
+          job.skills = JSON.parse(job.skills);
+          job.languages = JSON.parse(job.languages);
+          job.education = JSON.parse(job.education);
+        });
+      }
       sendSuccessResponse(res, jobs);
     } catch (error) {
       console.error("Error retrieving closed jobs by employer ID:", error);
@@ -504,24 +505,25 @@ exports.searchEmployees = [
           },
         ],
       });
-
-      // Parse JSON fields for jobPreferences for each employee
-      employees.forEach((employee) => {
-        if (employee.jobPreferences) {
-          employee.jobPreferences.jobTitles = JSON.parse(
-            employee.jobPreferences.jobTitles
-          );
-          employee.jobPreferences.jobTypes = JSON.parse(
-            employee.jobPreferences.jobTypes
-          );
-          employee.jobPreferences.workDays = JSON.parse(
-            employee.jobPreferences.workDays
-          );
-          employee.jobPreferences.shifts = JSON.parse(
-            employee.jobPreferences.shifts
-          );
-        }
-      });
+      if (process.env.DEV_TYPE === "local") {
+        // Parse JSON fields for jobPreferences for each employee
+        employees.forEach((employee) => {
+          if (employee.jobPreferences) {
+            employee.jobPreferences.jobTitles = JSON.parse(
+              employee.jobPreferences.jobTitles
+            );
+            employee.jobPreferences.jobTypes = JSON.parse(
+              employee.jobPreferences.jobTypes
+            );
+            employee.jobPreferences.workDays = JSON.parse(
+              employee.jobPreferences.workDays
+            );
+            employee.jobPreferences.shifts = JSON.parse(
+              employee.jobPreferences.shifts
+            );
+          }
+        });
+      }
 
       sendSuccessResponse(res, employees);
     } catch (error) {
@@ -595,10 +597,12 @@ exports.getApplicationDetailsById = [
         );
       }
       // Parse jobTypes field for each job
-      appliedJob.job.jobTypes = JSON.parse(appliedJob.job.jobTypes);
-      appliedJob.job.skills = JSON.parse(appliedJob.job.skills);
-      appliedJob.job.languages = JSON.parse(appliedJob.job.languages);
-      appliedJob.job.education = JSON.parse(appliedJob.job.education);
+      if (process.env.DEV_TYPE === "local") {
+        appliedJob.job.jobTypes = JSON.parse(appliedJob.job.jobTypes);
+        appliedJob.job.skills = JSON.parse(appliedJob.job.skills);
+        appliedJob.job.languages = JSON.parse(appliedJob.job.languages);
+        appliedJob.job.education = JSON.parse(appliedJob.job.education);
+      }
       sendSuccessResponse(res, appliedJob);
     } catch (error) {
       console.error("Error retrieving application details:", error);

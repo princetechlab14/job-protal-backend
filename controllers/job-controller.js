@@ -216,7 +216,7 @@ exports.getAllJobs = async (req, res) => {
         Sequelize.fn(
           "JSON_CONTAINS",
           Sequelize.col("jobTypes"),
-          JSON.stringify([jobType])
+          process.env.DEV_TYPE === "local" && JSON.stringify([jobType])
         ),
         true
       ),
@@ -231,7 +231,7 @@ exports.getAllJobs = async (req, res) => {
         Sequelize.fn(
           "JSON_CONTAINS",
           Sequelize.col("skills"),
-          JSON.stringify([skills])
+          process.env.DEV_TYPE === "local" && JSON.stringify([skills])
         ),
         true
       ),
@@ -245,7 +245,7 @@ exports.getAllJobs = async (req, res) => {
         Sequelize.fn(
           "JSON_CONTAINS",
           Sequelize.col("education"),
-          JSON.stringify([education])
+          process.env.DEV_TYPE === "local" && JSON.stringify([education])
         ),
         true
       ),
@@ -260,7 +260,7 @@ exports.getAllJobs = async (req, res) => {
         Sequelize.fn(
           "JSON_CONTAINS",
           Sequelize.col("languages"),
-          JSON.stringify([language])
+          process.env.DEV_TYPE === "local" && JSON.stringify([language])
         ),
         true
       ),
@@ -286,13 +286,15 @@ exports.getAllJobs = async (req, res) => {
       offset: parseInt(offset),
     });
 
-    // Parse JSON fields for each job
-    jobs.forEach((job) => {
-      job.jobTypes = JSON.parse(job.jobTypes);
-      job.skills = JSON.parse(job.skills);
-      job.languages = JSON.parse(job.languages);
-      job.education = JSON.parse(job.education);
-    });
+    if (process.env.DEV_TYPE === "local") {
+      // Parse JSON fields for each job
+      jobs.forEach((job) => {
+        job.jobTypes = JSON.parse(job.jobTypes);
+        job.skills = JSON.parse(job.skills);
+        job.languages = JSON.parse(job.languages);
+        job.education = JSON.parse(job.education);
+      });
+    }
 
     // Construct pagination metadata
     const totalPages = Math.ceil(count / limit);
@@ -313,12 +315,13 @@ exports.getJobById = async (req, res) => {
     if (!job) {
       return sendErrorResponse(res, { message: "Job not found" }, 404);
     }
-
-    // Parse jobTypes field
-    job.jobTypes = JSON.parse(job.jobTypes);
-    job.languages = JSON.parse(job.languages);
-    job.skills = JSON.parse(job.skills);
-    job.education = JSON.parse(job.education);
+    if (process.env.DEV_TYPE === "local") {
+      // Parse jobTypes field
+      job.jobTypes = JSON.parse(job.jobTypes);
+      job.languages = JSON.parse(job.languages);
+      job.skills = JSON.parse(job.skills);
+      job.education = JSON.parse(job.education);
+    }
 
     sendSuccessResponse(res, { job });
   } catch (error) {

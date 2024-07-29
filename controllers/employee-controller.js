@@ -190,19 +190,21 @@ exports.getProfile = [
       }
 
       // Parse jobPreferences data
-      if (employee.jobPreferences) {
-        employee.jobPreferences.jobTitles = JSON.parse(
-          employee.jobPreferences.jobTitles
-        );
-        employee.jobPreferences.jobTypes = JSON.parse(
-          employee.jobPreferences.jobTypes
-        );
-        employee.jobPreferences.workDays = JSON.parse(
-          employee.jobPreferences.workDays
-        );
-        employee.jobPreferences.shifts = JSON.parse(
-          employee.jobPreferences.shifts
-        );
+      if (process.env.DEV_TYPE === "local") {
+        if (employee.jobPreferences) {
+          employee.jobPreferences.jobTitles = JSON.parse(
+            employee.jobPreferences.jobTitles
+          );
+          employee.jobPreferences.jobTypes = JSON.parse(
+            employee.jobPreferences.jobTypes
+          );
+          employee.jobPreferences.workDays = JSON.parse(
+            employee.jobPreferences.workDays
+          );
+          employee.jobPreferences.shifts = JSON.parse(
+            employee.jobPreferences.shifts
+          );
+        }
       }
 
       sendSuccessResponse(res, { employee }, 200);
@@ -364,15 +366,16 @@ exports.getAllAppliedJobs = [
           },
         ],
       });
-
-      appliedJobs.forEach((appliedJob) => {
-        const { job } = appliedJob;
-        if (job && job.jobTypes) {
-          job.jobTypes = JSON.parse(job.jobTypes);
-          job.skills = JSON.parse(job.skills);
-          job.languages = JSON.parse(job.languages);
-        }
-      });
+      if (process.env.DEV_TYPE === "local") {
+        appliedJobs.forEach((appliedJob) => {
+          const { job } = appliedJob;
+          if (job && job.jobTypes) {
+            job.jobTypes = JSON.parse(job.jobTypes);
+            job.skills = JSON.parse(job.skills);
+            job.languages = JSON.parse(job.languages);
+          }
+        });
+      }
 
       sendSuccessResponse(res, { appliedJobs }, 200);
     } catch (error) {
@@ -393,15 +396,16 @@ exports.getAllSavedJobs = [
         where: { employeeId },
         include: [{ model: Job, as: "job" }],
       });
-
-      savedJobs.forEach((savedJob) => {
-        const { job } = savedJob;
-        if (job && job.jobTypes) {
-          job.jobTypes = JSON.parse(job.jobTypes);
-          job.skills = JSON.parse(job.skills);
-          job.languages = JSON.parse(job.languages);
-        }
-      });
+      if (process.env.DEV_TYPE === "local") {
+        savedJobs.forEach((savedJob) => {
+          const { job } = savedJob;
+          if (job && job.jobTypes) {
+            job.jobTypes = JSON.parse(job.jobTypes);
+            job.skills = JSON.parse(job.skills);
+            job.languages = JSON.parse(job.languages);
+          }
+        });
+      }
 
       sendSuccessResponse(res, { savedJobs }, 200);
     } catch (error) {
@@ -457,14 +461,15 @@ exports.getFilteredJobsWithSalary = [
           },
         ],
       });
-
-      // Parse JSON fields for each job
-      jobs.forEach((job) => {
-        job.jobTypes = JSON.parse(job.jobTypes);
-        job.skills = JSON.parse(job.skills);
-        job.languages = JSON.parse(job.languages);
-        job.education = JSON.parse(job.education);
-      });
+      if (process.env.DEV_TYPE === "local") {
+        // Parse JSON fields for each job
+        jobs.forEach((job) => {
+          job.jobTypes = JSON.parse(job.jobTypes);
+          job.skills = JSON.parse(job.skills);
+          job.languages = JSON.parse(job.languages);
+          job.education = JSON.parse(job.education);
+        });
+      }
 
       // Extract salaries from jobs
       const salaries = jobs
@@ -573,8 +578,9 @@ exports.getAllSkills = async (req, res) => {
     // Extract and combine all skills
     const allSkills = jobs.reduce((acc, job) => {
       if (job.skills) {
-        // const jobSkills = JSON.parse(job.skills);
-        return acc.concat(job.skills);
+        return acc.concat(
+          process.env.DEV_TYPE === "local" ? JSON.parse(job.skills) : job.skills
+        );
       }
       return acc;
     }, []);
