@@ -26,7 +26,7 @@ const options = {
         description: "Local development server",
       },
       {
-        url: "https://jobs.techpediapro.com/api", // Replace with your server URL
+        url: "https://web02.htmlwebgames.com/api", // Replace with your server URL
         description: "Live development server",
       },
     ],

@@ -569,12 +569,12 @@ exports.getAllSkills = async (req, res) => {
     const jobs = await Job.findAll({
       attributes: ["skills"],
     });
-
+    console.log(jobs);
     // Extract and combine all skills
     const allSkills = jobs.reduce((acc, job) => {
       if (job.skills) {
-        const jobSkills = JSON.parse(job.skills);
-        return acc.concat(jobSkills);
+        // const jobSkills = JSON.parse(job.skills);
+        return acc.concat(job.skills);
       }
       return acc;
     }, []);
