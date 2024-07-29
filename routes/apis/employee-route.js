@@ -26,6 +26,7 @@ const {
 const {
   deleteJobPreferences,
   addOrUpdateJobPreferences,
+  UpdateReadyToWork,
 } = require("../../controllers/jobPreferences-controller");
 
 /**
@@ -725,7 +726,6 @@ router.delete("/language/:id", authenticateToken, deleteLanguage);
  *     security:
  *       - bearerAuth: []
  *     requestBody:
- *       required: true
  *       content:
  *         application/json:
  *           schema:
@@ -759,10 +759,12 @@ router.delete("/language/:id", authenticateToken, deleteLanguage);
  *                   type: string
  *                 example: ["Day", "Night"]
  *                 description: List of preferred shifts.
- *               readyToWork:
- *                 type: boolean
- *                 example: true
- *                 description: Whether the employee is ready to work.
+ *               basePay:
+ *                 type: number
+ *                 example: 458978
+ *               payType:
+ *                 type: string
+ *                 example: "Per Month"
  *               employeeId:
  *                 type: integer
  *                 example: 123
@@ -781,20 +783,45 @@ router.post("/jobPreferences", authenticateToken, addOrUpdateJobPreferences);
 
 /**
  * @openapi
- * /employee/jobPreferences/{id}:
+ * /employee/readyToWork:
+ *   post:
+ *     summary: Add or update readyToWork
+ *     description: Add a new readyToWork or update an existing one.
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               readyToWork:
+ *                 type: boolean
+ *                 example: true
+ *                 description: Whether the employee is ready to work.
+ *     responses:
+ *       200:
+ *         description: readyToWork successfully updated
+ *       201:
+ *         description: readyToWork successfully created
+ *       404:
+ *         description: Experience not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/readyToWork", authenticateToken, UpdateReadyToWork);
+
+/**
+ * @openapi
+ * /employee/jobPreferences/delete:
  *   delete:
  *     summary: Delete jobPreferences
  *     description: Delete an existing jobPreferences by ID.
  *     tags: [Employees]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: integer
- *           example: 1
  *     responses:
  *       200:
  *         description: jobPreferences successfully deleted
@@ -803,8 +830,11 @@ router.post("/jobPreferences", authenticateToken, addOrUpdateJobPreferences);
  *       500:
  *         description: Internal server error
  */
-
-router.delete("/jobPreferences/:id", authenticateToken, deleteJobPreferences);
+router.delete(
+  "/jobPreferences/delete",
+  authenticateToken,
+  deleteJobPreferences
+);
 
 /**
  * @swagger

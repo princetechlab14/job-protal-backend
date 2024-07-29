@@ -10,6 +10,6 @@ exports.sendSuccessResponse = (res, data, statusCode = 200) => {
 exports.sendErrorResponse = (res, message, statusCode = 500) => {
   res.status(statusCode).json({
     success: false,
-    error: message,
+    message,
   });
 };

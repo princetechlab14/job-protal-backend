@@ -36,7 +36,7 @@ exports.addOrUpdateEducation = [
               : startDate && !endDate
               ? true
               : education.isPresent;
-          education.employeeId = req.user.employeeId; // Assuming employeeId is in req.user
+          education.employeeId = req.user.employeeId;
 
           await education.save();
           return sendSuccessResponse(res, {
@@ -63,7 +63,7 @@ exports.addOrUpdateEducation = [
         const newEducation = await Education.create({
           university,
           fieldOfStudy,
-          employeeId: req.user.employeeId, // Assuming employeeId is in req.user
+          employeeId: req.user.employeeId,
           startDate,
           endDate: isPresent === true ? null : endDate,
           isPresent:

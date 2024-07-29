@@ -12,7 +12,7 @@ exports.authenticateToken = (req, res, next) => {
       401
     );
   }
-  console.log(req, "Dsadsas");
+  console.log(token, "ter", req.originalUrl);
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
       if (err.name === "TokenExpiredError") {

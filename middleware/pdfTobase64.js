@@ -43,7 +43,7 @@ const uploadImageToS3 = async (req, res, next) => {
   // Upload image to S3
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME, // Your bucket name
-    Key: `images/${req.file.originalname}`, // File name you want to save as in S3
+    Key: `images/${req.file?.originalname}`, // File name you want to save as in S3
     Body: req.file.buffer,
     ContentType: req.file.mimetype,
   };

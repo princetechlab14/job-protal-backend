@@ -26,6 +26,8 @@ const {
   sendErrorResponse,
 } = require("../utils/responseUtils");
 const { ensureEmployer } = require("../middleware/ensureEmployer");
+const s3 = require("../utils/aws-config");
+const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
 
 // Register new employer
 exports.registerOrLoginEmployer = async (req, res) => {

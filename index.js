@@ -18,6 +18,7 @@ app.use(cors());
 // Importing routes
 const { apiRoutes } = require("./routes/apis");
 const adminRoutes = require("./routes/admin");
+const { default: axios } = require("axios");
 
 // Set up EJS view engine
 app.set("view engine", "ejs"); // Set EJS as the view engine

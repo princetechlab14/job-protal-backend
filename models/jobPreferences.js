@@ -16,10 +16,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.JSON(DataTypes.STRING),
       allowNull: true,
     },
-    readyToWork: {
-      type: DataTypes.BOOLEAN,
+    basePay: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    payType: {
+      type: DataTypes.TEXT,
       allowNull: false,
-      defaultValue: true,
+      defaultValue: "Per Month",
     },
     employeeId: {
       type: DataTypes.INTEGER,

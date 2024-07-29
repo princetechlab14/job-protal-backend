@@ -11,14 +11,20 @@ exports.addReview = async (req, res) => {
   const { employeeId } = req.user;
   try {
     // Validate input
-    if (!employerId || !comment || !rating || !role) {
+    if (!employerId || !comment || !rating) {
       return sendErrorResponse(
         res,
         { message: "Missing required fields" },
         400
       );
     }
-
+    const existingReview = await Review.findOne({
+      where: { employerId, employeeId },
+    });
+    
+    if (existingReview) {
+      return sendErrorResponse(res, { message: "Review already exists" }, 400);
+    }
     // Create the review
     const review = await Review.create({
       employeeId,
@@ -130,6 +136,14 @@ exports.getReviewsByEmployerId = async (req, res) => {
         400
       );
     }
+    // Fetch company details
+    const employer = await Employer.findOne({
+      where: { id: employerId },
+      attributes: ["id", "companyName", "profile"],
+    });
+    if (!employer) {
+      return sendErrorResponse(res, { message: "Invalid employer ID" }, 404);
+    }
     const jobs = await Job.findAll({
       where: { employerId },
     });
@@ -152,12 +166,6 @@ exports.getReviewsByEmployerId = async (req, res) => {
           as: "employee",
         },
       ],
-    });
-
-    // Fetch company details
-    const employer = await Employer.findOne({
-      where: { id: employerId },
-      attributes: ["id", "companyName", "profile"],
     });
 
     // Aggregate statistics

@@ -1,5 +1,5 @@
 const { ensureEmployee } = require("../middleware/ensureEmployee");
-const db = require("../models");
+const { Experience } = require("../models");
 const {
   sendSuccessResponse,
   sendErrorResponse,
@@ -16,7 +16,7 @@ exports.addOrUpdateExperience = [
 
       if (id) {
         // Update existing experience
-        const experience = await db.Experience.findByPk(id);
+        const experience = await Experience.findByPk(id);
         if (experience) {
           // Update only provided fields
           experience.jobTitle =
@@ -53,7 +53,7 @@ exports.addOrUpdateExperience = [
         }
       } else {
         // Add new experience
-        const newExperience = await db.Experience.create({
+        const newExperience = await Experience.create({
           jobTitle,
           companyName,
           startDate,
@@ -93,7 +93,7 @@ exports.deleteExperience = [
     try {
       const { id } = req.params;
       const { employeeId } = req.user;
-      const experience = await db.Experience.findOne({
+      const experience = await Experience.findOne({
         where: { id, employeeId },
       });
 
@@ -104,7 +104,7 @@ exports.deleteExperience = [
         return sendErrorResponse(res, { message: "Experience not found" }, 404);
       }
     } catch (error) {
-      return sendErrorResponse(res, error.message);
+      return sendErrorResponse(res, error.message, 500);
     }
   },
 ];

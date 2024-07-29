@@ -18,6 +18,8 @@ const router = express.Router();
  *     summary: Add a review
  *     description: Adds a review for an employee.
  *     tags: [Reviews]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:

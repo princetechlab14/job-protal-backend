@@ -1,5 +1,5 @@
 const { ensureEmployee } = require("../middleware/ensureEmployee");
-const { JobPreferences } = require("../models");
+const { JobPreferences, Employee } = require("../models");
 const {
   sendSuccessResponse,
   sendErrorResponse,
@@ -10,7 +10,7 @@ exports.addOrUpdateJobPreferences = [
   ensureEmployee,
   async (req, res) => {
     try {
-      const { jobTitles, jobTypes, workDays, shifts, readyToWork, id } =
+      const { jobTitles, jobTypes, workDays, shifts, payType, id, basePay } =
         req.body;
       const { employeeId } = req.user;
 
@@ -32,12 +32,13 @@ exports.addOrUpdateJobPreferences = [
           jobTypes !== undefined ? jobTypes : existingPreferences.jobTypes;
         existingPreferences.workDays =
           workDays !== undefined ? workDays : existingPreferences.workDays;
+        existingPreferences.basePay =
+          basePay !== undefined ? basePay : existingPreferences.basePay;
+        existingPreferences.payType =
+          payType !== undefined ? payType : existingPreferences.payType;
         existingPreferences.shifts =
           shifts !== undefined ? shifts : existingPreferences.shifts;
-        existingPreferences.readyToWork =
-          readyToWork !== undefined
-            ? readyToWork
-            : existingPreferences.readyToWork;
+        existingPreferences.readyToWork = existingPreferences.readyToWork;
         existingPreferences.employeeId = employeeId;
 
         await existingPreferences.save();
@@ -64,7 +65,9 @@ exports.addOrUpdateJobPreferences = [
           jobTypes,
           workDays,
           shifts,
-          readyToWork,
+          basePay,
+          payType,
+          readyToWork: false,
           employeeId,
         });
         return sendSuccessResponse(
@@ -92,18 +95,10 @@ exports.deleteJobPreferences = [
   ensureEmployee,
   async (req, res) => {
     try {
-      const { id } = req.params;
       const { employeeId } = req.user;
-      if (!id) {
-        return sendErrorResponse(
-          res,
-          { message: "Job Preferences ID is required" },
-          400
-        );
-      }
 
       const jobPreferences = await JobPreferences.findOne({
-        where: { id, employeeId },
+        where: { employeeId },
       });
       if (!jobPreferences) {
         return sendErrorResponse(
@@ -119,6 +114,39 @@ exports.deleteJobPreferences = [
       });
     } catch (error) {
       console.error("Error deleting job preferences:", error);
+      return sendErrorResponse(res, { message: error.message }, 500);
+    }
+  },
+];
+
+exports.UpdateReadyToWork = [
+  ensureEmployee,
+  async (req, res) => {
+    try {
+      const { employeeId } = req.user;
+
+      const readyToWork = await Employee.findOne({
+        where: { id: employeeId },
+      });
+      if (!readyToWork) {
+        return sendErrorResponse(res, { message: "Employee Not Found" }, 404);
+      }
+
+      await Employee.update(
+        {
+          readyToWork: req.body.readyToWork,
+        },
+        {
+          where: { id: employeeId },
+        }
+      );
+
+      return sendSuccessResponse(res, {
+        readyToWork: req.body.readyToWork,
+        message: "updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating job preferences:", error);
       return sendErrorResponse(res, { message: error.message }, 500);
     }
   },

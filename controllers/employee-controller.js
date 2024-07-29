@@ -23,10 +23,7 @@ const {
   sendSuccessResponse,
   sendErrorResponse,
 } = require("../utils/responseUtils");
-const {
-  registerSchema,
-  updateProfileSchema,
-} = require("../validators/employeeValidation");
+const { registerSchema } = require("../validators/employeeValidation");
 const { ensureEmployee } = require("../middleware/ensureEmployee");
 const s3 = require("../utils/aws-config");
 const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
@@ -266,7 +263,7 @@ exports.applyJob = [
       const existingAppliedJob = await AppliedJob.findOne({
         where: { employeeId, jobId },
       });
-      
+
       if (existingAppliedJob) {
         return sendErrorResponse(res, "Job already applied for", 400);
       }
@@ -657,7 +654,6 @@ exports.addOrUpdateResume = [
           fileName,
           cv,
           employeeId,
-          s3Url, // Save the S3 URL
         });
         return sendSuccessResponse(
           res,
