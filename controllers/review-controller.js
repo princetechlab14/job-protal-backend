@@ -78,6 +78,13 @@ exports.getAllEmployers = async (req, res) => {
     // Fetch employers along with their reviews
     const employers = await Employer.findAll({
       where: whereClause,
+      include: [
+        {
+          model: Review,
+          attributes: [],
+          as: "reviews",
+        },
+      ],
       attributes: [
         "id",
         "companyName",
@@ -85,21 +92,15 @@ exports.getAllEmployers = async (req, res) => {
         "phoneNumber",
         "profile",
         [
-          Sequelize.fn("COUNT", Sequelize.col("Reviews.id")),
+          Sequelize.fn("COUNT", Sequelize.col("reviews.id")),
           "totalReviewCount",
         ], // Total count of reviews
         [
-          Sequelize.fn("AVG", Sequelize.col("Reviews.rating")),
+          Sequelize.fn("AVG", Sequelize.col("reviews.rating")),
           "averageReviewRating",
         ], // Average rating of reviews
       ],
-      include: [
-        {
-          model: Review,
-          attributes: [], // We don't need to fetch any specific attributes from Review
-          as: "reviews",
-        },
-      ],
+
       group: ["Employer.id"], // Group by employer ID to calculate aggregate functions
     });
 

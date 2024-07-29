@@ -516,10 +516,6 @@ exports.getFilteredJobsWithSalary = [
       const averageDaily = medianSalary / 30; // Approximate number of days in a month
       const averageHourly = medianSalary / (30 * 8); // Approximate working hours in a month (8 hours/day * 30 days)
 
-      // Log intermediate calculations
-      console.log("Salaries:", salaries);
-      console.log("Median Salary:", medianSalary);
-
       // Construct pagination metadata
       const totalPages = Math.ceil(count / limit);
       const currentPage = parseInt(page);
@@ -574,7 +570,6 @@ exports.getAllSkills = async (req, res) => {
     const jobs = await Job.findAll({
       attributes: ["skills"],
     });
-    console.log(jobs);
     // Extract and combine all skills
     const allSkills = jobs.reduce((acc, job) => {
       if (job.skills) {

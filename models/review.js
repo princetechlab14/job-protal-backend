@@ -1,5 +1,10 @@
 module.exports = (sequelize, DataTypes) => {
   const Review = sequelize.define("Review", {
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      primaryKey: true,
+    },
     employeeId: {
       type: DataTypes.INTEGER,
       allowNull: false,
