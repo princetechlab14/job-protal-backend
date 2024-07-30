@@ -281,7 +281,7 @@ exports.getAllJobs = async (req, res) => {
         },
       ],
       group: [
-        "Job.id",
+        // "Job.id",
         "Job.jobTitle",
         "Job.jobLocation",
         "Job.employerId",
