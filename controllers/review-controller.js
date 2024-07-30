@@ -54,7 +54,7 @@ exports.addReview = async (req, res) => {
 // Controller to delete a review
 exports.deleteReview = async (req, res) => {
   const reviewId = req.params.id;
-
+  const { employeeId } = req.user;
   try {
     // Validate input
     if (!reviewId) {
@@ -62,7 +62,19 @@ exports.deleteReview = async (req, res) => {
     }
 
     // Find and delete the review
-    const review = await Review.findByPk(reviewId);
+    const review = await Review.findOne({
+      where: { id: reviewId, employeeId },
+      attributes: [
+        "id",
+        "employeeId",
+        "employerId",
+        "comment",
+        "rating",
+        "description",
+        "createdAt",
+        "updatedAt",
+      ],
+    });
     if (!review) {
       return sendErrorResponse(res, "Review not found", 404);
     }
@@ -276,7 +288,7 @@ exports.getAllReviewsByEmployeeId = async (req, res) => {
           include: [
             {
               model: Employer,
-              attributes: ["id", "fullName", "profile"],
+              attributes: ["id", "fullName", "profile", "companyName"],
               as: "employer",
             },
           ],

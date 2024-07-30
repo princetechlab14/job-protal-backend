@@ -56,6 +56,8 @@ router.post("/", authenticateToken, ensureEmployee, addReview);
  *     summary: Delete a review
  *     description: Deletes a review by its ID.
  *     tags: [Reviews]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
