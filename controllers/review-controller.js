@@ -20,6 +20,16 @@ exports.addReview = async (req, res) => {
     }
     const existingReview = await Review.findOne({
       where: { employerId, employeeId },
+      attributes: [
+        "id",
+        "employeeId",
+        "employerId",
+        "comment",
+        "rating",
+        "description",
+        "createdAt",
+        "updatedAt",
+      ],
     });
 
     if (existingReview) {
