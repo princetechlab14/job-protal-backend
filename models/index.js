@@ -95,5 +95,9 @@ db.Employer.hasMany(db.Review, { foreignKey: "employerId", as: "reviews" });
 db.Review.belongsTo(db.Employer, { foreignKey: "employerId", as: "employer" });
 db.Review.belongsTo(db.Employee, { foreignKey: "employeeId", as: "employee" });
 db.Employee.hasMany(db.Review, { foreignKey: "employeeId", as: "reviews" });
+db.AppliedJob.belongsTo(db.Employee, {
+  foreignKey: "employeeId",
+  as: "employee",
+});
 
 module.exports = db;
