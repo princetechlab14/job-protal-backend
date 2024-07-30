@@ -1,10 +1,10 @@
-const { Job, Employer, Review } = require("../models");
+const { Job, Employer, Review, sequelize } = require("../models");
 const { jobSchema } = require("../validators/jobValidator");
 const {
   sendSuccessResponse,
   sendErrorResponse,
 } = require("../utils/responseUtils");
-const { Op, Sequelize } = require("sequelize");
+const { Op } = require("sequelize");
 
 // Middleware to check if the user is an employee
 const ensureEmployer = (req, res, next) => {
@@ -125,8 +125,8 @@ exports.getAllJobs = async (req, res) => {
   if (jobTitle) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
-      Sequelize.where(
-        Sequelize.fn("LOWER", Sequelize.col("jobTitle")),
+      sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("jobTitle")),
         "LIKE",
         `%${jobTitle.toLowerCase()}%`
       ),
@@ -136,13 +136,13 @@ exports.getAllJobs = async (req, res) => {
   if (location) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
-      Sequelize.where(
-        Sequelize.fn("LOWER", Sequelize.col("city")),
+      sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("city")),
         "LIKE",
         `%${location.toLowerCase()}%`
       ),
-      Sequelize.where(
-        Sequelize.fn("LOWER", Sequelize.col("state")),
+      sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("state")),
         "LIKE",
         `%${location.toLowerCase()}%`
       ),
@@ -159,8 +159,8 @@ exports.getAllJobs = async (req, res) => {
   if (jobLocation) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
-      Sequelize.where(
-        Sequelize.fn("LOWER", Sequelize.col("jobLocation")),
+      sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("jobLocation")),
         "LIKE",
         `%${jobLocation.toLowerCase()}%`
       ),
@@ -170,24 +170,24 @@ exports.getAllJobs = async (req, res) => {
   if (minPay) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
-      Sequelize.where(Sequelize.col("minimumPay"), ">=", minPay),
+      sequelize.where(sequelize.col("minimumPay"), ">=", minPay),
     ];
   }
 
   if (maxPay) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
-      Sequelize.where(Sequelize.col("maximumPay"), "<=", maxPay),
+      sequelize.where(sequelize.col("maximumPay"), "<=", maxPay),
     ];
   }
 
   if (jobType) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
-      Sequelize.where(
-        Sequelize.fn(
+      sequelize.where(
+        sequelize.fn(
           "JSON_CONTAINS",
-          Sequelize.col("jobTypes"),
+          sequelize.col("jobTypes"),
           process.env.DEV_TYPE === "local" && JSON.stringify([jobType])
         ),
         true
@@ -198,10 +198,10 @@ exports.getAllJobs = async (req, res) => {
   if (skills) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
-      Sequelize.where(
-        Sequelize.fn(
+      sequelize.where(
+        sequelize.fn(
           "JSON_CONTAINS",
-          Sequelize.col("skills"),
+          sequelize.col("skills"),
           process.env.DEV_TYPE === "local" && JSON.stringify([skills])
         ),
         true
@@ -212,10 +212,10 @@ exports.getAllJobs = async (req, res) => {
   if (education) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
-      Sequelize.where(
-        Sequelize.fn(
+      sequelize.where(
+        sequelize.fn(
           "JSON_CONTAINS",
-          Sequelize.col("education"),
+          sequelize.col("education"),
           process.env.DEV_TYPE === "local" && JSON.stringify([education])
         ),
         true
@@ -226,10 +226,10 @@ exports.getAllJobs = async (req, res) => {
   if (language) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
-      Sequelize.where(
-        Sequelize.fn(
+      sequelize.where(
+        sequelize.fn(
           "JSON_CONTAINS",
-          Sequelize.col("languages"),
+          sequelize.col("languages"),
           process.env.DEV_TYPE === "local" && JSON.stringify([language])
         ),
         true
@@ -240,8 +240,8 @@ exports.getAllJobs = async (req, res) => {
   if (city) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
-      Sequelize.where(
-        Sequelize.fn("LOWER", Sequelize.col("city")),
+      sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("city")),
         "LIKE",
         `%${city.toLowerCase()}%`
       ),
@@ -263,18 +263,15 @@ exports.getAllJobs = async (req, res) => {
               model: Review,
               as: "reviews",
               attributes: [
-                [Sequelize.fn("AVG", Sequelize.col("rating")), "averageReviewRating"],
+                [
+                  sequelize.fn("AVG", sequelize.col("rating")),
+                  "averageReviewRating",
+                ],
               ],
             },
           ],
         },
       ],
-      // group: [
-      //   'Job.id',
-      //   'employer.id',
-      //   'employer.companyName',
-      //   'employer->reviews.id'
-      // ],
     });
 
     if (process.env.DEV_TYPE === "local") {
