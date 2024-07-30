@@ -255,27 +255,26 @@ exports.getAllJobs = async (req, res) => {
       offset: parseInt(offset),
       include: [
         {
+          model: Employer, // Assuming `Company` is the model name
+          attributes: ["id", "companyName"],
+          as: "employer",
           include: [
             {
               model: Review,
               as: "reviews",
               attributes: [
-                [
-                  Sequelize.fn("AVG", Sequelize.col("rating")),
-                  "averageReviewRating",
-                ],
+                [Sequelize.fn("AVG", Sequelize.col("rating")), "averageReviewRating"],
               ],
             },
           ],
-          model: Employer, // Assuming `Company` is the model name
-          attributes: [
-            "id",
-            "companyName",
-            // Average rating of reviews
-          ],
-          as: "employer",
         },
       ],
+      // group: [
+      //   'Job.id',
+      //   'employer.id',
+      //   'employer.companyName',
+      //   'employer->reviews.id'
+      // ],
     });
 
     if (process.env.DEV_TYPE === "local") {
