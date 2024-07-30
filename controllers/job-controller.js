@@ -272,6 +272,7 @@ exports.getAllJobs = async (req, res) => {
           ],
         },
       ],
+      group: ["Job.id"], // Add a group by clause
     });
 
     if (process.env.DEV_TYPE === "local") {
