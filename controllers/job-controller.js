@@ -281,7 +281,7 @@ exports.getAllJobs = async (req, res) => {
         },
       ],
       group: [
-        // "Job.id",
+        "Job.id",
         "Job.jobTitle",
         "Job.jobLocation",
         "Job.employerId",
@@ -311,10 +311,10 @@ exports.getAllJobs = async (req, res) => {
         "Job.experience",
         "Job.createdAt",
         "Job.updatedAt",
-        // "employer.id",
-        // "employer.companyName",
-        // "employer->reviews.id",
-      ], // Add a group by clause
+        "employer.id",
+        "employer.companyName",
+        "employer->reviews.id",
+      ],
     });
 
     if (process.env.DEV_TYPE === "local") {
