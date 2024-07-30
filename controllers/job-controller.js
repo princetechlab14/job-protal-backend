@@ -311,9 +311,9 @@ exports.getAllJobs = async (req, res) => {
         "Job.experience",
         "Job.createdAt",
         "Job.updatedAt",
-        "Job.employer.id",
-        "Job.employer.companyName",
-        "Job.employer->reviews.id",
+        "employer.id",
+        "employer.companyName",
+        "employer.reviews.id",
       ],
     });
 
