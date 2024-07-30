@@ -249,7 +249,13 @@ exports.getAllJobs = async (req, res) => {
   }
 
   try {
-    const { count, rows: jobs } = await Job.findAndCountAll({
+    // First query to get the total count
+    const totalJobs = await Job.count({
+      where: whereClause,
+    });
+
+    // Second query to get the jobs with pagination and grouping
+    const jobs = await Job.findAll({
       where: whereClause,
       limit: parseInt(limit),
       offset: parseInt(offset),
@@ -286,7 +292,7 @@ exports.getAllJobs = async (req, res) => {
     }
 
     // Construct pagination metadata
-    const totalPages = Math.ceil(count / limit);
+    const totalPages = Math.ceil(totalJobs / limit);
     const currentPage = parseInt(page);
 
     sendSuccessResponse(res, { jobs, totalPages, currentPage });
