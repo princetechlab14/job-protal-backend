@@ -351,7 +351,22 @@ exports.getAllAppliedJobs = [
   async (req, res) => {
     try {
       const { employeeId } = req.user;
+      const { limit = 10, offset = 0, whereClause = {} } = req.query;
 
+      // Get the count of all jobs based on the whereClause
+      const count = await Job.count({
+        where: whereClause,
+        include: [
+          {
+            model: Employer,
+            as: "employer",
+          },
+        ],
+        distinct: true,
+        col: "id",
+      });
+
+      // Fetch the applied jobs with the included models
       const appliedJobs = await AppliedJob.findAll({
         where: { employeeId },
         attributes: [
@@ -365,38 +380,63 @@ exports.getAllAppliedJobs = [
             model: Job,
             as: "job",
             attributes: ["id", "jobTitle", "city", "area", "streetAddress"],
-            include: {
-              model: Employer,
-              as: "employer",
-              attributes: ["companyName"],
-              include: [
-                {
-                  model: Review,
-                  as: "reviews",
-                  attributes: [
-                    [
-                      Sequelize.fn("AVG", Sequelize.col("rating")),
-                      "averageReviewRating",
-                    ],
-                  ],
-                },
-              ],
-            },
+            include: [
+              {
+                model: Employer,
+                as: "employer",
+                attributes: ["id", "companyName"],
+                include: [
+                  {
+                    model: Review,
+                    as: "reviews",
+                    attributes: ["rating"],
+                  },
+                ],
+              },
+            ],
           },
         ],
+        limit: parseInt(limit),
+        offset: parseInt(offset),
       });
-      if (process.env.DEV_TYPE === "local") {
-        appliedJobs.forEach((appliedJob) => {
-          const { job } = appliedJob;
-          if (job && job.jobTypes) {
-            job.jobTypes = JSON.parse(job.jobTypes);
-            job.skills = JSON.parse(job.skills);
-            job.languages = JSON.parse(job.languages);
-          }
-        });
-      }
 
-      sendSuccessResponse(res, { appliedJobs }, 200);
+      // Manually calculate the average review rating for each job
+      const appliedJobData = await Promise.all(
+        appliedJobs.map(async (appliedJob) => {
+          const job = appliedJob.job;
+          if (job) {
+            // Calculate the average review rating
+            const reviews = job.employer.reviews || [];
+            const averageReviewRating = reviews.length
+              ? reviews.reduce((acc, review) => acc + review.rating, 0) /
+                reviews.length
+              : null;
+
+            return {
+              ...appliedJob.toJSON(),
+              job: {
+                ...job.toJSON(),
+                employer: {
+                  ...job.employer.toJSON(),
+                  averageReviewRating,
+                },
+              },
+            };
+          }
+          return appliedJob.toJSON();
+        })
+      );
+
+      // Respond with the data and count
+      sendSuccessResponse(
+        res,
+        {
+          appliedJobs: appliedJobData,
+          totalPages: Math.ceil(count / parseInt(limit)),
+          currentPage: Math.floor(offset / parseInt(limit)) + 1,
+        },
+        200
+      );
     } catch (error) {
       console.error("Error fetching applied jobs:", error);
       sendErrorResponse(res, "Error fetching applied jobs", 500);
@@ -410,8 +450,10 @@ exports.getAllSavedJobs = [
   async (req, res) => {
     try {
       const { employeeId } = req.user;
+      const { limit = 10, offset = 0, whereClause = {} } = req.query;
 
-      const savedJobs = await SavedJob.findAll({
+      // Get the count of all saved jobs based on the whereClause
+      const count = await SavedJob.count({
         where: { employeeId },
         include: [
           {
@@ -420,35 +462,79 @@ exports.getAllSavedJobs = [
             include: {
               model: Employer,
               as: "employer",
-              attributes: ["companyName"],
-              include: [
-                {
-                  model: Review,
-                  as: "reviews",
-                  attributes: [
-                    [
-                      Sequelize.fn("AVG", Sequelize.col("rating")),
-                      "averageReviewRating",
-                    ],
-                  ],
-                },
-              ],
             },
           },
         ],
+        distinct: true,
+        col: "id",
       });
-      if (process.env.DEV_TYPE === "local") {
-        savedJobs.forEach((savedJob) => {
-          const { job } = savedJob;
-          if (job && job.jobTypes) {
-            job.jobTypes = JSON.parse(job.jobTypes);
-            job.skills = JSON.parse(job.skills);
-            job.languages = JSON.parse(job.languages);
-          }
-        });
-      }
 
-      sendSuccessResponse(res, { savedJobs }, 200);
+      // Fetch the saved jobs with the included models
+      const savedJobs = await SavedJob.findAll({
+        where: { employeeId },
+        attributes: ["id", "createdAt"],
+        include: [
+          {
+            model: Job,
+            as: "job",
+            attributes: ["id", "jobTitle", "city", "area", "streetAddress"],
+            include: [
+              {
+                model: Employer,
+                as: "employer",
+                attributes: ["id", "companyName"],
+                include: [
+                  {
+                    model: Review,
+                    as: "reviews",
+                    attributes: ["rating"],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+      });
+
+      // Manually calculate the average review rating for each job
+      const savedJobData = await Promise.all(
+        savedJobs.map(async (savedJob) => {
+          const job = savedJob.job;
+          if (job) {
+            // Calculate the average review rating
+            const reviews = job.employer.reviews || [];
+            const averageReviewRating = reviews.length
+              ? reviews.reduce((acc, review) => acc + review.rating, 0) /
+                reviews.length
+              : null;
+
+            return {
+              ...savedJob.toJSON(),
+              job: {
+                ...job.toJSON(),
+                employer: {
+                  ...job.employer.toJSON(),
+                  averageReviewRating,
+                },
+              },
+            };
+          }
+          return savedJob.toJSON();
+        })
+      );
+
+      // Respond with the data and count
+      sendSuccessResponse(
+        res,
+        {
+          savedJobs: savedJobData,
+          totalPages: Math.ceil(count / parseInt(limit)),
+          currentPage: Math.floor(offset / parseInt(limit)) + 1,
+        },
+        200
+      );
     } catch (error) {
       console.error("Error fetching saved jobs:", error);
       sendErrorResponse(res, "Error fetching saved jobs", 500);
