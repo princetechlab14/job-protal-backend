@@ -266,7 +266,7 @@ exports.getAllJobs = async (req, res) => {
         ? reviews.reduce((acc, review) => acc + review.rating, 0) /
           reviews.length
         : null;
-
+      console.log(job.employer.reviews);
       return {
         ...job.toJSON(),
         employer: {
