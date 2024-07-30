@@ -1,5 +1,5 @@
 const { Sequelize } = require("sequelize");
-const { Review, Employer, Employee, Job } = require("../models"); // Adjust the path according to your setup
+const { Review, Employer, Employee, Job } = require("../models");
 const {
   sendErrorResponse,
   sendSuccessResponse,
@@ -164,6 +164,7 @@ exports.getReviewsByEmployerId = async (req, res) => {
       where: { id: employerId },
       attributes: ["id", "companyName", "profile"],
     });
+
     if (!employer) {
       return sendErrorResponse(res, { message: "Invalid employer ID" }, 404);
     }

@@ -379,7 +379,38 @@ exports.getAllAppliedJobs = [
           {
             model: Job,
             as: "job",
-            attributes: ["id", "jobTitle", "city", "area", "streetAddress"],
+            attributes: [
+              "id",
+              "jobTitle",
+              "jobLocation",
+              "employerId",
+              "specificCity",
+              "advertiseCity",
+              "city",
+              "state",
+              "area",
+              "pincode",
+              "streetAddress",
+              "jobTypes",
+              "education",
+              "skills",
+              "languages",
+              "minimumPay",
+              "maximumPay",
+              "payType",
+              "exactPay",
+              "payRate",
+              "jobDescription",
+              "numberOfPeople",
+              "mobileNumber",
+              "email",
+              "deadline",
+              "deadlineDate",
+              "status",
+              "experience",
+              "createdAt",
+              "updatedAt",
+            ],
             include: [
               {
                 model: Employer,
@@ -405,6 +436,12 @@ exports.getAllAppliedJobs = [
         appliedJobs.map(async (appliedJob) => {
           const job = appliedJob.job;
           if (job) {
+            if (process.env.DEV_TYPE === "local") {
+              job.jobTypes = JSON.parse(job.jobTypes);
+              job.skills = JSON.parse(job.skills);
+              job.languages = JSON.parse(job.languages);
+              job.education = JSON.parse(job.education);
+            }
             // Calculate the average review rating
             const reviews = job.employer.reviews || [];
             const averageReviewRating = reviews.length
@@ -477,7 +514,38 @@ exports.getAllSavedJobs = [
           {
             model: Job,
             as: "job",
-            attributes: ["id", "jobTitle", "city", "area", "streetAddress"],
+            attributes: [
+              "id",
+              "jobTitle",
+              "jobLocation",
+              "employerId",
+              "specificCity",
+              "advertiseCity",
+              "city",
+              "state",
+              "area",
+              "pincode",
+              "streetAddress",
+              "jobTypes",
+              "education",
+              "skills",
+              "languages",
+              "minimumPay",
+              "maximumPay",
+              "payType",
+              "exactPay",
+              "payRate",
+              "jobDescription",
+              "numberOfPeople",
+              "mobileNumber",
+              "email",
+              "deadline",
+              "deadlineDate",
+              "status",
+              "experience",
+              "createdAt",
+              "updatedAt",
+            ],
             include: [
               {
                 model: Employer,
@@ -503,6 +571,12 @@ exports.getAllSavedJobs = [
         savedJobs.map(async (savedJob) => {
           const job = savedJob.job;
           if (job) {
+            if (process.env.DEV_TYPE === "local") {
+              job.jobTypes = JSON.parse(job.jobTypes);
+              job.skills = JSON.parse(job.skills);
+              job.languages = JSON.parse(job.languages);
+              job.education = JSON.parse(job.education);
+            }
             // Calculate the average review rating
             const reviews = job.employer.reviews || [];
             const averageReviewRating = reviews.length
