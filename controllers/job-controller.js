@@ -91,7 +91,7 @@ exports.updateJob = [
 
 // Get all jobs with pagination and optional filtering
 exports.getAllJobs = async (req, res) => {
-  const { page = 1, limit = 10 } = req.query; // Default page is 1, limit is 10 per page
+  const { page = 1, limit = 10 } = req.query;
   const {
     jobTitle,
     location,
@@ -107,26 +107,20 @@ exports.getAllJobs = async (req, res) => {
   } = req.body;
   const offset = (Number(page) - 1) * Number(limit);
 
-  // Construct the where clause for filtering
   const whereClause = {
-    status: "Open", // Filter by status = "Open"
+    status: "Open",
   };
 
-  // Filter by deadline date in the future or null
   const currentDate = new Date();
   whereClause.deadlineDate = {
-    [Op.or]: [
-      { [Op.gt]: currentDate }, // Deadline date is in the future
-      { [Op.eq]: null }, // Deadline date is null
-    ],
+    [Op.or]: [{ [Op.gt]: currentDate }, { [Op.eq]: null }],
   };
 
-  // Filters
   if (jobTitle) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
       sequelize.where(
-        sequelize.fn("LOWER", sequelize.col("jobTitle")),
+        fn("LOWER", col("jobTitle")),
         "LIKE",
         `%${jobTitle.toLowerCase()}%`
       ),
@@ -137,12 +131,12 @@ exports.getAllJobs = async (req, res) => {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
       sequelize.where(
-        sequelize.fn("LOWER", sequelize.col("city")),
+        fn("LOWER", col("city")),
         "LIKE",
         `%${location.toLowerCase()}%`
       ),
       sequelize.where(
-        sequelize.fn("LOWER", sequelize.col("state")),
+        fn("LOWER", col("state")),
         "LIKE",
         `%${location.toLowerCase()}%`
       ),
@@ -160,7 +154,7 @@ exports.getAllJobs = async (req, res) => {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
       sequelize.where(
-        sequelize.fn("LOWER", sequelize.col("jobLocation")),
+        fn("LOWER", col("jobLocation")),
         "LIKE",
         `%${jobLocation.toLowerCase()}%`
       ),
@@ -170,14 +164,14 @@ exports.getAllJobs = async (req, res) => {
   if (minPay) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
-      sequelize.where(sequelize.col("minimumPay"), ">=", minPay),
+      sequelize.where(col("minimumPay"), ">=", minPay),
     ];
   }
 
   if (maxPay) {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
-      sequelize.where(sequelize.col("maximumPay"), "<=", maxPay),
+      sequelize.where(col("maximumPay"), "<=", maxPay),
     ];
   }
 
@@ -185,11 +179,7 @@ exports.getAllJobs = async (req, res) => {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
       sequelize.where(
-        sequelize.fn(
-          "JSON_CONTAINS",
-          sequelize.col("jobTypes"),
-          process.env.DEV_TYPE === "local" && JSON.stringify([jobType])
-        ),
+        fn("JSON_CONTAINS", col("jobTypes"), JSON.stringify([jobType])),
         true
       ),
     ];
@@ -199,11 +189,7 @@ exports.getAllJobs = async (req, res) => {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
       sequelize.where(
-        sequelize.fn(
-          "JSON_CONTAINS",
-          sequelize.col("skills"),
-          process.env.DEV_TYPE === "local" && JSON.stringify([skills])
-        ),
+        fn("JSON_CONTAINS", col("skills"), JSON.stringify([skills])),
         true
       ),
     ];
@@ -213,11 +199,7 @@ exports.getAllJobs = async (req, res) => {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
       sequelize.where(
-        sequelize.fn(
-          "JSON_CONTAINS",
-          sequelize.col("education"),
-          process.env.DEV_TYPE === "local" && JSON.stringify([education])
-        ),
+        fn("JSON_CONTAINS", col("education"), JSON.stringify([education])),
         true
       ),
     ];
@@ -227,11 +209,7 @@ exports.getAllJobs = async (req, res) => {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
       sequelize.where(
-        sequelize.fn(
-          "JSON_CONTAINS",
-          sequelize.col("languages"),
-          process.env.DEV_TYPE === "local" && JSON.stringify([language])
-        ),
+        fn("JSON_CONTAINS", col("languages"), JSON.stringify([language])),
         true
       ),
     ];
@@ -241,7 +219,7 @@ exports.getAllJobs = async (req, res) => {
     whereClause[Op.or] = [
       ...(whereClause[Op.or] || []),
       sequelize.where(
-        sequelize.fn("LOWER", sequelize.col("city")),
+        fn("LOWER", col("city")),
         "LIKE",
         `%${city.toLowerCase()}%`
       ),
@@ -261,65 +239,45 @@ exports.getAllJobs = async (req, res) => {
       col: "id",
     });
 
-    // Main query
     const jobs = await Job.findAll({
       where: whereClause,
       limit: parseInt(limit),
       offset: parseInt(offset),
       include: [
         {
-          model: Employer, // Assuming `Company` is the model name
+          model: Employer,
           attributes: ["id", "companyName"],
           as: "employer",
           include: [
             {
               model: Review,
               as: "reviews",
-              attributes: [[fn("AVG", col("rating")), "averageReviewRating"]],
+              attributes: [],
             },
           ],
         },
       ],
-      group: [
-        "Job.id",
-        "Job.jobTitle",
-        "Job.jobLocation",
-        "Job.employerId",
-        "Job.specificCity",
-        "Job.advertiseCity",
-        "Job.city",
-        "Job.state",
-        "Job.area",
-        "Job.pincode",
-        "Job.streetAddress",
-        "Job.jobTypes",
-        "Job.education",
-        "Job.skills",
-        "Job.languages",
-        "Job.minimumPay",
-        "Job.maximumPay",
-        "Job.payType",
-        "Job.exactPay",
-        "Job.payRate",
-        "Job.jobDescription",
-        "Job.numberOfPeople",
-        "Job.mobileNumber",
-        "Job.email",
-        "Job.deadline",
-        "Job.deadlineDate",
-        "Job.status",
-        "Job.experience",
-        "Job.createdAt",
-        "Job.updatedAt",
-        "employer.id",
-        "employer.companyName",
-        "employer.reviews.id",
-      ],
+    });
+
+    // Manually calculate the average review rating
+    const jobData = jobs.map((job) => {
+      const reviews = job.employer.reviews || [];
+      const averageReviewRating = reviews.length
+        ? reviews.reduce((acc, review) => acc + review.rating, 0) /
+          reviews.length
+        : null;
+
+      return {
+        ...job.toJSON(),
+        employer: {
+          ...job.employer.toJSON(),
+          averageReviewRating,
+        },
+      };
     });
 
     if (process.env.DEV_TYPE === "local") {
-      // Parse JSON fields for each job
-      jobs.forEach((job) => {
+      jobData.forEach((job) => {
         job.jobTypes = JSON.parse(job.jobTypes);
         job.skills = JSON.parse(job.skills);
         job.languages = JSON.parse(job.languages);
@@ -327,11 +285,10 @@ exports.getAllJobs = async (req, res) => {
       });
     }
 
-    // Construct pagination metadata
     const totalPages = Math.ceil(count / limit);
     const currentPage = parseInt(page);
 
-    sendSuccessResponse(res, { jobs, totalPages, currentPage });
+    sendSuccessResponse(res, { jobs: jobData, totalPages, currentPage });
   } catch (error) {
     console.error("Error retrieving jobs:", error);
     sendErrorResponse(res, "Error retrieving jobs", 500);
