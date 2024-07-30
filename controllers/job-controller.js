@@ -4,7 +4,7 @@ const {
   sendSuccessResponse,
   sendErrorResponse,
 } = require("../utils/responseUtils");
-const { Op } = require("sequelize");
+const { Op, fn, col } = require("sequelize");
 
 // Middleware to check if the user is an employee
 const ensureEmployer = (req, res, next) => {
@@ -249,12 +249,19 @@ exports.getAllJobs = async (req, res) => {
   }
 
   try {
-    // First query to get the total count
-    const totalJobs = await Job.count({
+    const count = await Job.count({
       where: whereClause,
+      include: [
+        {
+          model: Employer,
+          as: "employer",
+        },
+      ],
+      distinct: true,
+      col: "id",
     });
 
-    // Second query to get the jobs with pagination and grouping
+    // Main query
     const jobs = await Job.findAll({
       where: whereClause,
       limit: parseInt(limit),
@@ -268,17 +275,17 @@ exports.getAllJobs = async (req, res) => {
             {
               model: Review,
               as: "reviews",
-              attributes: [
-                [
-                  sequelize.fn("AVG", sequelize.col("rating")),
-                  "averageReviewRating",
-                ],
-              ],
+              attributes: [[fn("AVG", col("rating")), "averageReviewRating"]],
             },
           ],
         },
       ],
-      group: ["Job.id"], // Add a group by clause
+      group: [
+        "Job.id",
+        // "employer.id",
+        // "employer.companyName",
+        // "employer.reviews.id",
+      ], // Add a group by clause
     });
 
     if (process.env.DEV_TYPE === "local") {
@@ -292,7 +299,7 @@ exports.getAllJobs = async (req, res) => {
     }
 
     // Construct pagination metadata
-    const totalPages = Math.ceil(totalJobs / limit);
+    const totalPages = Math.ceil(count / limit);
     const currentPage = parseInt(page);
 
     sendSuccessResponse(res, { jobs, totalPages, currentPage });
