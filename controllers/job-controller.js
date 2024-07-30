@@ -252,7 +252,6 @@ exports.getAllJobs = async (req, res) => {
             {
               model: Review,
               as: "reviews",
-              attributes: [],
             },
           ],
         },
