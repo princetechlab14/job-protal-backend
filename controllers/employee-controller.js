@@ -28,6 +28,9 @@ const { registerSchema } = require("../validators/employeeValidation");
 const { ensureEmployee } = require("../middleware/ensureEmployee");
 const s3 = require("../utils/aws-config");
 const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const ejs = require("ejs");
+const path = require("path");
+const nodemailer = require("nodemailer");
 
 // Register new employee or login
 exports.registerOrLoginEmployee = async (req, res) => {
@@ -144,7 +147,7 @@ exports.updateProfile = [
       sendSuccessResponse(res, { employee }, 200);
     } catch (error) {
       console.error("Error updating employee profile:", error);
-      sendErrorResponse(res, "Error updating employee profile", 500);
+      sendErrorResponse(res, "Error updating employee profile" + error, 500);
     }
   },
 ];
@@ -260,11 +263,14 @@ exports.applyJob = [
       const { employeeId } = req.user;
       const { jobId, jobTitle, companyName, availableDates, experience } =
         req.body;
+
       const employee = await Employee.findByPk(employeeId);
       if (!employee) {
         return sendErrorResponse(res, "Employee not found", 404);
       }
-      const job = await Job.findByPk(jobId);
+      const job = await Job.findByPk(jobId, {
+        include: [{ model: Employer, as: "employer" }], // Assuming the Job model is associated with Employer
+      });
       if (!job) {
         return sendErrorResponse(res, "Job not found", 404);
       }
@@ -286,6 +292,10 @@ exports.applyJob = [
         experience,
       });
 
+      // Send email to the employer
+      const employerEmail = job.email; // Assuming employer has an email attribute
+      await sendApplicationEmail(employerEmail, employee, job);
+
       sendSuccessResponse(res, { appliedJob }, 201);
     } catch (error) {
       console.error("Error applying for job:", error);
@@ -293,6 +303,39 @@ exports.applyJob = [
     }
   },
 ];
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "thelipsasavaliya123@gmail.com",
+    pass: "kskd egvv rqiu wago",
+  },
+});
+
+const sendApplicationEmail = async (to, employee, job) => {
+  try {
+    const templatePath = path.join(__dirname, "emailTemplate.ejs");
+    const html = await ejs.renderFile(templatePath, {
+      name: job.employer.fullName,
+      confirmationLink: "https://example.com/confirm", // Replace with relevant data
+      employeeName: employee.firstName,
+      jobTitle: job.jobTitle,
+    });
+
+    const mailOptions = {
+      from: "thelipsasavaliya123@gmail.com",
+      to,
+      subject: "New Job Application",
+      html: html,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("Application email sent to employer.");
+    return;
+  } catch (error) {
+    console.error("Error sending application email:", error);
+  }
+};
 
 // Update employee status for an applied job
 exports.updateEmployeeStatus = [
@@ -487,7 +530,7 @@ exports.getAllSavedJobs = [
   async (req, res) => {
     try {
       const { employeeId } = req.user;
-      const { limit = 10, offset = 0, whereClause = {} } = req.query;
+      const { limit = 10, offset = 0 } = req.query;
 
       // Get the count of all saved jobs based on the whereClause
       const count = await SavedJob.count({
@@ -830,13 +873,14 @@ exports.addOrUpdateResume = [
               Bucket: process.env.AWS_BUCKET_NAME,
               Key: `resumes/${oldKey}`,
             };
-
             try {
               await s3.send(new DeleteObjectCommand(deleteParams));
               console.log("Delete successfully");
             } catch (deleteError) {
               console.error("Error deleting old resume from S3:", deleteError);
-              return res.status(500).send("Error deleting old resume from S3");
+              return res
+                .status(500)
+                .send("Error deleting old resume from S3" + deleteError);
             }
           }
         }
@@ -845,11 +889,13 @@ exports.addOrUpdateResume = [
         existingResume.fileName = fileName;
         existingResume.cv = cv;
         await existingResume.save();
-        return sendSuccessResponse(
-          res,
-          { data: existingResume, message: "Resume updated successfully" },
-          200
-        );
+        sendSuccessResponse(res, existingResume, 200);
+        const response = {
+          message: "Resume updated successfully",
+          fileName: fileName,
+          cv: cv,
+        };
+        sendSuccessResponse(res, response, 200);
       } else {
         // Add new resume
         const newResume = await Resume.create({
