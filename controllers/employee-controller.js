@@ -1,4 +1,4 @@
-const { Op, Sequelize } = require("sequelize");
+const { Op, Sequelize, JSON } = require("sequelize");
 const {
   Employee,
   SavedJob,
@@ -208,10 +208,28 @@ exports.getProfile = [
           );
         }
       }
+      console.log(
+        employee.resume,
+        employee.resume.length !== 0 ? employee.resume[0]?.dataValues : {}
+      );
+
+      const resumes = employee.resume
+        ? employee.resume.map((r) => ({
+            id: r.id,
+            fileName: r.fileName,
+            cv: r.cv,
+            employeeId: r.employeeId,
+            createdAt: r.createdAt,
+            updatedAt: r.updatedAt,
+          }))
+        : {};
       sendSuccessResponse(
         res,
         {
-          employee,
+          employee: {
+            employee,
+            resume: resumes[0],
+          },
         },
         200
       );
