@@ -209,17 +209,22 @@ exports.getProfile = [
         }
       }
 
-      const resumes = employee.resume
-        ? employee.resume.map((r) => ({
-            id: r.id,
-            fileName: r.fileName,
-            cv: r.cv,
-            employeeId: r.employeeId,
-            createdAt: r.createdAt,
-            updatedAt: r.updatedAt,
-          }))
-        : {};
-      employee.resume = resumes[0];
+      // Extract the first resume
+      const firstResume =
+        employee.resume && employee.resume.length > 0
+          ? {
+              id: employee.resume[0].id,
+              fileName: employee.resume[0].fileName,
+              cv: employee.resume[0].cv,
+              employeeId: employee.resume[0].employeeId,
+              createdAt: employee.resume[0].createdAt,
+              updatedAt: employee.resume[0].updatedAt,
+            }
+          : null;
+
+      // Attach the first resume directly to the employee object
+      employee.dataValues.resume = firstResume;
+
       sendSuccessResponse(
         res,
         {
