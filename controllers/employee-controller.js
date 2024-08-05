@@ -208,11 +208,13 @@ exports.getProfile = [
           );
         }
       }
-      console.log(employee.resume);
       sendSuccessResponse(
         res,
         {
-          employee,
+          employee: {
+            ...employee,
+            resume: employee?.resume?.length === 0 ? {} : employee?.resume?.[0],
+          },
         },
         200
       );
