@@ -1,5 +1,3 @@
-// controllers/employeeController.js
-
 const { Op, Sequelize } = require("sequelize");
 const {
   Employee,
@@ -211,7 +209,16 @@ exports.getProfile = [
         }
       }
 
-      sendSuccessResponse(res, { employee }, 200);
+      sendSuccessResponse(
+        res,
+        {
+          employee: {
+            ...employee,
+            resume: employee.resume[0],
+          },
+        },
+        200
+      );
     } catch (error) {
       console.error("Error fetching employee profile:", error);
       sendErrorResponse(res, "Error fetching employee profile", 500);
@@ -960,4 +967,3 @@ exports.deleteResume = [
     }
   },
 ];
-  

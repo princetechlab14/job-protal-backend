@@ -1,5 +1,3 @@
-// models/employee.js
-
 module.exports = (sequelize, DataTypes) => {
   const Employer = sequelize.define("Employer", {
     fullName: {
@@ -21,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     hiringManager: {
       type: DataTypes.ENUM("Yes", "No"),
       allowNull: true,
-      defaultValue: "No", // Default value set to "No"
+      defaultValue: "No",
     },
     phoneNumber: {
       type: DataTypes.STRING,
