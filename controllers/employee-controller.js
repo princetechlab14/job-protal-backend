@@ -208,10 +208,6 @@ exports.getProfile = [
           );
         }
       }
-      console.log(
-        employee.resume,
-        employee.resume.length !== 0 ? employee.resume[0]?.dataValues : {}
-      );
 
       const resumes = employee.resume
         ? employee.resume.map((r) => ({
@@ -223,13 +219,11 @@ exports.getProfile = [
             updatedAt: r.updatedAt,
           }))
         : {};
+      employee.resume = resumes[0];
       sendSuccessResponse(
         res,
         {
-          employee: {
-            employee,
-            resume: resumes[0],
-          },
+          employee,
         },
         200
       );
