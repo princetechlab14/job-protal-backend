@@ -208,14 +208,11 @@ exports.getProfile = [
           );
         }
       }
-
+      console.log(employee.resume);
       sendSuccessResponse(
         res,
         {
-          employee: {
-            ...employee,
-            resume: employee.resume[0],
-          },
+          employee,
         },
         200
       );
