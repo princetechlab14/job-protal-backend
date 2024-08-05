@@ -137,7 +137,7 @@ exports.updateProfile = [
             console.log("Delete successfully");
           } catch (deleteError) {
             console.error("Error deleting old resume from S3:", deleteError);
-            return res.status(500).send("Error deleting old resume from S3");
+            return res.status(500).send("Error deleting old Image from S3");
           }
         }
       }
@@ -915,3 +915,49 @@ exports.addOrUpdateResume = [
     }
   },
 ];
+
+exports.deleteResume = [
+  ensureEmployee,
+  async (req, res) => {
+    try {
+      const { employeeId } = req.user; // Assumes employee ID is available from authenticated user
+
+      // Check if a resume exists for this employee
+      const existingResume = await Resume.findOne({ where: { employeeId } });
+
+      if (!existingResume) {
+        return sendErrorResponse(res, "No resume found for this employee", 404);
+      }
+
+      // Delete the resume from S3
+      if (existingResume.cv) {
+        const oldKey = existingResume.cv.split("/").pop();
+
+        const deleteParams = {
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Key: `resumes/${oldKey}`,
+        };
+        try {
+          await s3.send(new DeleteObjectCommand(deleteParams));
+          console.log("Resume deleted successfully from S3");
+        } catch (deleteError) {
+          console.error("Error deleting resume from S3:", deleteError);
+          return sendErrorResponse(res, "Error deleting resume from S3", 500);
+        }
+      }
+
+      // Delete the resume record from the database
+      await existingResume.destroy();
+
+      return sendSuccessResponse(
+        res,
+        { message: "Resume deleted successfully" },
+        200
+      );
+    } catch (error) {
+      console.error("Error deleting resume:", error);
+      return sendErrorResponse(res, "Error deleting resume", 500);
+    }
+  },
+];
+  

@@ -257,6 +257,7 @@ exports.getAllJobs = async (req, res) => {
           ],
         },
       ],
+      order: [["createdAt", "ASC"]], // Order by createdAt in ascending order
     });
 
     // Manually calculate the average review rating

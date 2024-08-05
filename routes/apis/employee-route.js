@@ -858,14 +858,6 @@ router.delete(
  *     responses:
  *       200:
  *         description: Resume added or updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Resume uploaded successfully
  *       400:
  *         description: Bad request
  *       401:
@@ -880,5 +872,25 @@ router.post(
   convertPdfToBase64,
   employeeController.addOrUpdateResume
 );
+
+/**
+ * @swagger
+ * /employee/resume:
+ *   delete:
+ *     summary: Delete employee resume
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Resume deleted successfully
+ *       404:
+ *         description: Resume not found
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       500:
+ *         description: Server error
+ */
+router.delete("/resume", authenticateToken, employeeController.deleteResume);
 
 module.exports = router;
