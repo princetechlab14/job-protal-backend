@@ -211,10 +211,7 @@ exports.getProfile = [
       sendSuccessResponse(
         res,
         {
-          employee: {
-            ...employee,
-            resume: employee?.resume?.length === 0 ? {} : employee?.resume?.[0],
-          },
+          employee,
         },
         200
       );
