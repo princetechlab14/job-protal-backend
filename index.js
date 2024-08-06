@@ -73,13 +73,14 @@ const synchronizeAndSeed = async () => {
     await require("./seeder/skill-seeder").skillData();
     await require("./seeder/jobpre-seeder").jobPreData();
     await require("./seeder/review-seeder").reviewData();
+    await require("./seeder/role-seeder").rolesData();
 
     console.log("Synchronization and seeding completed successfully!!");
   } catch (error) {
     console.error("Error during synchronization and seeding:", error);
   }
 };
-// synchronizeAndSeed()
+synchronizeAndSeed()
 
 // Define a cron job to run at 12:01 AM
 cron.schedule("* * * * *", async () => {

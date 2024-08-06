@@ -1,6 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const { Employee, AppliedJob, Employer, Job, Admin } = require("../../models"); // Define routes
+const {
+  Employee,
+  AppliedJob,
+  Employer,
+  Job,
+  Admin,
+  Roles,
+} = require("../../models"); // Define routes
 const authController = require("../../controllers/auth-controller");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -198,6 +205,91 @@ router.post("/profile", authenticateJWT, async (req, res) => {
       admin: null,
       error: "Internal server error",
     });
+  }
+});
+// Utility function to parse skills if in local environment
+function parseSkillsForLocal(roles) {
+  if (process.env.DEV_TYPE === "local") {
+    return roles.map((role) => {
+      role.skills = JSON.parse(role.skills);
+      return role;
+    });
+  }
+  return roles;
+}
+// Get roles index
+router.get("/roles", async (req, res) => {
+  try {
+    let roles = await Roles.findAll();
+    roles = parseSkillsForLocal(roles);
+    res.render("roles/index", { roles });
+  } catch (error) {
+    console.error("Error fetching roles:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Get create form
+router.get("/roles/create", (req, res) => {
+  res.render("roles/create");
+});
+
+// Handle create form submission
+router.post("/roles/create", async (req, res) => {
+  const { role, skills } = req.body;
+  try {
+    console.log(skills);
+    if (!role || !skills) {
+      return res.status(400).send("Role and Skills are required");
+    }
+    await Roles.create({ role, skills });
+    res.redirect("/admin/roles");
+  } catch (error) {
+    console.error("Error creating role:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Get edit form
+router.get("/roles/edit/:id", async (req, res) => {
+  const role = await Roles.findByPk(req.params.id);
+  if (process.env.DEV_TYPE === "local") {
+    role.skills = JSON.parse(role.skills);
+  }
+  if (!role) {
+    return res.status(404).send("Role not found");
+  }
+  res.render("roles/edit", { role });
+});
+
+// Handle edit form submission
+router.post("/roles/edit/:id", async (req, res) => {
+  const { role, skills } = req.body;
+  try {
+    if (!role || !skills) {
+      return res.status(400).send("Role and Skills are required");
+    }
+    await Roles.update({ role, skills }, { where: { id: req.params.id } });
+    res.redirect("/admin/roles");
+  } catch (error) {
+    console.error("Error updating role:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+// Add the delete route
+router.post("/roles/delete/:id", authenticateJWT, async (req, res) => {
+  const roleId = req.params.id;
+  try {
+    const role = await Roles.findByPk(roleId);
+    if (!role) {
+      return res.status(404).send("Role not found");
+    }
+
+    await Roles.destroy({ where: { id: roleId } });
+    res.redirect("/admin/roles");
+  } catch (error) {
+    console.error("Error deleting role:", error);
+    res.status(500).send("Internal Server Error");
   }
 });
 

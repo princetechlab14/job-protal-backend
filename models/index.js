@@ -49,6 +49,7 @@ db.Language = require("./language")(sequelize, DataTypes);
 db.Resume = require("./Resume-model")(sequelize, DataTypes);
 db.JobPreferences = require("./jobPreferences")(sequelize, DataTypes);
 db.Review = require("./review")(sequelize, DataTypes);
+db.Roles = require("./role")(sequelize, DataTypes);
 db.Admin = require("./admin-model")(sequelize, DataTypes);
 
 // Define associations
