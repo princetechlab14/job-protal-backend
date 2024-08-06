@@ -80,7 +80,7 @@ const synchronizeAndSeed = async () => {
     console.error("Error during synchronization and seeding:", error);
   }
 };
-// synchronizeAndSeed()
+synchronizeAndSeed()
 
 // Define a cron job to run at 12:01 AM
 cron.schedule("* * * * *", async () => {

@@ -9,10 +9,7 @@ const rolesData = async () => {
       },
       {
         role: "Data Scientist",
-        skills: {
-          languages: ["Python", "R"],
-          tools: ["TensorFlow", "Keras"],
-        },
+        skills: ["JavaScript", "Node.js", "React"],
       },
     ];
 
