@@ -991,23 +991,10 @@ exports.getSkillsByRole = async (req, res) => {
     });
 
     if (!role) {
-      return sendErrorResponse(res, "Role not found", 404);
+      return sendErrorResponse(res, "Role not found", 500);
     }
 
-    if (process.env.DEV_TYPE === "local") {
-      console.log(role.skills);
-    }
-
-    return sendSuccessResponse(
-      res,
-      {
-        data: {
-          ...role.dataValues,
-          skills: role.skills ?? [],
-        },
-      },
-      200
-    );
+    return sendSuccessResponse(res, { data: role }, 200);
   } catch (error) {
     console.error("Error retrieving skills:", error);
     return sendErrorResponse(res, "Error retrieving skills", 500);
