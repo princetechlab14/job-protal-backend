@@ -893,4 +893,36 @@ router.post(
  */
 router.delete("/resume", authenticateToken, employeeController.deleteResume);
 
+/**
+ * @swagger
+ * tags:
+ *   name: Roles
+ *   description: Role management
+ */
+
+/**
+ * @swagger
+ * /employee/roles/{roleName}/skills:
+ *   get:
+ *     summary: Retrieve skills by role name
+ *     tags: [Employees]
+ *     parameters:
+ *       - name: roleName
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved skills
+ *       404:
+ *         description: Role not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/roles/:roleName/skills",
+  employeeController.getSkillsByRole
+);
+
 module.exports = router;

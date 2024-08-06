@@ -60,7 +60,7 @@ const synchronizeAndSeed = async () => {
   try {
     await db.sequelize.sync({ force: true }); // Sync models with the database and force re-creation of tables
 
-    // // Import and execute all seeders
+    // Import and execute all seeders
     await require("./seeder/employer-seeder").employeeData();
     await require("./seeder/employee-seeder").employeeData();
     await require("./seeder/job-seeder").JobData();
@@ -80,7 +80,7 @@ const synchronizeAndSeed = async () => {
     console.error("Error during synchronization and seeding:", error);
   }
 };
-synchronizeAndSeed()
+// synchronizeAndSeed()
 
 // Define a cron job to run at 12:01 AM
 cron.schedule("* * * * *", async () => {
