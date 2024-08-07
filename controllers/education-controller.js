@@ -91,7 +91,7 @@ exports.addOrUpdateEducation = [
       );
     }
   },
-];
+];  
 
 // Delete Education
 exports.deleteEducation = [

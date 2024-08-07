@@ -52,8 +52,6 @@ db.Review = require("./review")(sequelize, DataTypes);
 db.Roles = require("./role")(sequelize, DataTypes);
 db.Admin = require("./admin-model")(sequelize, DataTypes);
 
-// Define associations
-
 // Job and Employee relationships
 db.Employer.hasMany(db.Job, {
   foreignKey: "employerId",
