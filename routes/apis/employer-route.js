@@ -74,7 +74,7 @@ router.post("/register", employerController.registerOrLoginEmployer);
  *                 format: phone-number
  *               email:
  *                 type: string
- *                 format: email 
+ *                 format: email
  *               profile:
  *                 type: string
  *                 format: binary
@@ -671,5 +671,27 @@ router.get(
   authenticateToken,
   employerController.getCountOfApplicantHired
 );
+
+/**
+ * @swagger
+ * /employee/roles/{roleName}/skills:
+ *   get:
+ *     summary: Retrieve skills by role name
+ *     tags: [Employers]
+ *     parameters:
+ *       - name: roleName
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved skills
+ *       404:
+ *         description: Role not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/roles/:roleName/skills", employerController.getSkillsByRole);
 
 module.exports = router;
