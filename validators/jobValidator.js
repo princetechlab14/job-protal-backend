@@ -23,7 +23,7 @@ exports.jobSchema = Joi.object({
     )
   ),
   skills: Joi.array().items(Joi.string()),
-  languages: Joi.array().items(Joi.string()),
+  languages: Joi.array(),
   education: Joi.array().items(Joi.string()),
   minimumPay: Joi.number().integer().allow(""),
   maximumPay: Joi.number().integer().allow(""),
