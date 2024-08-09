@@ -10,6 +10,7 @@ const {
   Experience,
   Education,
   Resume,
+  Roles,
 } = require("../models");
 const { Op, Sequelize } = require("sequelize");
 const {

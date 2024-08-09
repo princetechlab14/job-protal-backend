@@ -674,7 +674,7 @@ router.get(
 
 /**
  * @swagger
- * /employee/roles/{roleName}/skills:
+ * /employer/roles/{roleName}/skills:
  *   get:
  *     summary: Retrieve skills by role name
  *     tags: [Employers]
