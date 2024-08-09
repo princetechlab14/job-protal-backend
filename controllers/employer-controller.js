@@ -728,7 +728,11 @@ exports.getSkillsByRole = async (req, res) => {
   try {
     // Find the role by name
     const role = await Roles.findOne({
-      where: { role: roleName },
+      where: {
+        role: {
+          [Op.like]: `%${roleName}%`, // Using LIKE operator for partial matching
+        },
+      },
     });
 
     if (!role) {
