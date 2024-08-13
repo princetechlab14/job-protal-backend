@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include("../partial/head", { title: "Edit Role" }) %>
+    <!-- Tailwind CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .skill-inputs {
+        display: flex;
+        flex-direction: column;
+      }
+      .skill-inputs .skill-item {
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+      }
+      .skill-inputs .skill-item .delete-skill {
+        margin-left: 0.5rem;
+        cursor: pointer;
+        color: red;
+        font-weight: bold;
+      }
+      .error {
+        color: red;
+        display: none;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 dark:bg-gray-900 font-sans bg-cover bg-center">
+    <!-- Sidebar -->
+    <%- include("../partial/sidebar") %>
+    <!-- Main Content -->
+    <div class="ml-0 md:ml-64 flex flex-col min-h-screen">
+      <!-- Header -->
+      <%- include("../partial/header") %>
+      <!-- Main Content Area -->
+      <div class="container mx-auto py-8 mt-5">
+        <div class="flex flex-col shadow-md mb-5 bg-white rounded-lg p-5">
+          <h1
+            class="text-4xl font-extrabold mb-4 text-gray-900 dark:text-white"
+          >
+            Edit Role
+          </h1>
+          <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+              <li class="inline-flex items-center">
+                <a
+                  href="/admin/dashboard"
+                  class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                >
+                  <svg
+                    class="w-4 h-4 mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10 3.172L17.071 10.243 16.364 10.95 10 4.586 3.636 10.95 2.929 10.243 10 3.172z"
+                    ></path>
+                  </svg>
+                  Home
+                </a>
+              </li>
+              <li aria-current="page">
+                <div class="flex items-center">
+                  <svg
+                    class="w-6 h-6 text-gray-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10 3.172l7.071 7.071-1.414 1.414L10 4.586l-5.657 5.657-1.414-1.414L10 3.172z"
+                    ></path>
+                  </svg>
+                  <span
+                    class="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400"
+                    >Edit Role</span
+                  >
+                </div>
+              </li>
+            </ol>
+          </nav>
+        </div>
+        <div
+          class="container shadow-lg bg-white rounded-lg mx-auto px-4 sm:px-8"
+        >
+          <div class="py-8">
+            <form
+              id="editRoleForm"
+              action="/admin/roles/edit/<%= role.id %>"
+              method="POST"
+            >
+              <div class="mb-4">
+                <label
+                  for="role"
+                  class="block text-sm font-medium text-gray-700"
+                  >Role</label
+                >
+                <input
+                  type="text"
+                  id="role"
+                  name="role"
+                  value="<%= role.role %>"
+                  class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm"
+                />
+                <span class="error">This field is </span>
+              </div>
+              <div class="mb-4">
+                <label
+                  for="skills"
+                  class="block text-sm font-medium text-gray-700"
+                  >Skills</label
+                >
+                <div id="skillInputs" class="skill-inputs">
+                  <!-- Display Existing Skills -->
+                  <% role.skills.forEach(function(skill) { %>
+                  <div class="skill-item">
+                    <input
+                      type="text"
+                      name="skills[]"
+                      value="<%= skill %>"
+                      class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm"
+                    />
+                    <span class="delete-skill">&#10005;</span>
+                  </div>
+                  <% }); %>
+                </div>
+                <button
+                  type="button"
+                  id="addSkillButton"
+                  class="mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  Add Skill
+                </button>
+              </div>
+              <div class="flex justify-end">
+                <button
+                  type="submit"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Footer -->
+    <%- include("../partial/footer") %>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        // Function to toggle delete buttons visibility
+        function toggleDeleteButtons() {
+          // Show delete button only if there are more than two skills
+          if ($("#skillInputs .skill-item").length > 1) {
+            $("#skillInputs .delete-skill").show();
+          } else {
+            $("#skillInputs .delete-skill").hide();
+          }
+        }
+
+        // Add skill input
+        $("#addSkillButton").on("click", function () {
+          const newSkillInput = `
+      <div class="skill-item">
+        <input
+          type="text"
+          name="skills[]"
+          class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm"
+        />
+        <span class="delete-skill" style="display: none;">&#10005;</span>
+      </div>
+    `;
+          $("#skillInputs").append(newSkillInput);
+          toggleDeleteButtons(); // Update delete button visibility
+        });
+
+        // Remove skill input
+        $("#skillInputs").on("click", ".delete-skill", function () {
+          $(this).parent().remove();
+          toggleDeleteButtons(); // Update delete button visibility
+        });
+
+        // Form validation
+        $("#editRoleForm").on("submit", function (e) {
+          let isValid = true;
+
+          // Clear previous error messages
+          $(".error").hide();
+
+          // Check if the role field is empty
+          if ($("#role").val().trim() === "") {
+            isValid = false;
+            $("#role").next(".error").show();
+          }
+
+          // Validate that all skill fields are filled
+          let allSkillsFilled = true;
+          $("#skillInputs input").each(function () {
+            if ($(this).val().trim() === "") {
+              allSkillsFilled = false;
+              $(this).addClass("border-red-500");
+            } else {
+              $(this).removeClass("border-red-500");
+            }
+          });
+
+          if (!allSkillsFilled) {
+            isValid = false;
+            alert("Please fill all skill fields.");
+          }
+
+          if (!isValid) {
+            e.preventDefault(); // Prevent form submission if validation fails
+          }
+        });
+
+        // Hide error message on input focus
+        $("#editRoleForm input").on("focus", function () {
+          $(this).removeClass("border-red-500");
+        });
+
+        // Initial call to set delete button visibility
+        toggleDeleteButtons();
+      });
+    </script>
+  </body>
+</html>

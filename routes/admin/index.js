@@ -7,6 +7,7 @@ const {
   Job,
   Admin,
   Roles,
+  Quiz,
 } = require("../../models"); // Define routes
 const authController = require("../../controllers/auth-controller");
 const bcrypt = require("bcrypt");
@@ -289,6 +290,73 @@ router.post("/roles/delete/:id", authenticateJWT, async (req, res) => {
     res.redirect("/admin/roles");
   } catch (error) {
     console.error("Error deleting role:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+// Add the following route to fetch and display all quizzes with job titles
+router.get("/quiz", authenticateJWT, async (req, res) => {
+  try {
+    // Fetch all quizzes from the database
+    const quizzes = await Quiz.findAll({
+      include: [
+        {
+          model: Job,
+          as: "job", // Ensure this alias matches your Quiz model definition
+          attributes: ["jobTitle"], // Only fetch the job title
+        },
+      ],
+    });
+
+    // Parse the 'questions' field if it's a string and in local development
+    if (process.env.DEV_TYPE === "local") {
+      const parsedQuizzes = quizzes.map((quiz) => {
+        const quizData = quiz.toJSON();
+        if (typeof quizData.questions === "string") {
+          try {
+            quizData.questions = JSON.parse(quizData.questions);
+          } catch (error) {
+            quizData.questions = quizData.questions; // Keep as string if parsing fails
+          }
+        }
+        return quizData;
+      });
+      res.render("quiz/index", { quizzes: parsedQuizzes, title: "Quiz List" });
+    } else {
+      res.render("quiz/index", { quizzes, title: "Quiz List" });
+    }
+  } catch (error) {
+    console.error("Error fetching quizzes:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+// Route to render the quiz creation form
+router.get("/quiz/create", authenticateJWT, async (req, res) => {
+  try {
+    const jobs = await Job.findAll(); // Fetch all jobs to populate the select dropdown
+    res.render("quiz/create", { title: "Create Quiz", jobs });
+  } catch (error) {
+    console.error("Error fetching jobs for quiz creation:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Route to handle quiz creation
+router.post("/quiz/create", authenticateJWT, async (req, res) => {
+  const { jobId, questions } = req.body;
+  try {
+    if (!jobId || !questions) {
+      return res.status(400).send("Job and Questions are required");
+    }
+
+    // Create a new quiz
+    await Quiz.create({
+      jobId,
+      questions,
+    });
+
+    res.redirect("/admin/quiz");
+  } catch (error) {
+    console.error("Error creating quiz:", error);
     res.status(500).send("Internal Server Error");
   }
 });

@@ -37,6 +37,14 @@
     >
       <i class="fas fa-briefcase mr-2"></i>Roles
     </a>
+    <!-- New Quiz Link -->
+    <a
+      href="/admin/quiz"
+      class="block py-2 px-4 sidebar-link hover:bg-gray-700"
+      id="quizzes-link"
+    >
+      <i class="fas fa-question-circle mr-2"></i>Quizzes
+    </a>
   </nav>
   <!-- Logout button -->
   <div class="flex items-center justify-center">
@@ -58,6 +66,8 @@
       "/admin/dashboard": document.getElementById("dashboard-link"),
       "/admin/employee": document.getElementById("employee-link"),
       "/admin/employer": document.getElementById("employer-link"),
+      "/admin/roles": document.getElementById("roles-link"),
+      "/admin/quiz": document.getElementById("quizzes-link"), // Added quiz link
       "/admin/logout": document.getElementById("logout-link"),
     };
 

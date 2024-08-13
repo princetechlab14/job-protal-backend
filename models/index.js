@@ -51,6 +51,7 @@ db.JobPreferences = require("./jobPreferences")(sequelize, DataTypes);
 db.Review = require("./review")(sequelize, DataTypes);
 db.Roles = require("./role")(sequelize, DataTypes);
 db.Admin = require("./admin-model")(sequelize, DataTypes);
+db.Quiz = require("./quize")(sequelize, DataTypes);
 
 // Job and Employee relationships
 db.Employer.hasMany(db.Job, {
@@ -98,5 +99,8 @@ db.AppliedJob.belongsTo(db.Employee, {
   foreignKey: "employeeId",
   as: "employee",
 });
-
+db.Quiz.belongsTo(db.Job, {
+  foreignKey: "jobId", // Adjust if your foreign key is named differently
+  as: "job", // Alias for the association
+});
 module.exports = db;
