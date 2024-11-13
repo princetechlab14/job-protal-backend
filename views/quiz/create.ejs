@@ -1,177 +1,258 @@
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <%- include("../partial/head", { title: "Create Quiz" }) %>
-      <link
-        href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-        rel="stylesheet"
-      />
-      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    </head>
-    <body>
-      <!-- Sidebar -->
-      <%- include("../partial/sidebar") %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include("../partial/head", { title: "Create Quiz" }) %>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <%- include("../partial/sidebar") %>
 
-      <!-- Main Content -->
-      <div class="ml-0 md:ml-64 flex flex-col min-h-screen">
-        <!-- Header -->
-        <%- include("../partial/header") %>
+    <!-- Main Content -->
+    <div class="ml-0 md:ml-64 flex flex-col min-h-screen">
+      <!-- Header -->
+      <%- include("../partial/header") %>
 
-        <!-- Main Content Area -->
-        <div class="container mx-auto py-8 mt-5">
-          <div class="flex flex-col shadow-md mb-5 bg-white rounded-lg p-5">
-            <h1 class="text-4xl font-extrabold mb-4 text-gray-900">
-              Create Quiz
-            </h1>
+      <!-- Main Content Area -->
+      <div class="container mx-auto py-8 mt-5">
+        <div class="flex flex-col shadow-md mb-5 bg-white rounded-lg p-5">
+          <h1 class="text-4xl font-extrabold mb-4 text-gray-900">
+            Create Quiz
+          </h1>
 
-            <form action="/admin/quiz/create" method="POST">
-              <div class="mb-4">
-                <label for="jobId" class="block text-sm font-medium text-gray-700"
-                  >Job</label
-                >
-                <select
-                  id="jobId"
-                  name="jobId"
-                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                >
-                  <!-- Populate this with job options -->
-                  <% jobs.forEach(job => { %>
-                  <option value="<%= job.id %>"><%= job.jobTitle %></option>
-                  <% }) %>
-                </select>
-              </div>
-
-              <div class="mb-4">
-                <label
-                  for="questionType"
-                  class="block text-sm font-medium text-gray-700"
-                  >Question Type</label
-                >
-                <select
-                  id="questionType"
-                  name="questionType"
-                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                >
-                  <option value="single">Single Choice</option>
-                  <option value="multiple">Multiple Choice</option>
-                </select>
-              </div>
-
-              <div id="questionsContainer">
-                <!-- Dynamic question fields will be appended here -->
-              </div>
-
-              <button
-                type="submit"
-                class="inline-flex items-end px-4 py-2 bg-blue-500 border border-transparent rounded-md shadow-sm text-base font-medium text-white hover:bg-blue-600"
+          <form id="quizForm">
+            <div class="mb-4">
+              <label
+                for="jobId"
+                class="block text-sm font-medium text-gray-700"
               >
-                Create Quiz
-              </button>
-            </form>
-          </div>
+                Job
+              </label>
+              <select
+                id="jobId"
+                name="jobId"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+              >
+                <!-- Populate this with job options -->
+                <% jobs.forEach(job => { %>
+                <option value="<%= job.id %>" data-role="<%= job.jobTitle %>">
+                  <%= job.jobTitle %>
+                </option>
+                <% }) %>
+              </select>
+            </div>
+            <div id="questionsWrapper"></div>
+            <button
+              type="button"
+              id="addQuestionBtn"
+              class="inline-flex items-center px-4 py-2 bg-green-500 border border-transparent rounded-md shadow-sm text-base font-medium text-white hover:bg-green-600 mb-4"
+            >
+              Add New Question
+            </button>
+
+            <button
+              type="button"
+              id="submitQuizBtn"
+              class="inline-flex items-end px-4 py-2 bg-blue-500 border border-transparent rounded-md shadow-sm text-base font-medium text-white hover:bg-blue-600"
+            >
+              Submit Quiz
+            </button>
+          </form>
         </div>
       </div>
+    </div>
 
-      <!-- Footer -->
-      <%- include("../partial/footer") %>
+    <!-- Footer -->
+    <%- include("../partial/footer") %>
 
-      <script>
-        $(document).ready(function () {
-          function renderQuestionFields(type) {
-            $("#questionsContainer").html(""); // Clear existing fields
+    <script>
+          $(document).ready(function () {
+            let questionCount = 0;
 
-            // Create question input
-            $("#questionsContainer").append(`
-              <div class="mb-4">
-                <label for="question" class="block text-sm font-medium text-gray-700">Question</label>
-                <input id="question" name="question" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-              </div>
-            `);
+            function addNewQuestion() {
+              questionCount++;
 
-            // Create options fields
-            $("#questionsContainer").append(`
-              <div id="optionsContainer" class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Options</label>
-                <div id="optionsList"></div>
-                <button type="button" id="addOption" class="mt-2 inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md shadow-sm text-base font-medium text-gray-800 hover:bg-gray-400">Add Option</button>
-              </div>
-            `);
+              const questionHTML = `
+              <div class="mb-6 question-box p-4 border border-gray-300 rounded-lg shadow-sm" data-question-id="${questionCount}">
+                <h3 class="text-2xl font-semibold mb-2">Question ${questionCount}</h3>
 
-            if (type === "multiple") {
-              $("#optionsList").append(createOptionField("multiple", 1));
-            } else {
-              $("#optionsList").append(createOptionField("single", 1));
-            }
+                <div class="mb-4">
+                  <label for="question${questionCount}" class="block text-sm font-medium text-gray-700">Question</label>
+                  <input id="question${questionCount}" name="question${questionCount}" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 question-input" />
+                </div>
 
-            // Add more options dynamically
-            $("#addOption").on("click", function () {
-              let currentOptions = $("#optionsList .option-field").length;
+                <div class="mb-4">
+                  <label for="questionType${questionCount}" class="block text-sm font-medium text-gray-700">Question Type</label>
+                  <select id="questionType${questionCount}" name="questionType${questionCount}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 question-type-select">
+                    <option value="single">Single Choice</option>
+                    <option value="multiple">Multiple Choice</option>
+                  </select>
+                </div>
 
-              if (currentOptions < 4) {
-                const optionField =
-                  type === "multiple"
-                    ? createOptionField("multiple", currentOptions + 1)
-                    : createOptionField("single", currentOptions + 1);
+                <div id="optionsContainer${questionCount}" class="options-container mb-4"></div>
 
-                $("#optionsList").append(optionField);
-
-                // Disable button if options reach limit
-                if (currentOptions + 1 >= 4) {
-                  $(this)
-                    .prop("disabled", true)
-                    .addClass("cursor-not-allowed opacity-50");
-                }
-              }cv
-            });
-
-            // Listen for remove button click
-            $("#optionsList").on("click", ".removeOption", function () {
-              $(this).closest(".option-field").remove();
-
-              // Enable "Add Option" button if options are less than 4
-              if ($("#optionsList .option-field").length < 4) {
-                $("#addOption")
-                  .prop("disabled", false)
-                  .removeClass("cursor-not-allowed opacity-50");
-              }
-
-              // Hide "Remove" button if there is only one option left
-              toggleRemoveButton();
-            });
-
-            // Initial hide/remove button adjustment
-            toggleRemoveButton();
-          }
-
-          function createOptionField(type, optionNumber) {
-            const inputType = type === "multiple" ? "checkbox" : "radio";
-            return `
-              <div class="mb-2 option-field flex items-center">
-                <input type="${inputType}" name="options" value="Option${optionNumber}" />
-                <input type="text" name="optionText" class="ml-2 border-gray-300 rounded-md shadow-sm" placeholder="Option Text" />
-                <button type="button" class="removeOption ml-2 inline-flex items-center px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600">
-                  Remove
-                </button>
+                <button type="button" class="mt-2 inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md shadow-sm text-base font-medium text-gray-800 hover:bg-gray-400 add-option-btn" data-question-id="${questionCount}">Add Option</button>
               </div>
             `;
-          }
 
-          function toggleRemoveButton() {
-            $("#optionsList .option-field").each(function (index) {
-              $(this)
-                .find(".removeOption")
-                .toggle($("#optionsList .option-field").length > 1);
+              $("#questionsWrapper").append(questionHTML);
+              renderQuestionFields(questionCount, "single");
+            }
+
+            function renderQuestionFields(questionId, type) {
+              const $optionsContainer = $(`#optionsContainer${questionId}`);
+              $optionsContainer.html("");
+
+              $optionsContainer.append(createOptionField(questionId, type, 1));
+
+              $(`.add-option-btn[data-question-id=${questionId}]`).on(
+                "click",
+                function () {
+                  const $currentOptionsList = $(
+                    `#optionsContainer${questionId} .option-field`
+                  );
+                  let currentOptions = $currentOptionsList.length;
+
+                  if (currentOptions < 4) {
+                    const optionField = createOptionField(
+                      questionId,
+                      type,
+                      currentOptions + 1
+                    );
+                    $optionsContainer.append(optionField);
+
+                    if (currentOptions + 1 >= 4) {
+                      $(this)
+                        .prop("disabled", true)
+                        .addClass("cursor-not-allowed opacity-50");
+                    }
+                  }
+                }
+              );
+
+              $optionsContainer.on("click", ".removeOption", function () {
+                $(this).closest(".option-field").remove();
+
+                if ($optionsContainer.find(".option-field").length < 4) {
+                  $(`.add-option-btn[data-question-id=${questionId}]`)
+                    .prop("disabled", false)
+                    .removeClass("cursor-not-allowed opacity-50");
+                }
+
+                toggleRemoveButton(questionId);
+              });
+
+              toggleRemoveButton(questionId);
+            }
+
+            function createOptionField(questionId, type, optionNumber) {
+              const inputType = type === "multiple" ? "checkbox" : "radio";
+              return `
+              <div class="mb-2 option-field flex items-center">
+                <input type="${inputType}" name="options${questionId}" value="Option${optionNumber}" class="form-checkbox" />
+                <input type="text" name="optionText${questionId}" class="ml-2 border-gray-300 rounded-md shadow-sm p-2 focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Option Text" />
+                <button type="button" class="removeOption ml-2 inline-flex items-center px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600">Remove</button>
+              </div>
+            `;
+            }
+
+            function toggleRemoveButton(questionId) {
+              $(`#optionsContainer${questionId} .option-field`).each(function () {
+                $(this)
+                  .find(".removeOption")
+                  .toggle(
+                    $(`#optionsContainer${questionId} .option-field`).length > 1
+                  );
+              });
+            }
+
+            addNewQuestion();
+
+            $("#addQuestionBtn").on("click", function () {
+              addNewQuestion();
             });
+            $("#submitQuizBtn").on("click", function (e) {
+      e.preventDefault();
+
+      const questions = [];
+      let valid = true;
+      const jobId = $("#jobId").val();
+      const jobRole = $("#jobId option:selected").data("role");
+
+      console.log("Job ID:", jobId);
+      console.log("Job Role:", jobRole);
+
+      $(".question-box").each(function () {
+        const questionId = $(this).data("question-id");
+        const questionText = $(`#question${questionId}`).val();
+        const questionType = $(`#questionType${questionId}`).val();
+        const options = [];
+        const rightAnswers = [];
+
+        $(`#optionsContainer${questionId} .option-field`).each(function (index) {
+          const optionText = $(this)
+            .find(`input[name="optionText${questionId}"]`)
+            .val();
+          const isCorrect = $(this)
+            .find(`input[name="correctOption${questionId}"]`)
+            .is(":checked");
+
+          console.log(`Option ${index}:`, optionText, "Correct:", isCorrect);
+
+          if (questionType === "single" && isCorrect) {
+            if (rightAnswers.length > 0) {
+              valid = false;
+              alert("Each single-choice question should have exactly one correct answer.");
+              return false; // Exit loop
+            }
+            rightAnswers.push(index);
+          } else if (questionType === "multiple" && isCorrect) {
+            rightAnswers.push(index);
           }
 
-          // Initialize question fields based on default type
-          renderQuestionFields($("#questionType").val());
-
-          // Update question fields when type changes
-          $("#questionType").on("change", function () {
-            renderQuestionFields($(this).val());
-          });
+          options.push(optionText);
         });
-      </script>
-    </body>
-  </html>
+
+        if (options.length === 0) {
+          valid = false;
+          alert("Each question must have at least one option.");
+          return false; // Exit loop
+        }
+
+        questions.push({
+          question: questionText,
+          type: questionType.charAt(0).toUpperCase() + questionType.slice(1),
+          options: options,
+          rightAnswers: rightAnswers,
+        });
+
+        console.log("Question:", questionText, "Type:", questionType, "Options:", options, "Right Answers:", rightAnswers);
+      });
+
+      if (valid) {
+        const payload = {
+          questions: questions,
+          employerId: null,
+          role: jobRole,
+          userRole: "admin",
+          jobId: parseInt(jobId, 10),
+          adminId: 1,
+        };
+
+        console.log("Payload:", payload);
+      }})
+
+            $(document).on("change", ".question-type-select", function () {
+              const questionId = $(this)
+                .closest(".question-box")
+                .data("question-id");
+              renderQuestionFields(questionId, $(this).val());
+            });
+          });
+    </script>
+  </body>
+</html>
