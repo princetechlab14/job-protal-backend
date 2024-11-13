@@ -361,4 +361,61 @@ router.post("/quiz/create", authenticateJWT, async (req, res) => {
   }
 });
 
+router.post("/quizzes/delete/:id", authenticateJWT, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deleted = await Quiz.destroy({
+      where: { id: id },
+    });
+
+    if (deleted) {
+      return res.redirect("/admin/quiz");
+    } else {
+      return res.status(404).send("Quiz not found");
+    }
+
+  } catch (error) {
+    console.error("Error deleting quiz:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+router.get("/quizzes/edit/:id", authenticateJWT, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const quiz = await Quiz.findByPk(id);
+    if (!quiz) {
+      return res.status(404).send("quiz not found");
+    }
+    const questions = JSON.parse(quiz.questions);
+    console.log("questions =>", questions);
+    const jobs = await Job.findAll();
+    res.render("quiz/edit", { title: "Edit Quiz", jobs, quiz, questions });
+  } catch (error) {
+    console.error("Error deleting quiz:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+router.post("/quizzes/edit/:id", authenticateJWT, async (req, res) => {
+  const { jobId, questions } = req.body;
+  const { id } = req.params;
+  try {
+    if (!jobId || !questions) {
+      return res.status(400).send("Job and Questions are required");
+    }
+    const quiz = await Quiz.findByPk(id);
+    if (!quiz) {
+      return res.status(404).send("quiz not found");
+    }
+    quiz.jobId = jobId;
+    quiz.questions = questions;
+    await quiz.save();
+    res.redirect("/admin/quiz");
+  } catch (error) {
+    console.error("Error creating quiz:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 module.exports = router;

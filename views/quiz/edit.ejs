@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <%- include("../partial/head", { title: "Edit Role" }) %>
-    <!-- Tailwind CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
+
+<head>
+  <%- include("../partial/head", { title: "Edit Quiz" }) %>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
     <style>
       .skill-inputs {
         display: flex;
@@ -28,208 +25,282 @@
         display: none;
       }
     </style>
-  </head>
-  <body class="bg-gray-100 dark:bg-gray-900 font-sans bg-cover bg-center">
-    <!-- Sidebar -->
-    <%- include("../partial/sidebar") %>
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <%- include("../partial/sidebar") %>
+
     <!-- Main Content -->
     <div class="ml-0 md:ml-64 flex flex-col min-h-screen">
       <!-- Header -->
       <%- include("../partial/header") %>
-      <!-- Main Content Area -->
-      <div class="container mx-auto py-8 mt-5">
-        <div class="flex flex-col shadow-md mb-5 bg-white rounded-lg p-5">
-          <h1
-            class="text-4xl font-extrabold mb-4 text-gray-900 dark:text-white"
-          >
-            Edit Role
-          </h1>
-          <nav class="flex mb-4" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-              <li class="inline-flex items-center">
-                <a
-                  href="/admin/dashboard"
-                  class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                >
-                  <svg
-                    class="w-4 h-4 mr-2"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M10 3.172L17.071 10.243 16.364 10.95 10 4.586 3.636 10.95 2.929 10.243 10 3.172z"
-                    ></path>
-                  </svg>
-                  Home
-                </a>
-              </li>
-              <li aria-current="page">
-                <div class="flex items-center">
-                  <svg
-                    class="w-6 h-6 text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M10 3.172l7.071 7.071-1.414 1.414L10 4.586l-5.657 5.657-1.414-1.414L10 3.172z"
-                    ></path>
-                  </svg>
-                  <span
-                    class="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400"
-                    >Edit Role</span
-                  >
-                </div>
-              </li>
-            </ol>
-          </nav>
-        </div>
-        <div
-          class="container shadow-lg bg-white rounded-lg mx-auto px-4 sm:px-8"
-        >
-          <div class="py-8">
-            <form
-              id="editRoleForm"
-              action="/admin/roles/edit/<%= role.id %>"
-              method="POST"
-            >
+
+        <!-- Main Content Area -->
+        <div class="container mx-auto py-8 mt-5">
+          <div class="flex flex-col shadow-md mb-5 bg-white rounded-lg p-5">
+            <h1 class="text-4xl font-extrabold mb-4 text-gray-900">
+              Edit Quiz
+            </h1>
+
+            <form id="quizForm">
               <div class="mb-4">
-                <label
-                  for="role"
-                  class="block text-sm font-medium text-gray-700"
-                  >Role</label
-                >
-                <input
-                  type="text"
-                  id="role"
-                  name="role"
-                  value="<%= role.role %>"
-                  class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm"
-                />
-                <span class="error">This field is </span>
+                <label for="jobId" class="block text-sm font-medium text-gray-700">
+                  Job
+                </label>
+                <select id="jobId" name="jobId"
+                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                  <!-- Populate this with job options -->
+                  <% jobs.forEach(job=> { %>
+                    <option value="<%= job.id %>" data-role="<%= job.jobTitle %>" <%=job.id==quiz.jobId ? "selected"
+                      : "" %>>
+                      <%= job.jobTitle %>
+                    </option>
+                    <% }) %>
+                </select>
               </div>
-              <div class="mb-4">
-                <label
-                  for="skills"
-                  class="block text-sm font-medium text-gray-700"
-                  >Skills</label
-                >
-                <div id="skillInputs" class="skill-inputs">
-                  <!-- Display Existing Skills -->
-                  <% role.skills.forEach(function(skill) { %>
-                  <div class="skill-item">
-                    <input
-                      type="text"
-                      name="skills[]"
-                      value="<%= skill %>"
-                      class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm"
-                    />
-                    <span class="delete-skill">&#10005;</span>
+              <div id="questionsWrapper">
+                <% questions.forEach((question, index)=> { %>
+                  <div class="mb-6 question-box p-4 border border-gray-300 rounded-lg shadow-sm"
+                    data-question-id="<%= index + 1 %>">
+                    <h3 class="text-2xl font-semibold mb-2">Question <%= index + 1 %>
+                    </h3>
+
+                    <div class="mb-4">
+                      <label for="question<%= index + 1 %>"
+                        class="block text-sm font-medium text-gray-700">Question</label>
+                      <input id="question<%= index + 1 %>" name="question<%= index + 1 %>" type="text"
+                        value="<%= question.question %>"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 question-input" />
+                    </div>
+
+                    <div class="mb-4">
+                      <label for="questionType<%= index + 1 %>" class="block text-sm font-medium text-gray-700">Question
+                        Type</label>
+                      <select id="questionType<%= index + 1 %>" name="questionType<%= index + 1 %>"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 question-type-select">
+                        <option value="single" <%=question.type==="Single" ? "selected" : "" %>>Single Choice</option>
+                        <option value="multiple" <%=question.type==="Multiple" ? "selected" : "" %>>Multiple Choice
+                        </option>
+                      </select>
+                    </div>
+
+                    <div id="optionsContainer<%= index + 1 %>" class="options-container mb-4">
+                      <% question.options.forEach((option, optionIndex)=> { %>
+                        <div class="mb-2 option-field flex items-center">
+                          <input type="<%= question.type === 'Multiple' ? 'checkbox' : 'radio' %>"
+                            name="options<%= index + 1 %>" value="<%= optionIndex %>" class="form-checkbox"
+                            <%=question.rightAnswers.includes(optionIndex) ? 'checked' : '' %> />
+                          <input type="text" name="optionText<%= index + 1 %>" value="<%= option %>"
+                            class="ml-2 border-gray-300 rounded-md shadow-sm p-2 focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                            placeholder="Option Text" />
+                          <button type="button"
+                            class="removeOption ml-2 inline-flex items-center px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                            data-id="<%= index + 1 %>">Remove</button>
+                        </div>
+                        <% }) %>
+                    </div>
+
+                    <button type="button"
+                      class="mt-2 inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md shadow-sm text-base font-medium text-gray-800 hover:bg-gray-400 add-option-btn"
+                      data-question-id="<%= index + 1 %>">Add Option</button>
                   </div>
-                  <% }); %>
-                </div>
-                <button
-                  type="button"
-                  id="addSkillButton"
-                  class="mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  Add Skill
-                </button>
+                  <% }) %>
               </div>
-              <div class="flex justify-end">
-                <button
-                  type="submit"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  Save
-                </button>
-              </div>
+              <button type="button" id="addQuestionBtn"
+                class="inline-flex items-center px-4 py-2 bg-green-500 border border-transparent rounded-md shadow-sm text-base font-medium text-white hover:bg-green-600 mb-4">
+                Add New Question
+              </button>
+
+              <button type="button" id="submitQuizBtn"
+                class="inline-flex items-end px-4 py-2 bg-blue-500 border border-transparent rounded-md shadow-sm text-base font-medium text-white hover:bg-blue-600">
+                Submit Quiz
+              </button>
             </form>
           </div>
         </div>
-      </div>
     </div>
+
     <!-- Footer -->
     <%- include("../partial/footer") %>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-      $(document).ready(function () {
-        // Function to toggle delete buttons visibility
-        function toggleDeleteButtons() {
-          // Show delete button only if there are more than two skills
-          if ($("#skillInputs .skill-item").length > 1) {
-            $("#skillInputs .delete-skill").show();
-          } else {
-            $("#skillInputs .delete-skill").hide();
-          }
-        }
 
-        // Add skill input
-        $("#addSkillButton").on("click", function () {
-          const newSkillInput = `
-      <div class="skill-item">
-        <input
-          type="text"
-          name="skills[]"
-          class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm"
-        />
-        <span class="delete-skill" style="display: none;">&#10005;</span>
-      </div>
-    `;
-          $("#skillInputs").append(newSkillInput);
-          toggleDeleteButtons(); // Update delete button visibility
-        });
+      <script>
+        $(document).ready(function () {
+          let questionCount = "<%= questions.length %>";
 
-        // Remove skill input
-        $("#skillInputs").on("click", ".delete-skill", function () {
-          $(this).parent().remove();
-          toggleDeleteButtons(); // Update delete button visibility
-        });
+          function addNewQuestion() {
+            questionCount++;
 
-        // Form validation
-        $("#editRoleForm").on("submit", function (e) {
-          let isValid = true;
+            const questionHTML = `
+              <div class="mb-6 question-box p-4 border border-gray-300 rounded-lg shadow-sm" data-question-id="${questionCount}">
+                <h3 class="text-2xl font-semibold mb-2">Question ${questionCount}</h3>
 
-          // Clear previous error messages
-          $(".error").hide();
+                <div class="mb-4">
+                  <label for="question${questionCount}" class="block text-sm font-medium text-gray-700">Question</label>
+                  <input id="question${questionCount}" name="question${questionCount}" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 question-input" />
+                </div>
 
-          // Check if the role field is empty
-          if ($("#role").val().trim() === "") {
-            isValid = false;
-            $("#role").next(".error").show();
+                <div class="mb-4">
+                  <label for="questionType${questionCount}" class="block text-sm font-medium text-gray-700">Question Type</label>
+                  <select id="questionType${questionCount}" name="questionType${questionCount}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 question-type-select">
+                    <option value="single">Single Choice</option>
+                    <option value="multiple">Multiple Choice</option>
+                  </select>
+                </div>
+
+                <div id="optionsContainer${questionCount}" class="options-container mb-4"></div>
+
+                <button type="button" class="mt-2 inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md shadow-sm text-base font-medium text-gray-800 hover:bg-gray-400 add-option-btn" data-question-id="${questionCount}">Add Option</button>
+              </div>
+            `;
+
+            $("#questionsWrapper").append(questionHTML);
+            renderQuestionFields(questionCount, "single");
           }
 
-          // Validate that all skill fields are filled
-          let allSkillsFilled = true;
-          $("#skillInputs input").each(function () {
-            if ($(this).val().trim() === "") {
-              allSkillsFilled = false;
-              $(this).addClass("border-red-500");
-            } else {
-              $(this).removeClass("border-red-500");
+          function renderQuestionFields(questionId, type) {
+            const $optionsContainer = $(`#optionsContainer${questionId}`);
+            $optionsContainer.html("");
+
+            $optionsContainer.append(createOptionField(questionId, type, 1));
+
+            // Event handler for adding new options
+            $(`.add-option-btn[data-question-id=${questionId}]`).on("click", function () {
+              const $currentOptionsList = $(`#optionsContainer${questionId} .option-field`);
+              let currentOptions = $currentOptionsList.length;
+
+              if (currentOptions < 4) {
+                const optionField = createOptionField(questionId, type, currentOptions + 1);
+                $optionsContainer.append(optionField);
+
+                // Disable the button if 4 options are reached
+                if (currentOptions + 1 >= 4) {
+                  $(this)
+                    .prop("disabled", true)
+                    .addClass("cursor-not-allowed opacity-50");
+                }
+              }
+            });
+
+            // Delegate the click event for removeOption to handle dynamically added elements
+            $(`#optionsContainer${questionId}`).on("click", ".removeOption", function () {
+              $(this).closest(".option-field").remove();
+
+              // Enable the add option button if there are less than 4 options
+              if ($(`#optionsContainer${questionId} .option-field`).length < 4) {
+                $(`.add-option-btn[data-question-id=${questionId}]`)
+                  .prop("disabled", false)
+                  .removeClass("cursor-not-allowed opacity-50");
+              }
+              toggleRemoveButton(questionId);
+            });
+            toggleRemoveButton(questionId);
+          }
+
+          function createOptionField(questionId, type, optionNumber) {
+            const inputType = type === "multiple" ? "checkbox" : "radio";
+            return `<div class="mb-2 option-field flex items-center">
+                <input type="${inputType}" name="options${questionId}" value="Option${optionNumber}" class="form-checkbox" />
+                <input type="text" name="optionText${questionId}" class="ml-2 border-gray-300 rounded-md shadow-sm p-2 focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" placeholder="Option Text" />
+                <button type="button" class="removeOption ml-2 inline-flex items-center px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600">Remove</button>
+              </div>
+            `;
+          }
+
+          function toggleRemoveButton(questionId) {
+            $(`#optionsContainer${questionId} .option-field`).each(function () {
+              $(this)
+                .find(".removeOption")
+                .toggle(
+                  $(`#optionsContainer${questionId} .option-field`).length > 1
+                );
+            });
+          }
+
+          // Add a new question
+          $("#addQuestionBtn").on("click", function () {
+            addNewQuestion();
+          });
+
+          // Submit Quiz Button Logic
+          $("#submitQuizBtn").on("click", function (e) {
+            e.preventDefault();
+
+            const questions = [];
+            let valid = true;
+            const jobId = $("#jobId").val();
+            const jobRole = $("#jobId option:selected").data("role");
+
+            $(".question-box").each(function () {
+              const questionId = $(this).data("question-id");
+              const questionText = $(`#question${questionId}`).val();
+              const questionType = $(`#questionType${questionId}`).val();
+              const options = [];
+              const rightAnswers = [];
+
+              $(`#optionsContainer${questionId} .option-field`).each(function (index) {
+                const optionText = $(this)
+                  .find(`input[name="optionText${questionId}"]`)
+                  .val();
+                const isCorrect = $(this)
+                  .find(`input[name="options${questionId}"]`)
+                  .is(":checked");
+
+                if (questionType === "single" && isCorrect) {
+                  if (rightAnswers.length > 0) {
+                    valid = false;
+                    alert("Each single-choice question should have exactly one correct answer.");
+                    return false; // Exit loop
+                  }
+                  rightAnswers.push(index);
+                } else if (questionType === "multiple" && isCorrect) {
+                  rightAnswers.push(index);
+                }
+
+                options.push(optionText);
+              });
+
+              if (options.length === 0) {
+                valid = false;
+                alert("Each question must have at least one option.");
+                return false; // Exit loop
+              }
+
+              questions.push({
+                question: questionText,
+                type: questionType.charAt(0).toUpperCase() + questionType.slice(1),
+                options: options,
+                rightAnswers: rightAnswers,
+              });
+            });
+
+            if (valid) {
+              const $form = $('<form>', {
+                action: `/admin/quizzes/edit/<%= quiz.id %>`,
+                method: 'POST',
+                style: 'display: none;'
+              });
+              $form.append($('<input>', { type: 'hidden', name: 'questions', value: JSON.stringify(questions) }));
+              $form.append($('<input>', { type: 'hidden', name: 'employerId', value: null }));
+              $form.append($('<input>', { type: 'hidden', name: 'role', value: jobRole }));
+              $form.append($('<input>', { type: 'hidden', name: 'userRole', value: 'admin' }));
+              $form.append($('<input>', { type: 'hidden', name: 'jobId', value: parseInt(jobId, 10) }));
+              $form.append($('<input>', { type: 'hidden', name: 'adminId', value: 1 }));
+              $('body').append($form);
+              $form.submit();
             }
           });
 
-          if (!allSkillsFilled) {
-            isValid = false;
-            alert("Please fill all skill fields.");
-          }
-
-          if (!isValid) {
-            e.preventDefault(); // Prevent form submission if validation fails
-          }
+          // Handle the change of question type and render options accordingly
+          $(document).on("change", ".question-type-select", function () {
+            const questionId = $(this)
+              .closest(".question-box")
+              .data("question-id");
+            renderQuestionFields(questionId, $(this).val());
+          });
         });
 
-        // Hide error message on input focus
-        $("#editRoleForm input").on("focus", function () {
-          $(this).removeClass("border-red-500");
-        });
+      </script>
+</body>
 
-        // Initial call to set delete button visibility
-        toggleDeleteButtons();
-      });
-    </script>
-  </body>
 </html>
