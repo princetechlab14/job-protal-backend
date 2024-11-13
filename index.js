@@ -61,6 +61,7 @@ const synchronizeAndSeed = async () => {
     await db.sequelize.sync({ force: true }); // Sync models with the database and force re-creation of tables
 
     // Import and execute all seeders
+    await require("./seeder/admin-seeder").admin();
     await require("./seeder/employer-seeder").employeeData();
     await require("./seeder/employee-seeder").employeeData();
     await require("./seeder/job-seeder").JobData();
