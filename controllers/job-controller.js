@@ -276,15 +276,38 @@ exports.getAllJobs = async (req, res) => {
       };
     });
 
+    // if (process.env.DEV_TYPE === "local") {
+    //   jobData.forEach((job) => {
+    //     job.jobTypes = JSON.parse(job.jobTypes);
+    //     job.skills = JSON.parse(job.skills);
+    //     job.languages = JSON.parse(job.languages);
+    //     job.education = JSON.parse(job.education);
+    //   });
+    // }
     if (process.env.DEV_TYPE === "local") {
       jobData.forEach((job) => {
-        job.jobTypes = JSON.parse(job.jobTypes);
-        job.skills = JSON.parse(job.skills);
-        job.languages = JSON.parse(job.languages);
-        job.education = JSON.parse(job.education);
+        // Safely parse each field if it is a JSON string
+        if (typeof job.jobTypes === 'string') {
+          job.jobTypes = JSON.parse(job.jobTypes);
+        }
+        if (typeof job.skills === 'string') {
+          try {
+            job.skills = JSON.parse(job.skills);
+          } catch (error) {
+            console.error('Error parsing job.skills:', error);
+            // You can either set it to an empty array or leave it unchanged
+            job.skills = [];
+          }
+        }
+        if (typeof job.languages === 'string') {
+          job.languages = JSON.parse(job.languages);
+        }
+        if (typeof job.education === 'string') {
+          job.education = JSON.parse(job.education);
+        }
       });
     }
-
+    
     const totalPages = Math.ceil(count / limit);
     const currentPage = parseInt(page);
 
