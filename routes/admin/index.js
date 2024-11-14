@@ -222,7 +222,7 @@ function parseSkillsForLocal(roles) {
 router.get("/roles", async (req, res) => {
   try {
     let roles = await Roles.findAll();
-    roles = parseSkillsForLocal(roles);
+    // roles = parseSkillsForLocal(roles);
     res.render("roles/index", { roles });
   } catch (error) {
     console.error("Error fetching roles:", error);

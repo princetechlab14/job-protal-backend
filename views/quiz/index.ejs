@@ -141,7 +141,7 @@
                     <td
                       class="px-4 py-4 whitespace-nowrap text-sm text-gray-900"
                     >
-                      <% quiz.questions.forEach((question, qIndex) => { %>
+                      <% quiz?.questions?.forEach((question, qIndex) => { %>
                         <div>
                           <strong>Q<%= qIndex + 1 %>:</strong> <%= question.question %>
                         </div>
