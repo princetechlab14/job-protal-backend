@@ -838,12 +838,26 @@ exports.getAllSkills = async (req, res) => {
     // Extract and combine all skills
     const allSkills = jobs.reduce((acc, job) => {
       if (job.skills) {
-        return acc.concat(
-          process.env.DEV_TYPE === "local" ? JSON.parse(job.skills) : job.skills
-        );
+        let skills = job.skills;
+    
+        // Check if the skills are a string and need parsing
+        if (typeof skills === 'string') {
+          try {
+            skills = JSON.parse(skills); // Safely parse the string
+          } catch (error) {
+            console.error('Error parsing skills:', error);
+            // If parsing fails, you can either skip or use an empty array as fallback
+            skills = [];
+          }
+        }
+    
+        // Add the skills (parsed or already in array format) to the accumulator
+        return acc.concat(skills);
       }
+    
       return acc;
     }, []);
+    
 
     // Create unique skills and assign IDs
     const uniqueSkillsMap = new Map();
