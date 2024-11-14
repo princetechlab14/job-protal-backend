@@ -64,7 +64,10 @@
 
             const questionHTML = `
               <div class="mb-6 question-box p-4 border border-gray-300 rounded-lg shadow-sm" data-question-id="${questionCount}">
-                <h3 class="text-2xl font-semibold mb-2">Question ${questionCount}</h3>
+                <div class="flex justify-between">
+                  <h3 class="text-2xl font-semibold mb-2">Question ${questionCount}</h3>
+                  <button class="font-bold text-red-800 removeQuestion">X</button>
+                </div>
 
                 <div class="mb-4">
                   <label for="question${questionCount}" class="block text-sm font-medium text-gray-700">Question</label>
@@ -158,6 +161,10 @@
 
           addNewQuestion();
 
+          $(document).on("click", ".removeQuestion", function () {
+            $(this).closest(".question-box").remove();
+          });
+          
           $("#addQuestionBtn").on("click", function () {
             addNewQuestion();
           });

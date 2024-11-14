@@ -63,8 +63,10 @@
                 <% questions.forEach((question, index)=> { %>
                   <div class="mb-6 question-box p-4 border border-gray-300 rounded-lg shadow-sm"
                     data-question-id="<%= index + 1 %>">
-                    <h3 class="text-2xl font-semibold mb-2">Question <%= index + 1 %>
-                    </h3>
+                    <div class="flex justify-between">
+                      <h3 class="text-2xl font-semibold mb-2">Question <%= index + 1 %></h3>
+                      <button class="font-bold text-red-800 removeQuestion">X</button>
+                    </div>
 
                     <div class="mb-4">
                       <label for="question<%= index + 1 %>"
@@ -95,7 +97,7 @@
                             class="ml-2 border-gray-300 rounded-md shadow-sm p-2 focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
                             placeholder="Option Text" />
                           <button type="button"
-                            class="removeOption ml-2 inline-flex items-center px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                            class="removeOption removeOldOption ml-2 inline-flex items-center px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
                             data-id="<%= index + 1 %>">Remove</button>
                         </div>
                         <% }) %>
@@ -133,8 +135,10 @@
 
             const questionHTML = `
               <div class="mb-6 question-box p-4 border border-gray-300 rounded-lg shadow-sm" data-question-id="${questionCount}">
-                <h3 class="text-2xl font-semibold mb-2">Question ${questionCount}</h3>
-
+                <div class="flex justify-between">
+                  <h3 class="text-2xl font-semibold mb-2">Question ${questionCount}</h3>
+                  <button class="font-bold text-red-800 removeQuestion">X</button>
+                </div>
                 <div class="mb-4">
                   <label for="question${questionCount}" class="block text-sm font-medium text-gray-700">Question</label>
                   <input id="question${questionCount}" name="question${questionCount}" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 question-input" />
@@ -196,6 +200,14 @@
             });
             toggleRemoveButton(questionId);
           }
+
+          $(document).on("click", ".removeOldOption", function () {
+            $(this).closest(".option-field").remove();
+          });
+
+          $(document).on("click", ".removeQuestion", function () {
+            $(this).closest(".question-box").remove();
+          });
 
           function createOptionField(questionId, type, optionNumber) {
             const inputType = type === "multiple" ? "checkbox" : "radio";
