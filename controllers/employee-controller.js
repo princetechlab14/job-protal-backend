@@ -501,10 +501,20 @@ exports.getAllAppliedJobs = [
           const job = appliedJob.job;
           if (job) {
             if (process.env.DEV_TYPE === "local") {
-              job.jobTypes = JSON.parse(job.jobTypes);
-              job.skills = JSON.parse(job.skills);
-              job.languages = JSON.parse(job.languages);
-              job.education = JSON.parse(job.education);
+              // Helper function to parse fields safely
+              const parseField = (field) => {
+                try {
+                  return JSON.parse(field); // If valid JSON, parse it
+                } catch {
+                  return field.includes(",") ? field.split(",") : [field]; // Split by commas or wrap in an array
+                }
+              };
+        
+              // Safely parse job fields
+              job.jobTypes = parseField(job.jobTypes);
+              job.languages = parseField(job.languages);
+              job.skills = parseField(job.skills);
+              job.education = parseField(job.education);
             }
             // Calculate the average review rating
             const reviews = job.employer.reviews || [];
