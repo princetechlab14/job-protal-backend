@@ -276,15 +276,38 @@ exports.getAllJobs = async (req, res) => {
       };
     });
 
+    // if (process.env.DEV_TYPE === "local") {
+    //   jobData.forEach((job) => {
+    //     job.jobTypes = JSON.parse(job.jobTypes);
+    //     job.skills = JSON.parse(job.skills);
+    //     job.languages = JSON.parse(job.languages);
+    //     job.education = JSON.parse(job.education);
+    //   });
+    // }
     if (process.env.DEV_TYPE === "local") {
       jobData.forEach((job) => {
-        job.jobTypes = JSON.parse(job.jobTypes);
-        job.skills = JSON.parse(job.skills);
-        job.languages = JSON.parse(job.languages);
-        job.education = JSON.parse(job.education);
+        // Safely parse each field if it is a JSON string
+        if (typeof job.jobTypes === 'string') {
+          job.jobTypes = JSON.parse(job.jobTypes);
+        }
+        if (typeof job.skills === 'string') {
+          try {
+            job.skills = JSON.parse(job.skills);
+          } catch (error) {
+            console.error('Error parsing job.skills:', error);
+            // You can either set it to an empty array or leave it unchanged
+            job.skills = [];
+          }
+        }
+        if (typeof job.languages === 'string') {
+          job.languages = JSON.parse(job.languages);
+        }
+        if (typeof job.education === 'string') {
+          job.education = JSON.parse(job.education);
+        }
       });
     }
-
+    
     const totalPages = Math.ceil(count / limit);
     const currentPage = parseInt(page);
 
@@ -316,15 +339,26 @@ exports.getJobById = async (req, res) => {
   try {
     const { jobId } = req.params;
     const job = await Job.findByPk(jobId);
+
     if (!job) {
       return sendErrorResponse(res, { message: "Job not found" }, 404);
     }
+
     if (process.env.DEV_TYPE === "local") {
-      // Parse jobTypes field
-      job.jobTypes = JSON.parse(job.jobTypes);
-      job.languages = JSON.parse(job.languages);
-      job.skills = JSON.parse(job.skills);
-      job.education = JSON.parse(job.education);
+      // Helper function to parse fields safely
+      const parseField = (field) => {
+        try {
+          return JSON.parse(field); // If valid JSON, parse it
+        } catch {
+          return field.includes(",") ? field.split(",") : [field]; // Split by commas or wrap in an array
+        }
+      };
+
+      // Safely parse job fields
+      job.jobTypes = parseField(job.jobTypes);
+      job.languages = parseField(job.languages);
+      job.skills = parseField(job.skills);
+      job.education = parseField(job.education);
     }
 
     sendSuccessResponse(res, { job });
@@ -333,6 +367,7 @@ exports.getJobById = async (req, res) => {
     sendErrorResponse(res, { message: "Error retrieving job" }, 500);
   }
 };
+
 
 // Delete job by ID
 exports.deleteJob = [
