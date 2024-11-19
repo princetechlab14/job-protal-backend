@@ -1,9 +1,10 @@
-const { Quiz } = require("../models");
+const { Quiz, EmployeeQuiz, Sequelize } = require("../models");
 const Joi = require("joi");
 const {
   sendSuccessResponse,
   sendErrorResponse,
 } = require("../utils/responseUtils");
+const { Op } = require("sequelize");
 
 // Validation schema using Joi
 const quizSchema = Joi.object({
@@ -24,9 +25,26 @@ const quizSchema = Joi.object({
   adminId: Joi.number().optional(),
 });
 
+const employeeQuizSchema = Joi.object({
+  employeeId: Joi.number().required(),
+  quizId: Joi.number().required(),
+});
+
 exports.getAllQuizzes = async (req, res) => {
   try {
-    const quizzes = await Quiz.findAll();
+    const { employeeId, userType } = req.user;
+    if (!employeeId && userType != "employee") {
+      return sendErrorResponse(res, "Employee ID is required.", 400);
+    }
+    const quizzes = await Quiz.findAll({
+      where: {
+        id: {
+          [Op.notIn]: Sequelize.literal(`
+            (SELECT quizId FROM EmployeeQuizzes WHERE employeeId = ${employeeId})
+          `),
+        },
+      },
+    });
 
     // Parse the 'questions' field if it's a string and in local development
     if (process.env.DEV_TYPE === "local") {
@@ -127,3 +145,30 @@ exports.deleteQuiz = async (req, res) => {
     sendErrorResponse(res, error.message);
   }
 };
+
+exports.employeeQuiz = async (req, res) => {
+  const { error } = employeeQuizSchema.validate(req.body);
+  if (error) return sendErrorResponse(res, error.details[0].message, 400);
+
+  try {
+    const { employeeId, quizId } = req.body;
+    const [record, created] = await EmployeeQuiz.findOrCreate({
+      where: { employeeId, quizId },
+      defaults: req.body,
+    });
+    if (created) {
+      return res.json({
+        success: true,
+        message: "Employee quiz added successfully.",
+      });
+    } else {
+      return res.status(409).json({
+        success: false,
+        message: "Employee quiz record already exists.",
+      });
+    }
+  } catch (error) {
+    sendErrorResponse(res, error.message);
+  }
+};
+

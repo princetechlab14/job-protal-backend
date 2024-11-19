@@ -1,7 +1,89 @@
 const express = require("express");
 const quizController = require("../../controllers/quiz-controller");
+const { authenticateToken } = require("../../middleware/verifyToken");
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /employees:
+ *   post:
+ *     summary: Assign a quiz to an employee
+ *     description: Assigns a quiz to an employee by creating a record in the employeeQuiz table. If the combination of employeeId and quizId already exists, it prevents duplication.
+ *     tags:
+ *       - Employee Quiz
+ *     security:
+ *       - bearerAuth: [] # Assumes you are using bearer token authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               employeeId:
+ *                 type: integer
+ *                 description: ID of the employee
+ *                 example: 101
+ *               quizId:
+ *                 type: integer
+ *                 description: ID of the quiz
+ *                 example: 202
+ *     responses:
+ *       200:
+ *         description: Quiz successfully assigned to the employee
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Employee quiz added successfully
+ *       400:
+ *         description: Validation error or bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid employeeId or quizId."
+ *       409:
+ *         description: Employee quiz record already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Employee quiz record already exists.
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error occurred."
+ */
+router.post("/employees", authenticateToken, quizController.employeeQuiz);
 
 /**
  * @swagger
@@ -55,7 +137,7 @@ const router = express.Router();
  *                     type: string
  *                     format: date-time
  */
-router.get("/", quizController.getAllQuizzes);
+router.get("/", authenticateToken, quizController.getAllQuizzes);
 
 /**
  * @swagger
@@ -116,7 +198,7 @@ router.get("/", quizController.getAllQuizzes);
  *       404:
  *         description: Quiz not found
  */
-router.get("/:id", quizController.getQuizById);
+router.get("/:id", authenticateToken, quizController.getQuizById);
 
 /**
  * @swagger
@@ -164,7 +246,7 @@ router.get("/:id", quizController.getQuizById);
  *       400:
  *         description: Invalid input
  */
-router.post("/", quizController.createQuiz);
+router.post("/", authenticateToken, quizController.createQuiz);
 
 /**
  * @swagger
@@ -221,7 +303,7 @@ router.post("/", quizController.createQuiz);
  *       404:
  *         description: Quiz not found
  */
-router.put("/:id", quizController.updateQuiz);
+router.put("/:id", authenticateToken, quizController.updateQuiz);
 
 /**
  * @swagger
@@ -241,6 +323,6 @@ router.put("/:id", quizController.updateQuiz);
  *       404:
  *         description: Quiz not found
  */
-router.delete("/:id", quizController.deleteQuiz);
+router.delete("/:id", authenticateToken, quizController.deleteQuiz);
 
 module.exports = router;
