@@ -36,7 +36,8 @@ exports.getAllQuizzes = async (req, res) => {
     if (!employeeId && userType != "employee") {
       return sendErrorResponse(res, "Employee ID is required.", 400);
     }
-    const quizzes = await Quiz.findAll({
+    const { jobId = 0 } = req.query;
+    let conditionQuiz = {
       where: {
         id: {
           [Op.notIn]: Sequelize.literal(`
@@ -44,23 +45,25 @@ exports.getAllQuizzes = async (req, res) => {
           `),
         },
       },
-    });
-
+    };
+    if (jobId > 0) {
+      conditionQuiz.where.jobId = jobId;
+    }
+    const quizzes = await Quiz.findOne(conditionQuiz);
+    if (!quizzes) {
+      return sendSuccessResponse(res, null);
+    }
     // Parse the 'questions' field if it's a string and in local development
     if (process.env.DEV_TYPE === "local") {
-      const parsedQuizzes = quizzes.map((quiz) => {
-        const quizData = quiz.toJSON();
-        if (typeof quizData.questions === "string") {
-          try {
-            quizData.questions = JSON.parse(quizData.questions);
-          } catch (error) {
-            quizData.questions = quizData.questions; // Keep as string if parsing fails
-          }
+      const quizData = quizzes.toJSON();
+      if (typeof quizData.questions === "string") {
+        try {
+          quizData.questions = JSON.parse(quizData.questions);
+        } catch (error) {
+          quizData.questions = quizData.questions;
         }
-        return quizData;
-      });
-
-      return sendSuccessResponse(res, parsedQuizzes);
+      }
+      return sendSuccessResponse(res, quizData);
     }
 
     sendSuccessResponse(res, quizzes);
