@@ -48,24 +48,24 @@ exports.getAllQuizzes = async (req, res) => {
     };
     if (jobId > 0) {
       conditionQuiz.where.jobId = jobId;
+      conditionQuiz.limit = 1;
     }
-    const quizzes = await Quiz.findOne(conditionQuiz);
-    if (!quizzes) {
-      return sendSuccessResponse(res, null);
-    }
+    const quizzes = await Quiz.findAll(conditionQuiz);
     // Parse the 'questions' field if it's a string and in local development
     if (process.env.DEV_TYPE === "local") {
-      const quizData = quizzes.toJSON();
-      if (typeof quizData.questions === "string") {
-        try {
-          quizData.questions = JSON.parse(quizData.questions);
-        } catch (error) {
-          quizData.questions = quizData.questions;
+      const parsedQuizzes = quizzes.map((quiz) => {
+        const quizData = quiz.toJSON();
+        if (typeof quizData.questions === "string") {
+          try {
+            quizData.questions = JSON.parse(quizData.questions);
+          } catch (error) {
+            console.warn(`Failed to parse questions for quiz ID ${quizData.id}:`, error.message);
+          }
         }
-      }
-      return sendSuccessResponse(res, quizData);
+        return quizData;
+      });
+      return sendSuccessResponse(res, parsedQuizzes);
     }
-
     sendSuccessResponse(res, quizzes);
   } catch (error) {
     sendErrorResponse(res, error.message);
