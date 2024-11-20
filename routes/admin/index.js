@@ -308,22 +308,22 @@ router.get("/quiz", authenticateJWT, async (req, res) => {
     });
 
     // Parse the 'questions' field if it's a string and in local development
-    if (process.env.DEV_TYPE === "local") {
-      const parsedQuizzes = quizzes.map((quiz) => {
-        const quizData = quiz.toJSON();
-        if (typeof quizData.questions === "string") {
-          try {
-            quizData.questions = JSON.parse(quizData.questions);
-          } catch (error) {
-            quizData.questions = quizData.questions; // Keep as string if parsing fails
-          }
+    // if (process.env.DEV_TYPE === "local") {
+    const parsedQuizzes = quizzes.map((quiz) => {
+      const quizData = quiz.toJSON();
+      if (typeof quizData.questions === "string") {
+        try {
+          quizData.questions = JSON.parse(quizData.questions);
+        } catch (error) {
+          quizData.questions = quizData.questions; // Keep as string if parsing fails
         }
-        return quizData;
-      });
-      res.render("quiz/index", { quizzes: parsedQuizzes, title: "Quiz List" });
-    } else {
-      res.render("quiz/index", { quizzes, title: "Quiz List" });
-    }
+      }
+      return quizData;
+    });
+    res.render("quiz/index", { quizzes: parsedQuizzes, title: "Quiz List" });
+    // } else {
+    //   res.render("quiz/index", { quizzes, title: "Quiz List" });
+    // }
   } catch (error) {
     console.error("Error fetching quizzes:", error);
     res.status(500).send("Internal Server Error");
