@@ -33,25 +33,28 @@ const employeeQuizSchema = Joi.object({
 exports.getAllQuizzes = async (req, res) => {
   try {
     const { employeeId, userType } = req.user;
-    if (!employeeId && userType != "employee") {
+
+    // Ensure only employees can access this endpoint
+    if (!employeeId && userType !== "employee") {
       return sendErrorResponse(res, "Employee ID is required.", 400);
     }
+
     const { jobId = 0 } = req.query;
+
+    // Define the base condition
     let conditionQuiz = {
-      where: {
-        id: {
-          [Op.notIn]: Sequelize.literal(`
-            (SELECT quizId FROM EmployeeQuizzes WHERE employeeId = ${employeeId})
-          `),
-        },
-      },
+      where: {},
     };
+
+    // Add jobId filter if it's provided and greater than 0
     if (jobId > 0) {
       conditionQuiz.where.jobId = jobId;
-      conditionQuiz.limit = 1;
     }
+
+    // Fetch quizzes based on the condition
     const quizzes = await Quiz.findAll(conditionQuiz);
-    // Parse the 'questions' field if it's a string and in local development
+
+    // Parse the 'questions' field if in local development
     if (process.env.DEV_TYPE === "local") {
       const parsedQuizzes = quizzes.map((quiz) => {
         const quizData = quiz.toJSON();
@@ -66,11 +69,56 @@ exports.getAllQuizzes = async (req, res) => {
       });
       return sendSuccessResponse(res, parsedQuizzes);
     }
+
+    // Return the quizzes
     sendSuccessResponse(res, quizzes);
   } catch (error) {
     sendErrorResponse(res, error.message);
   }
 };
+
+
+// exports.getAllQuizzes = async (req, res) => {
+//   try {
+//     const { employeeId, userType } = req.user;
+//     if (!employeeId && userType != "employee") {
+//       return sendErrorResponse(res, "Employee ID is required.", 400);
+//     }
+//     const { jobId = 0 } = req.query;
+//     let conditionQuiz = {
+//       where: {
+//         id: {
+//           [Op.notIn]: Sequelize.literal(`
+//             (SELECT quizId FROM EmployeeQuizzes WHERE employeeId = ${employeeId})
+//           `),
+//         },
+//       },
+//     };
+//     if (jobId > 0) {
+//       conditionQuiz.where.jobId = jobId;
+//       conditionQuiz.limit = 1;
+//     }
+//     const quizzes = await Quiz.findAll(conditionQuiz);
+//     // Parse the 'questions' field if it's a string and in local development
+//     if (process.env.DEV_TYPE === "local") {
+//       const parsedQuizzes = quizzes.map((quiz) => {
+//         const quizData = quiz.toJSON();
+//         if (typeof quizData.questions === "string") {
+//           try {
+//             quizData.questions = JSON.parse(quizData.questions);
+//           } catch (error) {
+//             console.warn(`Failed to parse questions for quiz ID ${quizData.id}:`, error.message);
+//           }
+//         }
+//         return quizData;
+//       });
+//       return sendSuccessResponse(res, parsedQuizzes);
+//     }
+//     sendSuccessResponse(res, quizzes);
+//   } catch (error) {
+//     sendErrorResponse(res, error.message);
+//   }
+// };
 
 exports.getQuizById = async (req, res) => {
   try {
