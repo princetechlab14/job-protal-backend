@@ -175,3 +175,21 @@ exports.employeeQuiz = async (req, res) => {
   }
 };
 
+exports.employeeQuizList = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await EmployeeQuiz.findAll({
+      where: {
+        employeeId: id,
+      },
+      attributes: ['quizId']
+    });
+    return res.json({
+      success: true,
+      message: "Get employee quiz list successfully.",
+      data: result
+    });
+  } catch (error) {
+    sendErrorResponse(res, error.message);
+  }
+};

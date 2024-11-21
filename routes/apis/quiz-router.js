@@ -4,6 +4,8 @@ const { authenticateToken } = require("../../middleware/verifyToken");
 
 const router = express.Router();
 
+router.get("/employees/:id", authenticateToken, quizController.employeeQuizList);
+
 /**
  * @swagger
  * /employees:
