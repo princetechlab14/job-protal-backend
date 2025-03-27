@@ -29,7 +29,7 @@ const convertPdfToBase64 = async (req, res, next) => {
   try {
     const command = new PutObjectCommand(params);
     const data = await s3.send(command);
-    req.body.cvBase64 = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/resumes/${req.file.originalname}`; // Construct the S3 URL
+    req.body.cvBase64 = `${process.env.AWS_BASE_URL}/${process.env.AWS_BUCKET_NAME}/resumes/${req.file.originalname}`;
     req.body.fileName = req.file.originalname;
     next();
   } catch (error) {
@@ -50,7 +50,7 @@ const uploadImageToS3 = async (req, res, next) => {
       };
       const command = new PutObjectCommand(params);
       await s3.send(command);
-      req.body.imageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/images/${req.file.originalname}`; // Construct the S3 URL
+      req.body.imageUrl = `${process.env.AWS_BASE_URL}/${process.env.AWS_BUCKET_NAME}/images/${req.file.originalname}`; // Construct the S3 URL
       req.body.fileName = req.file.originalname;
     }
     next();
