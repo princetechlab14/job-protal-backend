@@ -8,6 +8,8 @@ const {
   Admin,
   Roles,
   Quiz,
+  OtherCategory,
+  OtherJob
 } = require("../../models"); // Define routes
 const authController = require("../../controllers/auth-controller");
 const bcrypt = require("bcrypt");
@@ -219,7 +221,7 @@ function parseSkillsForLocal(roles) {
   return roles;
 }
 // Get roles index
-router.get("/roles", async (req, res) => {
+router.get("/roles", authenticateJWT, async (req, res) => {
   try {
     let roles = await Roles.findAll();
     // roles = parseSkillsForLocal(roles);
@@ -231,12 +233,12 @@ router.get("/roles", async (req, res) => {
 });
 
 // Get create form
-router.get("/roles/create", (req, res) => {
+router.get("/roles/create", authenticateJWT, (req, res) => {
   res.render("roles/create");
 });
 
 // Handle create form submission
-router.post("/roles/create", async (req, res) => {
+router.post("/roles/create", authenticateJWT, async (req, res) => {
   const { role, skills } = req.body;
   try {
     console.log(skills);
@@ -252,7 +254,7 @@ router.post("/roles/create", async (req, res) => {
 });
 
 // Get edit form
-router.get("/roles/edit/:id", async (req, res) => {
+router.get("/roles/edit/:id", authenticateJWT, async (req, res) => {
   const role = await Roles.findByPk(req.params.id);
   if (process.env.DEV_TYPE === "local") {
     role.skills = JSON.parse(role.skills);
@@ -264,7 +266,7 @@ router.get("/roles/edit/:id", async (req, res) => {
 });
 
 // Handle edit form submission
-router.post("/roles/edit/:id", async (req, res) => {
+router.post("/roles/edit/:id", authenticateJWT, async (req, res) => {
   const { role, skills } = req.body;
   try {
     if (!role || !skills) {
@@ -414,6 +416,137 @@ router.post("/quizzes/edit/:id", authenticateJWT, async (req, res) => {
     res.redirect("/admin/quiz");
   } catch (error) {
     console.error("Error creating quiz:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Get other-category index
+router.get("/other-category", authenticateJWT, async (req, res) => {
+  try {
+    let otherCategories = await OtherCategory.findAll();
+    res.render("otherCategory/index", { otherCategories });
+  } catch (error) {
+    console.error("Error fetching otherCategory:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Get create form
+router.get("/other-category/create", authenticateJWT, (req, res) => {
+  res.render("otherCategory/create");
+});
+
+// Handle create form submission
+router.post("/other-category", authenticateJWT, async (req, res) => {
+  const { title, shorting = 50 } = req.body;
+  try {
+    if (!title) return res.status(400).send("Title are required");
+    await OtherCategory.create({ title, shorting });
+    res.redirect("/admin/other-category");
+  } catch (error) {
+    console.error("Error creating other-category:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Get edit form
+router.get("/other-category/edit/:id", authenticateJWT, async (req, res) => {
+  const otherCategory = await OtherCategory.findByPk(req.params.id);
+  if (!otherCategory) return res.status(404).send("Other Category not found");
+  res.render("otherCategory/edit", { otherCategory });
+});
+
+// Handle edit form submission
+router.post("/other-category/edit/:id", authenticateJWT, async (req, res) => {
+  const { title, shorting = 50 } = req.body;
+  try {
+    if (!title) return res.status(400).send("Title are required");
+    await OtherCategory.update({ title, shorting }, { where: { id: req.params.id } });
+    res.redirect("/admin/other-category");
+  } catch (error) {
+    console.error("Error updating Other Category:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Add the delete route
+router.post("/other-category/delete/:id", authenticateJWT, async (req, res) => {
+  const id = req.params.id;
+  try {
+    const otherCategory = await OtherCategory.findByPk(id);
+    if (!otherCategory) return res.status(404).send("OtherCategory not found");
+    await OtherCategory.destroy({ where: { id } });
+    res.redirect("/admin/other-category");
+  } catch (error) {
+    console.error("Error deleting other-category:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+
+// Get other-category index
+router.get("/other-job", authenticateJWT, async (req, res) => {
+  try {
+    let otherJobs = await OtherJob.findAll({
+      include: [{ model: OtherCategory, as: "other_category", attributes: ["title"], }]
+    });
+    res.render("otherJobs/index", { otherJobs });
+  } catch (error) {
+    console.error("Error fetching otherJobs:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Get create form
+router.get("/other-job/create", authenticateJWT, async (req, res) => {
+  const otherCategories = await OtherCategory.findAll();
+  res.render("otherJobs/create", { otherCategories });
+});
+
+// Handle create form submission
+router.post("/other-job", authenticateJWT, async (req, res) => {
+  const { otherCategoryId = null, title, shorting = 50, image = null, description = null } = req.body;
+  try {
+    if (!title) return res.status(400).send("Title are required");
+    await OtherJob.create({ otherCategoryId, title, image, description, shorting });
+    res.redirect("/admin/other-job");
+  } catch (error) {
+    console.error("Error creating other-job:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Get edit form
+router.get("/other-job/edit/:id", authenticateJWT, async (req, res) => {
+  const otherJob = await OtherJob.findByPk(req.params.id);
+  const otherCategories = await OtherCategory.findAll();
+  if (!otherJob) return res.status(404).send("Other Job not found");
+  res.render("otherJobs/edit", { otherJob, otherCategories });
+});
+
+// Handle edit form submission
+router.post("/other-job/edit/:id", authenticateJWT, async (req, res) => {
+  const { otherCategoryId = null, title, shorting = 50, image = null, description = null } = req.body;
+  try {
+    if (!title) return res.status(400).send("Title are required");
+    await OtherJob.update({ otherCategoryId, title, image, description, shorting }, { where: { id: req.params.id } });
+    res.redirect("/admin/other-job");
+  } catch (error) {
+    console.error("Error updating other-job:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Add the delete route
+router.post("/other-job/delete/:id", authenticateJWT, async (req, res) => {
+  const id = req.params.id;
+  try {
+    const otherJob = await OtherJob.findByPk(id);
+    if (!otherJob) return res.status(404).send("otherJob not found");
+    await OtherJob.destroy({ where: { id } });
+    res.redirect("/admin/other-job");
+  } catch (error) {
+    console.error("Error deleting other-job:", error);
     res.status(500).send("Internal Server Error");
   }
 });
