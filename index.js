@@ -112,5 +112,5 @@ cron.schedule("* * * * *", async () => {
 
 // Start server
 app.listen(port, () => {
-  console.log(`Server is running on http://192.168.29.62:${port}`);
+  console.log(`Server is running on http://localhost:${port}`);
 });
