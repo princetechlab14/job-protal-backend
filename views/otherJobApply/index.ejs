@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <%- include("../partial/head", { title: "OtherJob List" }) %>
+  <%- include("../partial/head", { title: "OtherJobApplied List" }) %>
     <!-- Tailwind CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
     <!-- Font Awesome -->
@@ -32,7 +32,7 @@
         <div class="container mx-auto py-8 mt-5">
           <div class="flex flex-col shadow-md mb-5 bg-white rounded-lg p-5">
             <h1 class="text-4xl font-extrabold mb-4 text-gray-900 dark:text-white">
-              Other Job List
+              Other Job Applied List
             </h1>
             <nav class="flex mb-4" aria-label="Breadcrumb">
               <ol class="inline-flex items-center space-x-1 md:space-x-3">
@@ -52,7 +52,7 @@
                       xmlns="http://www.w3.org/2000/svg">
                       <path d="M10 3.172l7.071 7.071-1.414 1.414L10 4.586l-5.657 5.657-1.414-1.414L10 3.172z"></path>
                     </svg>
-                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400">Other Job
+                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400">Other Job Applied
                       List</span>
                   </div>
                 </li>
@@ -61,12 +61,6 @@
           </div>
           <div class="container shadow-lg bg-white rounded-lg mx-auto px-4 sm:px-8">
             <!-- Create Button -->
-            <div class="container text-right">
-              <a href="/admin/other-job/create"
-                class="inline-flex items-center px-4 my-2 py-2 bg-blue-500 border border-transparent rounded-md shadow-sm text-base font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Create Other Job
-              </a>
-            </div>
             <div class="py-8">
               <div class="overflow-x-auto">
                 <table id="employeeTable" class="min-w-full bg-white border border-gray-200 rounded-lg">
@@ -76,30 +70,34 @@
                         Actions
                       </th>
                       <th class="px-4 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">
-                        ID
+                        Index
                       </th>
                       <th class="px-4 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">
-                        OtherCategory
+                        Name
                       </th>
                       <th class="px-4 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">
-                        Title
+                        Email
                       </th>
                       <th class="px-4 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">
-                        Image
+                        Mobile No
                       </th>
                       <th class="px-4 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">
-                        Shorting
+                        Job Title
+                      </th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">
+                        Job Name
                       </th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-200">
-                    <% otherJobs.forEach((job, index)=> { %>
+                    <% otherJobApply.forEach((job, index)=> { %>
                       <tr class="<%= index % 2 === 0 ? 'bg-gray-50' : 'bg-white' %> hover:bg-gray-100">
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <a href="/admin/other-job/edit/<%= job.id %>"
+                          <a href="/admin/other-job-apply/<%= job.id %>"
                             class="text-blue-500 hover:text-blue-700 icon-button" title="Edit"><i
                               class="fa fa-edit"></i></a>
-                          <form action="/admin/other-job/delete/<%= job.id %>" method="POST" class="inline delete-form">
+                          <form action="/admin/other-job-apply/delete/<%= job.id %>" method="POST"
+                            class="inline delete-form">
                             <button type="submit" class="text-red-500 hover:text-red-700 icon-button" title="Delete">
                               <i class="fa fa-trash"></i>
                             </button>
@@ -109,16 +107,19 @@
                           <%= index+1 %>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <%= job?.other_category?.title %>
+                          <%= job?.name %>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <%= job.title %>
+                          <%= job.email %>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <img src="<%= job.image %>" alt="img" class="w-16 h-16">
+                          <%= job.mobile_code %> - <%= job.mobile_no %>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <%= job.shorting %>
+                          <%= job.job_title %>
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <%= job.job_name %>
                         </td>
                       </tr>
                       <% }); %>

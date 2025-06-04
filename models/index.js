@@ -55,6 +55,7 @@ db.Quiz = require("./quize")(sequelize, DataTypes);
 db.EmployeeQuiz = require("./employeeQuiz")(sequelize, DataTypes);
 db.OtherCategory = require("./otherCategory")(sequelize, DataTypes);
 db.OtherJob = require("./otherJob")(sequelize, DataTypes);
+db.OtherJobApply = require("./otherJobApply")(sequelize, DataTypes);
 
 // Job and Employee relationships
 db.Employer.hasMany(db.Job, {

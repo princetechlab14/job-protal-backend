@@ -9,7 +9,8 @@ const {
   Roles,
   Quiz,
   OtherCategory,
-  OtherJob
+  OtherJob,
+  OtherJobApply
 } = require("../../models"); // Define routes
 const authController = require("../../controllers/auth-controller");
 const bcrypt = require("bcrypt");
@@ -505,10 +506,10 @@ router.get("/other-job/create", authenticateJWT, async (req, res) => {
 
 // Handle create form submission
 router.post("/other-job", authenticateJWT, async (req, res) => {
-  const { otherCategoryId = null, title, shorting = 50, image = null, description = null } = req.body;
+  const { otherCategoryId = null, title, shorting = 50, image = null, description = null, link = null, short_desc = null } = req.body;
   try {
     if (!title) return res.status(400).send("Title are required");
-    await OtherJob.create({ otherCategoryId, title, image, description, shorting });
+    await OtherJob.create({ otherCategoryId, title, image, description, shorting, link, short_desc });
     res.redirect("/admin/other-job");
   } catch (error) {
     console.error("Error creating other-job:", error);
@@ -526,10 +527,10 @@ router.get("/other-job/edit/:id", authenticateJWT, async (req, res) => {
 
 // Handle edit form submission
 router.post("/other-job/edit/:id", authenticateJWT, async (req, res) => {
-  const { otherCategoryId = null, title, shorting = 50, image = null, description = null } = req.body;
+  const { otherCategoryId = null, title, shorting = 50, image = null, description = null, link = null, short_desc = null } = req.body;
   try {
     if (!title) return res.status(400).send("Title are required");
-    await OtherJob.update({ otherCategoryId, title, image, description, shorting }, { where: { id: req.params.id } });
+    await OtherJob.update({ otherCategoryId, title, image, description, shorting, link, short_desc }, { where: { id: req.params.id } });
     res.redirect("/admin/other-job");
   } catch (error) {
     console.error("Error updating other-job:", error);
@@ -551,4 +552,38 @@ router.post("/other-job/delete/:id", authenticateJWT, async (req, res) => {
   }
 });
 
+// other job apply
+router.get("/other-job-apply", authenticateJWT, async (req, res) => {
+  try {
+    let otherJobApply = await OtherJobApply.findAll();
+    res.render("otherJobApply/index", { otherJobApply });
+  } catch (error) {
+    console.error("Error fetching otherJobApply:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+router.get("/other-job-apply/:id", authenticateJWT, async (req, res) => {
+  try {
+    let otherJobApply = await OtherJobApply.findByPk(req.params.id);
+    if (!otherJobApply) return res.status(404).send("Other Job applied not found");
+    res.render("otherJobApply/show", { otherJobApply });
+  } catch (error) {
+    console.error("Error fetching otherJobApply:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+router.post("/other-job-apply/delete/:id", authenticateJWT, async (req, res) => {
+  const id = req.params.id;
+  try {
+    const otherJobApplied = await OtherJobApply.findByPk(id);
+    if (!otherJobApplied) return res.status(404).send("Other job applied not found");
+    await OtherJobApply.destroy({ where: { id } });
+    res.redirect("/admin/other-job-apply");
+  } catch (error) {
+    console.error("Error deleting other-job-apply:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 module.exports = router;

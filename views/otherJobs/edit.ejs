@@ -103,6 +103,18 @@
                     value="<%= otherJob.image %>" />
                 </div>
 
+                <div class="mb-4">
+                  <label for="link" class="block text-sm font-medium text-gray-700">Link</label>
+                  <input type="text" id="link" name="link" value="<%= otherJob.link %>"
+                    class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm" />
+                </div>
+
+                <div class="mb-4">
+                  <label for="short_desc" class="block text-sm font-medium text-gray-700">Short Description:</label>
+                  <textarea name="short_desc" id="short_desc"
+                    class="mt-1 block border p-1 w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"><%= otherJob.short_desc %></textarea>
+                </div>
+
                 <!-- Description field (CKEditor) -->
                 <div class="mb-4">
                   <label for="description" class="block text-sm font-medium text-gray-700">Description:</label>

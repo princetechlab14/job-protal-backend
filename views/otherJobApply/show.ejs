@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include("../partial/head", { title: "Show Other Job Apply" }) %>
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <script src="https://cdn.ckeditor.com/4.16.1/full/ckeditor.js"></script>
+
+    <style>
+      .skill-inputs {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .skill-inputs .skill-item {
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+      }
+
+      .skill-inputs .skill-item .delete-skill {
+        margin-left: 0.5rem;
+        cursor: pointer;
+        color: red;
+        font-weight: bold;
+      }
+
+      .error {
+        color: red;
+        display: none;
+      }
+    </style>
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900 font-sans bg-cover bg-center">
+  <!-- Sidebar -->
+  <%- include("../partial/sidebar") %>
+    <!-- Main Content -->
+    <div class="ml-0 md:ml-64 flex flex-col min-h-screen">
+      <!-- Header -->
+      <%- include("../partial/header") %>
+        <!-- Main Content Area -->
+        <div class="container mx-auto py-8 mt-5">
+          <div class="flex flex-col shadow-md mb-5 bg-white rounded-lg p-5">
+            <h1 class="text-4xl font-extrabold mb-4 text-gray-900 dark:text-white">
+              Show Other Job Apply
+            </h1>
+            <nav class="flex mb-4" aria-label="Breadcrumb">
+              <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                  <a href="/admin/dashboard"
+                    class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10 3.172L17.071 10.243 16.364 10.95 10 4.586 3.636 10.95 2.929 10.243 10 3.172z"></path>
+                    </svg>
+                    Home
+                  </a>
+                </li>
+                <li aria-current="page">
+                  <div class="flex items-center">
+                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10 3.172l7.071 7.071-1.414 1.414L10 4.586l-5.657 5.657-1.414-1.414L10 3.172z"></path>
+                    </svg>
+                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400">
+                      Other Job Apply</span>
+                  </div>
+                </li>
+              </ol>
+            </nav>
+          </div>
+          <div class="container shadow-lg bg-white rounded-lg mx-auto px-4 sm:px-8">
+            <div class="py-8">
+              <div class="mb-4">
+                <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                <input type="text" id="name" name="name" value="<%= otherJobApply.name %>"
+                  class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm" />
+              </div>
+
+              <div class="mb-4">
+                <label for="birth_date" class="block text-sm font-medium text-gray-700">Birth Date</label>
+                <input type="text" id="birth_date" name="birth_date" value="<%= otherJobApply.birth_date %>"
+                  class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm" />
+              </div>
+
+              <div class="mb-4">
+                <label for="gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                <input type="text" id="gender" name="gender" value="<%= otherJobApply.gender %>"
+                  class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm" />
+              </div>
+
+              <div class="mb-4">
+                <label for="mobile_no" class="block text-sm font-medium text-gray-700">Mobile No</label>
+                <input type="text" id="mobile_no" name="mobile_no"
+                  value="<%= otherJobApply.mobile_code %> - <%= otherJobApply.mobile_no %>"
+                  class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm" />
+              </div>
+
+              <div class="mb-4">
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="text" id="email" name="email" value="<%= otherJobApply.email %>"
+                  class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm" />
+              </div>
+
+              <div class="mb-4">
+                <label for="job_title" class="block text-sm font-medium text-gray-700">Job Title</label>
+                <input type="text" id="job_title" name="job_title" value="<%= otherJobApply.job_title %>"
+                  class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm" />
+              </div>
+
+              <div class="mb-4">
+                <label for="job_name" class="block text-sm font-medium text-gray-700">Job Name</label>
+                <input type="text" id="job_name" name="job_name" value="<%= otherJobApply.job_name %>"
+                  class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm" />
+              </div>
+
+              <div class="mb-4">
+                <label for="currency" class="block text-sm font-medium text-gray-700">Currency</label>
+                <input type="text" id="currency" name="currency" value="<%= otherJobApply.currency %>"
+                  class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm" />
+              </div>
+
+              <div class="mb-4">
+                <label for="income" class="block text-sm font-medium text-gray-700">Income</label>
+                <input type="text" id="income" name="income" value="<%= otherJobApply.income %>"
+                  class="mt-1 block w-full px-2 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 border-2 border-gray-300 focus:ring-indigo-500 sm:text-sm" />
+              </div>
+
+              <div class="mb-4">
+                <label for="address" class="block text-sm font-medium text-gray-700">Address:</label>
+                <textarea name="address" id="address"
+                  class="mt-1 block border p-1 w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"><%= otherJobApply.address %></textarea>
+              </div>
+
+              <div class="mb-4">
+                <label for="note" class="block text-sm font-medium text-gray-700">Note:</label>
+                <textarea name="note" id="note"
+                  class="mt-1 block border p-1 w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"><%= otherJobApply.note %></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+    <!-- Footer -->
+    <%- include("../partial/footer") %>
+
+</body>
+
+</html>

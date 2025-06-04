@@ -12,9 +12,21 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    link: {
+      type: DataTypes.STRING(1000),
+      allowNull: true,
+    },
+    short_desc: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     description: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+    employerId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     },
     shorting: {
       type: DataTypes.INTEGER,
