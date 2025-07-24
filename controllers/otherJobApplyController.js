@@ -15,12 +15,14 @@ exports.otherJobApplyPost = async (req, res) => {
 };
 
 exports.getAllOtherJobs = async (req, res) => {
+  const { gclid = null, utm_source = "" } = req.query;
+  const organic = !(gclid !== null || ["facebook", "instagram"].some(source => utm_source.toLowerCase().includes(source)));
   try {
     const otherJobs = await OtherJob.findAll({
       order: [["shorting", "ASC"], ["createdAt", "DESC"]],
       attributes: ["id", "title", "image", "link", "description", "short_desc", "shorting", "createdAt"],
     });
-    sendSuccessResponse(res, otherJobs);
+    res.status(200).json({ success: true, data: otherJobs, organic });
   } catch (error) {
     console.error("Error retrieving jobs:", error);
     sendErrorResponse(res, "Error retrieving jobs", 500);
